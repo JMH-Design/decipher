@@ -102,7 +102,7 @@ export interface Explanation {
 export const LLM_FALLBACK_THRESHOLD = 0.45;
 
 // ---------------------------------------------------------------------------
-// Knowledge Debt
+// Learning catalog (the concepts the agent used, and how to learn them)
 // ---------------------------------------------------------------------------
 
 export type Depth = 'beginner' | 'intermediate' | 'advanced';
@@ -113,7 +113,7 @@ export interface Topic {
   minutes: number;
 }
 
-export type ResourceType = 'explainer' | 'official' | 'tutorial' | 'video' | 'skill';
+export type ResourceType = 'explainer' | 'official' | 'tutorial' | 'video' | 'course' | 'workshop' | 'skill';
 
 export interface Resource {
   type: ResourceType;
@@ -148,16 +148,7 @@ export interface KnowledgeConcept {
   detection: ConceptDetection;
 }
 
-export type EvidenceKind =
-  | 'import'
-  | 'symbol'
-  | 'package'
-  | 'file'
-  | 'skill'
-  | 'command'
-  | 'mcp'
-  | 'request'
-  | 'llm';
+export type EvidenceKind = 'import' | 'symbol' | 'package' | 'file' | 'skill' | 'command' | 'mcp' | 'request' | 'llm';
 
 export interface Evidence {
   kind: EvidenceKind;
@@ -174,60 +165,62 @@ export interface DetectedConcept {
   relevance: number;
 }
 
-export type ConceptStatus = 'new' | 'learning' | 'learned';
-
-export interface ConceptProfileEntry {
-  exposures: number;
-  status: ConceptStatus;
-  firstSeen: string;
-  lastSeen: string;
-  learnedAt?: string;
-}
-
-export interface LearningProfile {
-  version: 1;
-  concepts: Record<string, ConceptProfileEntry>;
-  /** Sum of debt points of concepts the user marked learned. */
-  totalDebtPaid: number;
-  sessionsReviewed: number;
-  /** Glossary term id → times the user expanded it. Drives progressive de-duplication. */
-  termsExpanded: Record<string, number>;
-  /** Conversation ids whose exposures have already been counted. */
-  countedConversations: string[];
-}
-
-export interface ScoredConcept {
+/** A concept the agent used in this chat, resolved against the catalog. */
+export interface SessionConcept {
   concept: KnowledgeConcept;
   detected: DetectedConcept;
-  status: ConceptStatus;
-  exposures: number;
-  novelty: number;
-  depthWeight: number;
-  relevance: number;
-  /** 0–10 */
-  debt: number;
-  /** Estimated minutes to close the gap. */
-  minutes: number;
-  /** Prerequisites the user has not learned yet. */
-  missingPrerequisites: string[];
+  /** Files the concept showed up in, for "Used in". */
+  files: string[];
 }
 
-export interface SessionDebtSummary {
+/** One learning resource, tagged with the concept it came from. */
+export interface SessionResource {
+  resource: Resource;
+  conceptId: string;
+  conceptLabel: string;
+}
+
+// ---------------------------------------------------------------------------
+// Improvement recommendations (tools/MCPs/kits that could help the user)
+// ---------------------------------------------------------------------------
+
+export type RecommendationKind = 'tool' | 'mcp' | 'kit' | 'service' | 'course';
+
+export interface Recommendation {
+  id: string;
+  kind: RecommendationKind;
+  title: string;
+  /** Plain English, 1–2 sentences. */
+  summary: string;
+  /** Tied to what the user actually asked for. */
+  whyForYou: string;
+  url?: string;
+  source: 'curated' | 'researched';
+}
+
+export type ResearchStatus = 'idle' | 'ready' | 'unavailable' | 'error';
+
+export interface ResearchResult {
   conversationId: string;
-  totalDebt: number;
-  newConcepts: number;
-  reviewConcepts: number;
-  learnedConcepts: number;
-  estimatedMinutes: number;
-  /** Sorted by debt desc. */
-  queue: ScoredConcept[];
+  /** Cache key: conversation + last turn + step count. */
+  signature: string;
+  goal?: string;
+  recommendations: Recommendation[];
+  status: ResearchStatus;
+  /** Why the result is thin (no API key, model unavailable, request failed). */
+  note?: string;
+  generatedAt: string;
 }
 
-export interface BlindSpot {
-  concept: KnowledgeConcept;
-  exposures: number;
-  status: ConceptStatus;
-}
+// ---------------------------------------------------------------------------
+// Loading
+// ---------------------------------------------------------------------------
+
+/**
+ * The webview blocks on a full-panel loader until every stage is done, so the user
+ * never sees a half-built panel.
+ */
+export type LoadingPhase = 'boot' | 'parsing' | 'research' | 'ready';
 
 // ---------------------------------------------------------------------------
 // Composite state sent to the webview
@@ -255,11 +248,24 @@ export interface SessionState {
   /** "Right now: …" / "This turn: …" */
   liveSummary: string;
   liveSummaryKind: 'now' | 'turn' | 'idle';
-  debt: SessionDebtSummary | null;
-  blindSpots: BlindSpot[];
   glossary: Record<string, GlossaryTerm>;
   concepts: Record<string, KnowledgeConcept>;
-  profile: LearningProfile;
+  /** Concepts detected in this chat, most relevant first. */
+  sessionConcepts: SessionConcept[];
+  /** De-duplicated learning resources merged across `sessionConcepts`. */
+  resources: SessionResource[];
+  /** What the user asked for, in their own words (latest non-empty request). */
+  goal?: string;
+  recommendations: Recommendation[];
+  researchStatus: ResearchStatus;
+  researchNote?: string;
+  /** False until a Context.dev key is stored, so the UI can prompt for setup. */
+  webSearchConfigured: boolean;
+  loadingPhase: LoadingPhase;
+  /** Model powering the user's agent chat. Drives the loading phrases. */
+  agentModel?: string;
+  /** How often the loading phrase rotates, in milliseconds. */
+  loadingRotateMs: number;
   mode: ExplainMode;
   hooksInstalled: boolean;
   llmAvailable: boolean;
@@ -277,13 +283,11 @@ export type FromWebviewMessage =
   | { type: 'refresh' }
   | { type: 'selectConversation'; conversationId: string }
   | { type: 'setMode'; mode: ExplainMode }
-  | { type: 'markConcept'; conceptId: string; status: ConceptStatus }
-  | { type: 'markAllSeen' }
-  | { type: 'termExpanded'; termId: string }
   | { type: 'openResource'; resource: Resource }
   | { type: 'openFile'; path: string; line?: number }
-  | { type: 'askAgent'; conceptId: string }
-  | { type: 'exportLearningPlan' }
+  | { type: 'researchNow' }
+  | { type: 'configureWebSearch' }
+  | { type: 'exportResourceSheet' }
   | { type: 'installHooks' };
 
 // ---------------------------------------------------------------------------
@@ -312,6 +316,9 @@ export interface HookEvent {
   modifiedFiles?: string[];
   subagentType?: string;
   summary?: string;
+  /** Display name of the model driving the agent, when Cursor reports it. */
+  model?: string;
+  modelId?: string;
 }
 
 // ---------------------------------------------------------------------------

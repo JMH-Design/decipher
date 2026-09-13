@@ -1,15 +1,30 @@
 import * as fs from 'node:fs';
-import type { ActivityStep, ConversationSummary, ExplainMode, ExplainedStep, HookEvent, SessionState, StepCategory, Turn } from '../../../shared/activity-schema';
+import type {
+  ActivityStep,
+  ConversationSummary,
+  ExplainMode,
+  ExplainedStep,
+  HookEvent,
+  SessionConcept,
+  SessionResource,
+  SessionState,
+  StepCategory,
+  Turn,
+} from '../../../shared/activity-schema';
 import type { LlmSummarizer } from '../explainer/llmSummarizer';
 import type { TemplateEngine } from '../explainer/templateEngine';
 import type { GlossaryService } from '../glossary/glossaryService';
 import { ConceptDetector } from '../knowledge/conceptDetector';
-import type { DebtTracker } from '../knowledge/debtTracker';
 import type { KnowledgeGraph } from '../knowledge/knowledgeGraph';
-import type { ProfileStore } from '../knowledge/profileStore';
+import { agentModelFromEvents } from '../loading/agentModel';
 import { parseTranscript } from '../parser/transcriptParser';
+import { firstProgram, splitShellCommand } from '../parser/shellParser';
 import { listSubagentTranscripts, listTranscripts, type DecipherPaths } from '../paths';
+import type { ResearchService } from '../research/researchService';
 import { mergeHookEvents } from './hookMerger';
+
+/** Enough resources to browse, few enough that the panel stays readable. */
+const MAX_SESSION_RESOURCES = 30;
 
 export interface SessionBuilderDeps {
   paths: DecipherPaths;
@@ -17,10 +32,8 @@ export interface SessionBuilderDeps {
   engine: TemplateEngine;
   glossary: GlossaryService;
   graph: KnowledgeGraph;
-  debt: DebtTracker;
-  profile: ProfileStore;
   llm?: LlmSummarizer;
-  maxQueue: number;
+  research?: ResearchService;
 }
 
 export interface BuildOptions {
@@ -28,12 +41,18 @@ export interface BuildOptions {
   mode: ExplainMode;
   hooksInstalled: boolean;
   llmAvailable: boolean;
+  webSearchConfigured: boolean;
+  loadingRotateMs: number;
 }
 
 /**
- * Turns raw inputs (transcript JSONL, subagent transcripts, hook events, learning profile)
- * into the single `SessionState` object the webview renders. Rebuilt from scratch on every
- * change — the inputs are small and this keeps the pipeline deterministic.
+ * Turns raw inputs (transcript JSONL, subagent transcripts, hook events) into the single
+ * `SessionState` object the webview renders. Rebuilt from scratch on every change — the inputs
+ * are small and this keeps the pipeline deterministic.
+ *
+ * `build()` is synchronous and always sets `loadingPhase: 'parsing'`. The controller owns the
+ * transition to `'ready'`, because only it knows whether the async LLM and research passes are
+ * still outstanding.
  */
 export class SessionBuilder {
   private readonly detector: ConceptDetector;
@@ -62,7 +81,7 @@ export class SessionBuilder {
   }
 
   build(opts: BuildOptions): SessionState {
-    const { paths, glossary, graph, profile } = this.deps;
+    const { glossary, graph } = this.deps;
     const conversationId = opts.conversationId ?? this.pickActiveConversation();
     const base: SessionState = {
       conversationId,
@@ -71,11 +90,15 @@ export class SessionBuilder {
       steps: [],
       liveSummary: 'Start a chat with the agent — I’ll explain everything here.',
       liveSummaryKind: 'idle',
-      debt: null,
-      blindSpots: this.deps.debt.blindSpots(profile.get()),
       glossary: glossary.all(),
       concepts: graph.asRecord(),
-      profile: profile.get(),
+      sessionConcepts: [],
+      resources: [],
+      recommendations: [],
+      researchStatus: 'idle',
+      webSearchConfigured: opts.webSearchConfigured,
+      loadingPhase: 'parsing',
+      loadingRotateMs: opts.loadingRotateMs,
       mode: opts.mode,
       hooksInstalled: opts.hooksInstalled,
       llmAvailable: opts.llmAvailable,
@@ -83,7 +106,7 @@ export class SessionBuilder {
     };
     if (!conversationId) return base;
 
-    const { steps, turns } = this.loadConversation(conversationId);
+    const { steps, turns, events } = this.loadConversation(conversationId);
     const userRequests = turns.map((t) => t.userRequest ?? '').filter(Boolean);
 
     const explained: ExplainedStep[] = steps.map((step) => {
@@ -93,14 +116,18 @@ export class SessionBuilder {
       return { ...step, explanation, conceptIds };
     });
 
-    // Knowledge debt for the whole session.
-    const detected = this.detector.detectAll(steps, userRequests);
-    const lastTurn = turns[turns.length - 1];
-    const sessionComplete = !lastTurn || lastTurn.status !== 'active';
-    if (sessionComplete && detected.length) profile.recordExposures(conversationId, detected.map((d) => d.conceptId));
-    const debt = detected.length ? this.deps.debt.summarize(conversationId, detected, profile.get(), this.deps.maxQueue) : null;
+    const sessionConcepts = this.detector
+      .detectAll(steps, userRequests)
+      .map((detected) => {
+        const concept = graph.get(detected.conceptId);
+        if (!concept) return undefined;
+        const files = [...new Set(detected.evidence.map((e) => e.file).filter((f): f is string => Boolean(f)))];
+        return { concept, detected, files } satisfies SessionConcept;
+      })
+      .filter((c): c is SessionConcept => Boolean(c));
 
     const { text, kind } = this.liveSummary(conversationId, turns, explained);
+    const research = this.deps.research?.latest(conversationId);
 
     return {
       ...base,
@@ -109,10 +136,20 @@ export class SessionBuilder {
       steps: explained,
       liveSummary: text,
       liveSummaryKind: kind,
-      debt,
-      blindSpots: this.deps.debt.blindSpots(profile.get()),
-      profile: profile.get(),
+      sessionConcepts,
+      resources: collectResources(sessionConcepts),
+      goal: userRequests[userRequests.length - 1],
+      recommendations: research?.recommendations ?? [],
+      researchStatus: research?.status ?? 'idle',
+      researchNote: research?.note,
+      agentModel: agentModelFromEvents(events),
     };
+  }
+
+  /** Turns in the recent window that have not been through the LLM yet. */
+  pendingLlmTurns(state: SessionState): number {
+    if (!this.deps.llm || !state.conversationId) return 0;
+    return this.recentTurns(state).filter((t) => !this.llmSummaries.has(this.llmKey(state, t))).length;
   }
 
   /** Kick off LLM turn summaries for complex turns; resolves true when a new summary landed. */
@@ -120,13 +157,13 @@ export class SessionBuilder {
     const llm = this.deps.llm;
     if (!llm || !state.conversationId) return false;
     let changed = false;
-    // Only the last two turns — earlier ones are already stable and rarely looked at.
-    for (const turn of state.turns.slice(-2)) {
-      if (turn.status === 'active') continue;
-      const steps = state.steps.filter((s) => s.turnIndex === turn.index && !s.subagentId);
-      const key = `${state.conversationId}:${turn.index}:${steps.length}`;
+    for (const turn of this.recentTurns(state)) {
+      const key = this.llmKey(state, turn);
       if (this.llmSummaries.has(key)) continue;
+      const steps = this.turnSteps(state, turn);
       const summary = await llm.summarizeTurn(state.conversationId, turn.index, { userRequest: turn.userRequest, steps, turnStatus: turn.status }, signal);
+      // A superseded pass must not cache "no summary", or the turn never gets one.
+      if (signal?.aborted) return changed;
       if (summary) {
         this.llmSummaries.set(key, summary);
         changed = true;
@@ -135,13 +172,45 @@ export class SessionBuilder {
     return changed;
   }
 
+  /** Research tools/MCPs for the current goal; resolves true when a fresh result landed. */
+  async enhanceWithResearch(state: SessionState, signal?: AbortSignal): Promise<boolean> {
+    const research = this.deps.research;
+    if (!research || !state.conversationId || !research.shouldResearch(state)) return false;
+    await research.run(
+      {
+        conversationId: state.conversationId,
+        signature: research.signatureFor(state),
+        goal: state.goal,
+        requests: state.turns.map((t) => t.userRequest ?? '').filter(Boolean),
+        concepts: state.sessionConcepts.map((c) => ({ id: c.concept.id, label: c.concept.label, category: c.concept.category })),
+        packages: installedPackages(state.steps),
+        mcpNamespaces: mcpNamespaces(state.steps),
+      },
+      signal,
+    );
+    return true;
+  }
+
   llmSummaryFor(conversationId: string, turn: Turn, stepCount: number): string | undefined {
     return this.llmSummaries.get(`${conversationId}:${turn.index}:${stepCount}`) || undefined;
   }
 
   // ---------------------------------------------------------------------------
 
-  private loadConversation(conversationId: string): { steps: ActivityStep[]; turns: Turn[] } {
+  /** Only the last two turns — earlier ones are stable and rarely looked at. */
+  private recentTurns(state: SessionState): Turn[] {
+    return state.turns.slice(-2).filter((t) => t.status !== 'active');
+  }
+
+  private turnSteps(state: SessionState, turn: Turn): ExplainedStep[] {
+    return state.steps.filter((s) => s.turnIndex === turn.index && !s.subagentId);
+  }
+
+  private llmKey(state: SessionState, turn: Turn): string {
+    return `${state.conversationId}:${turn.index}:${this.turnSteps(state, turn).length}`;
+  }
+
+  private loadConversation(conversationId: string): { steps: ActivityStep[]; turns: Turn[]; events: HookEvent[] } {
     const { transcriptsDir, eventsDir } = this.deps.paths;
     const mainFile = `${transcriptsDir}/${conversationId}/${conversationId}.jsonl`;
     let steps: ActivityStep[] = [];
@@ -175,7 +244,7 @@ export class SessionBuilder {
       steps = merged.steps;
       turns = merged.turns;
     }
-    return { steps, turns };
+    return { steps, turns, events };
   }
 
   private liveSummary(conversationId: string, turns: Turn[], steps: ExplainedStep[]): { text: string; kind: SessionState['liveSummaryKind'] } {
@@ -194,6 +263,49 @@ export class SessionBuilder {
     if (!turnSteps.length) return { text: last.finalResponse ? `This turn: the agent replied without changing anything.` : 'This turn: no actions were taken.', kind: 'turn' };
     return { text: `This turn: ${composeTurn(turnSteps)}`, kind: 'turn' };
   }
+}
+
+/** Every resource across the session's concepts, de-duplicated, most relevant concept first. */
+export function collectResources(sessionConcepts: SessionConcept[]): SessionResource[] {
+  const out: SessionResource[] = [];
+  const seen = new Set<string>();
+  for (const { concept } of sessionConcepts) {
+    for (const resource of concept.resources) {
+      const key = (resource.url ?? resource.path ?? resource.title).toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ resource, conceptId: concept.id, conceptLabel: concept.label });
+      if (out.length >= MAX_SESSION_RESOURCES) return out;
+    }
+  }
+  return out;
+}
+
+/** Packages the agent installed in this session, as a signal for recommendations. */
+export function installedPackages(steps: ExplainedStep[]): string[] {
+  const found = new Set<string>();
+  for (const step of steps) {
+    if (step.toolName !== 'Shell') continue;
+    for (const segment of splitShellCommand(String(step.input.command ?? ''))) {
+      const { program, args } = firstProgram(segment);
+      if (!['npm', 'pnpm', 'yarn', 'bun'].includes(program)) continue;
+      const positional = args.filter((a) => !a.startsWith('-'));
+      if (!['install', 'i', 'add'].includes(positional[0] ?? '')) continue;
+      for (const pkg of positional.slice(1)) found.add(pkg.replace(/@[\^~]?[\d.]+$/, ''));
+    }
+  }
+  return [...found];
+}
+
+/** MCP servers the agent reached for, so research can suggest complementary ones. */
+export function mcpNamespaces(steps: ExplainedStep[]): string[] {
+  const found = new Set<string>();
+  for (const step of steps) {
+    if (!['CallDynamicTool', 'GetDynamicTools', 'FetchMcpResource'].includes(step.toolName)) continue;
+    const ns = String(step.input.namespace ?? step.input.server ?? '').trim();
+    if (ns) found.add(ns);
+  }
+  return [...found];
 }
 
 /** Template-only composition: "Searched the project, edited 3 files, and saved a checkpoint." */

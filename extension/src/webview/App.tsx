@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ExplainMode, SessionState } from '../../../shared/activity-schema';
-import { DebtPanel } from './components/DebtPanel';
 import { ConceptDetail } from './components/ConceptDetail';
+import { LearnImprovePanel } from './components/LearnImprovePanel';
+import { LoadingState } from './components/LoadingState';
 import { SummaryStrip } from './components/SummaryStrip';
 import { Timeline } from './components/Timeline';
 import { getUiState, onMessage, post, setUiState } from './vscodeApi';
@@ -34,16 +35,25 @@ export function App() {
 
   const conversationTitle = useMemo(() => state?.conversations.find((c) => c.id === state.conversationId)?.title, [state]);
 
+  // No state yet: the host has not finished its first build.
   if (!state) {
     return (
-      <div className="app loading">
-        <div className="empty">Loading…</div>
+      <div className="app">
+        <LoadingState phase="boot" />
+      </div>
+    );
+  }
+
+  // Timeline, turn summaries, and recommendations all land together, so one loader covers them.
+  if (state.loadingPhase !== 'ready') {
+    return (
+      <div className={`app mode-${state.mode}`}>
+        <LoadingState phase={state.loadingPhase} model={state.agentModel} rotateMs={state.loadingRotateMs} />
       </div>
     );
   }
 
   const openConcept = ui.openConcept ? state.concepts[ui.openConcept] : undefined;
-  const scored = ui.openConcept ? state.debt?.queue.find((q) => q.concept.id === ui.openConcept) : undefined;
 
   return (
     <div className={`app mode-${state.mode}`}>
@@ -64,8 +74,7 @@ export function App() {
             What happened
           </button>
           <button role="tab" aria-selected={ui.tab === 'learn'} className={ui.tab === 'learn' ? 'active' : ''} onClick={() => setUi({ tab: 'learn' })}>
-            Learn
-            {state.debt && state.debt.totalDebt > 0 && <span className="badge">{state.debt.totalDebt}</span>}
+            Learn &amp; improve
           </button>
         </nav>
       </header>
@@ -83,11 +92,11 @@ export function App() {
 
       <main className="content">
         {openConcept ? (
-          <ConceptDetail concept={openConcept} scored={scored} state={state} onBack={() => setUi({ tab: ui.tab })} />
+          <ConceptDetail concept={openConcept} state={state} onBack={() => setUi({ tab: ui.tab })} />
         ) : ui.tab === 'activity' ? (
           <Timeline state={state} onOpenConcept={(id) => setUi({ tab: 'activity', openConcept: id })} />
         ) : (
-          <DebtPanel state={state} onOpenConcept={(id) => setUi({ tab: 'learn', openConcept: id })} />
+          <LearnImprovePanel state={state} onOpenConcept={(id) => setUi({ tab: 'learn', openConcept: id })} />
         )}
       </main>
 

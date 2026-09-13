@@ -1,14 +1,9 @@
 import { useState } from 'react';
 import type { Explanation, ExplainedStep, SessionState } from '../../../../shared/activity-schema';
-import { post } from '../vscodeApi';
-
-const FAMILIAR_AFTER = 3;
 
 export function LearnMore({ step, state, onOpenConcept }: { step: ExplainedStep; state: SessionState; onOpenConcept: (id: string) => void }) {
   const e = step.explanation;
-  const fresh = e.vocabulary.filter((id) => (state.profile.termsExpanded[id] ?? 0) < FAMILIAR_AFTER && state.glossary[id]);
-  const familiar = e.vocabulary.filter((id) => (state.profile.termsExpanded[id] ?? 0) >= FAMILIAR_AFTER && state.glossary[id]);
-  const [showFamiliar, setShowFamiliar] = useState(false);
+  const vocabulary = e.vocabulary.filter((id) => state.glossary[id]);
 
   return (
     <div className="learn-more-body">
@@ -39,25 +34,13 @@ export function LearnMore({ step, state, onOpenConcept }: { step: ExplainedStep;
         </Section>
       )}
 
-      {(fresh.length > 0 || familiar.length > 0) && (
+      {vocabulary.length > 0 && (
         <Section title="Vocabulary">
           <ul className="vocab">
-            {fresh.map((id) => (
+            {vocabulary.map((id) => (
               <VocabItem key={id} id={id} state={state} />
             ))}
           </ul>
-          {familiar.length > 0 && (
-            <button className="link subtle" onClick={() => setShowFamiliar((s) => !s)}>
-              {showFamiliar ? 'Hide' : 'Show'} {familiar.length} term{familiar.length > 1 ? 's' : ''} you’ve seen {FAMILIAR_AFTER}+ times
-            </button>
-          )}
-          {showFamiliar && (
-            <ul className="vocab familiar">
-              {familiar.map((id) => (
-                <VocabItem key={id} id={id} state={state} />
-              ))}
-            </ul>
-          )}
         </Section>
       )}
 
@@ -113,14 +96,7 @@ function VocabItem({ id, state }: { id: string; state: SessionState }) {
   if (!term) return null;
   return (
     <li className={open ? 'open' : ''}>
-      <button
-        className="vocab-term"
-        aria-expanded={open}
-        onClick={() => {
-          if (!open) post({ type: 'termExpanded', termId: id });
-          setOpen((o) => !o);
-        }}
-      >
+      <button className="vocab-term" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
         {term.term}
       </button>
       {open ? (

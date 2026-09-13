@@ -107,6 +107,7 @@ function buildEvent(payload) {
       break;
     case 'beforeSubmitPrompt':
       ev.prompt = truncate(redact(payload.prompt), 4000);
+      recordModel(ev, payload);
       break;
     case 'afterAgentResponse':
       ev.text = truncate(redact(payload.text), 6000);
@@ -116,11 +117,22 @@ function buildEvent(payload) {
       break;
     case 'sessionStart':
       ev.status = payload.composer_mode;
+      recordModel(ev, payload);
       break;
     default:
       break;
   }
   return ev;
+}
+
+/**
+ * Cursor passes the active model on every agent hook. Decipher only needs it to caption its
+ * loading state, so we record it on the two per-turn hooks rather than on every tool call.
+ */
+function recordModel(ev, payload) {
+  const model = payload.model ?? payload.model_id;
+  if (typeof model === 'string' && model.trim()) ev.model = model.trim().slice(0, 80);
+  if (typeof payload.model_id === 'string' && payload.model_id.trim()) ev.modelId = payload.model_id.trim().slice(0, 80);
 }
 
 function sanitizeInput(input) {

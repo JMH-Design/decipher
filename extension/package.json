@@ -1,8 +1,8 @@
 {
   "name": "decipher",
   "displayName": "Decipher — Plain-Language Agent Explainer",
-  "description": "See what the Cursor agent did in plain English, learn the vocabulary, and track your Knowledge Debt.",
-  "version": "0.1.0",
+  "description": "See what the Cursor agent did in plain English, learn the concepts behind it, and discover tools that could help you build it better.",
+  "version": "0.2.0",
   "publisher": "haggitjm",
   "license": "MIT",
   "private": true,
@@ -19,7 +19,8 @@
     "agent",
     "explainer",
     "learning",
-    "plain language"
+    "plain language",
+    "recommendations"
   ],
   "main": "./dist/extension.js",
   "activationEvents": [
@@ -61,12 +62,16 @@
         "title": "Decipher: Install Cursor hooks (richer explanations)"
       },
       {
-        "command": "decipher.exportLearningPlan",
-        "title": "Decipher: Export learning plan (Markdown)"
+        "command": "decipher.researchNow",
+        "title": "Decipher: Refresh tool suggestions"
       },
       {
-        "command": "decipher.resetProfile",
-        "title": "Decipher: Reset learning profile"
+        "command": "decipher.setSearchApiKey",
+        "title": "Decipher: Set Context.dev API key (live web search)"
+      },
+      {
+        "command": "decipher.exportResourceSheet",
+        "title": "Decipher: Export resource sheet (Markdown)"
       }
     ],
     "menus": {
@@ -106,20 +111,43 @@
           "default": false,
           "description": "Ask the language model to rewrite every turn summary, not just complex ones."
         },
-        "decipher.llm.conceptExtraction": {
-          "type": "boolean",
-          "default": false,
-          "description": "Let the language model suggest concepts for code the knowledge graph doesn't recognize. Only small diff snippets are sent."
-        },
         "decipher.cursorProjectsDir": {
           "type": "string",
           "default": "",
           "description": "Override the Cursor projects directory (defaults to ~/.cursor/projects)."
         },
-        "decipher.maxVisibleQueue": {
+        "decipher.research.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Suggest tools, MCP servers, and kits that could help with what you asked for."
+        },
+        "decipher.research.webSearch": {
+          "type": "boolean",
+          "default": true,
+          "description": "Search the live web (via Context.dev) for current tools. Requires an API key: run 'Decipher: Set Context.dev API key'. A short query derived from your request is sent to Context.dev."
+        },
+        "decipher.research.trigger": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "manual"
+          ],
+          "default": "auto",
+          "enumDescriptions": [
+            "Refresh suggestions after each agent turn",
+            "Only refresh when you ask (Refresh suggestions button or command)"
+          ],
+          "description": "When to look for tool suggestions."
+        },
+        "decipher.research.maxResults": {
           "type": "number",
-          "default": 5,
-          "description": "Maximum number of concepts shown in the Knowledge Debt priority queue."
+          "default": 6,
+          "description": "Maximum number of tool suggestions shown at once."
+        },
+        "decipher.loading.rotateMs": {
+          "type": "number",
+          "default": 3500,
+          "description": "How often the loading phrase changes, in milliseconds."
         }
       }
     }
@@ -131,7 +159,7 @@
     "test": "vitest run",
     "dogfood": "tsx scripts/dogfood.ts",
     "package": "node esbuild.mjs --production && vsce package --no-dependencies",
-    "install:cursor": "npm run package && \"/Applications/Cursor.app/Contents/Resources/app/bin/cursor\" --install-extension decipher-0.1.0.vsix --force"
+    "install:cursor": "npm run package && \"/Applications/Cursor.app/Contents/Resources/app/bin/cursor\" --install-extension decipher-0.2.0.vsix --force"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",

@@ -2,20 +2,24 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
-import type { ExplainMode, FromWebviewMessage, Resource, SessionState, ToWebviewMessage } from '../../shared/activity-schema';
+import type { ExplainMode, FromWebviewMessage, LoadingPhase, Resource, SessionState, ToWebviewMessage } from '../../shared/activity-schema';
 import { LlmSummarizer } from './explainer/llmSummarizer';
 import { TemplateEngine } from './explainer/templateEngine';
 import { VscodeLmProvider } from './explainer/vscodeLmProvider';
 import { GlossaryService } from './glossary/glossaryService';
-import { DebtTracker } from './knowledge/debtTracker';
 import { KnowledgeGraph } from './knowledge/knowledgeGraph';
-import { ProfileStore } from './knowledge/profileStore';
 import { expandHome, resolvePaths, type DecipherPaths } from './paths';
+import { RecommendationCatalog } from './research/catalog';
+import { ResearchService } from './research/researchService';
+import { resourceSheetMarkdown } from './research/resourceSheet';
+import { ContextDevSearchClient } from './research/webSearchClient';
 import { SessionBuilder } from './session/sessionBuilder';
 import { ActivityWatcher } from './session/watcher';
 
 const VIEW_ID = 'decipher.activityView';
 const LOCAL_PLUGIN_DIR = path.join(os.homedir(), '.cursor', 'plugins', 'local', 'decipher-hooks');
+/** Secret storage key for the Context.dev token used by live web search. */
+const SEARCH_KEY_SECRET = 'decipher.contextDevApiKey';
 
 export function activate(context: vscode.ExtensionContext): void {
   const output = vscode.window.createOutputChannel('Decipher');
@@ -37,8 +41,9 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('decipher.open', () => vscode.commands.executeCommand(`${VIEW_ID}.focus`)),
     vscode.commands.registerCommand('decipher.refresh', () => controller.refresh('manual')),
     vscode.commands.registerCommand('decipher.installHooks', () => controller.installHooks()),
-    vscode.commands.registerCommand('decipher.exportLearningPlan', () => controller.exportLearningPlan()),
-    vscode.commands.registerCommand('decipher.resetProfile', () => controller.resetProfile()),
+    vscode.commands.registerCommand('decipher.researchNow', () => controller.researchNow()),
+    vscode.commands.registerCommand('decipher.setSearchApiKey', () => controller.setSearchApiKey()),
+    vscode.commands.registerCommand('decipher.exportResourceSheet', () => controller.exportResourceSheet()),
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration('decipher')) controller.reloadConfig();
     }),
@@ -57,16 +62,20 @@ class DecipherController implements vscode.Disposable {
   private paths: DecipherPaths;
   private readonly glossary = new GlossaryService();
   private readonly graph = new KnowledgeGraph();
-  private readonly debt = new DebtTracker(this.graph);
-  private profile: ProfileStore;
+  private readonly lmProvider = new VscodeLmProvider();
+  private readonly search: ContextDevSearchClient;
   private engine: TemplateEngine;
   private llm: LlmSummarizer;
+  private research: ResearchService;
   private builder: SessionBuilder;
   private watcher: ActivityWatcher | undefined;
   private state: SessionState | undefined;
   private selectedConversation: string | null = null;
   private llmAvailable = false;
-  private llmAbort: AbortController | undefined;
+  private webSearchConfigured = false;
+  private asyncAbort: AbortController | undefined;
+  /** Guards against a stale enrichment pass publishing over a newer build. */
+  private generation = 0;
   private readonly listeners = new Set<(s: SessionState) => void>();
   private readonly toasts = new Set<(t: string) => void>();
 
@@ -76,9 +85,10 @@ class DecipherController implements vscode.Disposable {
     private readonly output: vscode.OutputChannel,
   ) {
     this.paths = resolvePaths(workspaceRoot, this.config<string>('cursorProjectsDir') || undefined);
-    this.profile = new ProfileStore(this.paths.profilePath);
     this.engine = new TemplateEngine({ glossary: this.glossary, workspaceRoot });
-    this.llm = new LlmSummarizer(new VscodeLmProvider(), this.llmOptions());
+    this.llm = new LlmSummarizer(this.lmProvider, this.llmOptions());
+    this.search = new ContextDevSearchClient(async () => this.context.secrets.get(SEARCH_KEY_SECRET));
+    this.research = this.makeResearch();
     this.builder = this.makeBuilder();
     output.appendLine(`Cursor project dir: ${this.paths.projectDir}`);
   }
@@ -91,8 +101,27 @@ class DecipherController implements vscode.Disposable {
     return {
       enabled: this.config<boolean>('llm.enabled') ?? true,
       alwaysExplainInDepth: this.config<boolean>('llm.alwaysExplainInDepth') ?? false,
-      conceptExtraction: this.config<boolean>('llm.conceptExtraction') ?? false,
     };
+  }
+
+  private researchOptions() {
+    return {
+      enabled: this.config<boolean>('research.enabled') ?? true,
+      webSearch: this.config<boolean>('research.webSearch') ?? true,
+      trigger: this.config<'auto' | 'manual'>('research.trigger') ?? 'auto',
+      maxResults: this.config<number>('research.maxResults') ?? 6,
+    };
+  }
+
+  private makeResearch(): ResearchService {
+    return new ResearchService({
+      catalog: new RecommendationCatalog(),
+      provider: this.lmProvider,
+      search: this.search,
+      cacheDir: this.paths.researchDir,
+      options: this.researchOptions(),
+      log: (m) => this.output.appendLine(m),
+    });
   }
 
   private makeBuilder(): SessionBuilder {
@@ -102,20 +131,21 @@ class DecipherController implements vscode.Disposable {
       engine: this.engine,
       glossary: this.glossary,
       graph: this.graph,
-      debt: this.debt,
-      profile: this.profile,
       llm: this.llm,
-      maxQueue: this.config<number>('maxVisibleQueue') ?? 5,
+      research: this.research,
     });
   }
 
   start(): void {
     this.watcher = new ActivityWatcher([this.paths.transcriptsDir, this.paths.eventsDir], () => this.refresh('watch'));
     this.watcher.start();
-    this.profile.onChange(() => this.refresh('profile'));
+    void this.search.isConfigured().then((ok) => {
+      this.webSearchConfigured = ok;
+      this.refresh('search-key');
+    });
     void this.llm.isAvailable().then((ok) => {
       this.llmAvailable = ok;
-      this.output.appendLine(`Language model ${ok ? 'available' : 'unavailable'} — ${ok ? 'complex turns will get richer summaries' : 'using templates only'}.`);
+      this.output.appendLine(`Language model ${ok ? 'available' : 'unavailable'} — ${ok ? 'turn summaries and recommendations will be richer' : 'using templates and the built-in catalog only'}.`);
       this.refresh('llm');
     });
     this.refresh('start');
@@ -124,6 +154,7 @@ class DecipherController implements vscode.Disposable {
   reloadConfig(): void {
     this.paths = resolvePaths(this.workspaceRoot, this.config<string>('cursorProjectsDir') || undefined);
     this.llm.setOptions(this.llmOptions());
+    this.research = this.makeResearch();
     this.builder = this.makeBuilder();
     this.watcher?.stop();
     this.start();
@@ -144,30 +175,51 @@ class DecipherController implements vscode.Disposable {
     return new vscode.Disposable(() => this.toasts.delete(fn));
   }
 
+  /**
+   * Build synchronously, then decide whether async work is still outstanding. The webview only
+   * sees `loadingPhase: 'ready'` once summaries and recommendations have both landed, so it can
+   * block on a single full-panel loader instead of rendering a half-built view.
+   */
   refresh(reason: string): void {
+    const generation = ++this.generation;
     try {
       const state = this.builder.build({
         conversationId: this.selectedConversation,
         mode: this.mode,
         hooksInstalled: this.hooksInstalled(),
         llmAvailable: this.llmAvailable,
+        webSearchConfigured: this.webSearchConfigured,
+        loadingRotateMs: this.config<number>('loading.rotateMs') ?? 3500,
       });
-      this.state = state;
-      for (const fn of this.listeners) fn(state);
-      this.scheduleLlm(state);
+      const pendingLlm = this.llmAvailable && this.builder.pendingLlmTurns(state) > 0;
+      const pendingResearch = this.research.shouldResearch(state);
+      const phase: LoadingPhase = pendingResearch ? 'research' : pendingLlm ? 'parsing' : 'ready';
+      this.publish({ ...state, loadingPhase: phase });
+      if (pendingLlm || pendingResearch) void this.enrich(generation, state, pendingLlm, pendingResearch);
     } catch (err) {
       this.output.appendLine(`refresh(${reason}) failed: ${(err as Error).stack ?? err}`);
+      // Never leave the webview stuck behind the loader.
+      if (this.state) this.publish({ ...this.state, loadingPhase: 'ready' });
     }
   }
 
-  private scheduleLlm(state: SessionState): void {
-    if (!this.llmAvailable) return;
-    this.llmAbort?.abort();
+  private publish(state: SessionState): void {
+    this.state = state;
+    for (const fn of this.listeners) fn(state);
+  }
+
+  private async enrich(generation: number, state: SessionState, pendingLlm: boolean, pendingResearch: boolean): Promise<void> {
+    this.asyncAbort?.abort();
     const abort = new AbortController();
-    this.llmAbort = abort;
-    void this.builder.enhanceWithLlm(state, abort.signal).then((changed) => {
-      if (changed && !abort.signal.aborted) this.refresh('llm-summary');
-    });
+    this.asyncAbort = abort;
+    // allSettled: a failure in one pass must not strand the other, or the loader never clears.
+    await Promise.allSettled([
+      pendingLlm ? this.builder.enhanceWithLlm(state, abort.signal) : Promise.resolve(false),
+      pendingResearch ? this.builder.enhanceWithResearch(state, abort.signal) : Promise.resolve(false),
+    ]);
+    if (abort.signal.aborted || generation !== this.generation) return;
+    // Both passes cache their outcome, so this rebuild finds nothing pending and lands on 'ready'.
+    this.refresh('enriched');
   }
 
   private hooksInstalled(): boolean {
@@ -194,28 +246,20 @@ class DecipherController implements vscode.Disposable {
       case 'setMode':
         void vscode.workspace.getConfiguration('decipher').update('mode', msg.mode, vscode.ConfigurationTarget.Global);
         break;
-      case 'markConcept': {
-        const scored = this.state?.debt?.queue.find((q) => q.concept.id === msg.conceptId);
-        this.profile.setStatus(msg.conceptId, msg.status, scored?.debt ?? this.estimateDebt(msg.conceptId));
-        break;
-      }
-      case 'markAllSeen':
-        for (const q of this.state?.debt?.queue ?? []) if (q.status === 'new') this.profile.setStatus(q.concept.id, 'learning', 0);
-        break;
-      case 'termExpanded':
-        this.profile.recordTermExpanded(msg.termId);
-        break;
       case 'openResource':
         void this.openResource(msg.resource);
         break;
       case 'openFile':
         void this.openFile(msg.path, msg.line);
         break;
-      case 'askAgent':
-        void this.askAgent(msg.conceptId);
+      case 'researchNow':
+        this.researchNow();
         break;
-      case 'exportLearningPlan':
-        void this.exportLearningPlan();
+      case 'configureWebSearch':
+        void this.setSearchApiKey();
+        break;
+      case 'exportResourceSheet':
+        void this.exportResourceSheet();
         break;
       case 'installHooks':
         void this.installHooks();
@@ -223,9 +267,53 @@ class DecipherController implements vscode.Disposable {
     }
   }
 
-  private estimateDebt(conceptId: string): number {
-    const c = this.graph.get(conceptId);
-    return c ? (c.depth === 'beginner' ? 4 : c.depth === 'intermediate' ? 8 : 10) : 0;
+  /** Drop the cached result for this chat so the next build researches again. */
+  researchNow(): void {
+    const id = this.state?.conversationId;
+    if (!id) {
+      void vscode.window.showInformationMessage('Decipher: pick a chat first.');
+      return;
+    }
+    this.research.requestNow(id);
+    this.refresh('research-now');
+  }
+
+  /**
+   * Context.dev token for live search. Stored in the editor's secret storage — never in
+   * settings JSON, the workspace, or the webview.
+   */
+  async setSearchApiKey(): Promise<void> {
+    const existing = await this.context.secrets.get(SEARCH_KEY_SECRET);
+    const value = await vscode.window.showInputBox({
+      title: 'Decipher — Context.dev API key',
+      prompt: 'Paste a Context.dev API key to let Decipher search the live web for tools. Leave blank to remove the stored key.',
+      placeHolder: existing ? 'A key is already stored — type a new one, or leave blank to remove it' : 'ctxt_secret_…',
+      password: true,
+      ignoreFocusOut: true,
+    });
+    if (value === undefined) return;
+
+    const trimmed = value.trim();
+    if (trimmed) {
+      await this.context.secrets.store(SEARCH_KEY_SECRET, trimmed);
+      this.toast('Context.dev key saved. Live web search is on.');
+    } else {
+      await this.context.secrets.delete(SEARCH_KEY_SECRET);
+      this.toast('Context.dev key removed. Suggestions will use the built-in catalog.');
+    }
+    this.webSearchConfigured = await this.search.isConfigured();
+    if (this.state?.conversationId) this.research.invalidate(this.state.conversationId);
+    this.refresh('search-key');
+  }
+
+  async exportResourceSheet(): Promise<void> {
+    const state = this.state;
+    if (!state?.conversationId || (!state.sessionConcepts.length && !state.recommendations.length)) {
+      void vscode.window.showInformationMessage('Decipher: nothing to export yet — no concepts or suggestions for this chat.');
+      return;
+    }
+    const doc = await vscode.workspace.openTextDocument({ content: resourceSheetMarkdown(state), language: 'markdown' });
+    await vscode.window.showTextDocument(doc, { preview: false });
   }
 
   private async openResource(resource: Resource): Promise<void> {
@@ -258,47 +346,6 @@ class DecipherController implements vscode.Disposable {
     }
   }
 
-  /** Pre-fill a teaching prompt. There is no public API to inject into Cursor's chat, so we copy + try known commands. */
-  private async askAgent(conceptId: string): Promise<void> {
-    const concept = this.graph.get(conceptId);
-    if (!concept) return;
-    const evidence = this.state?.debt?.queue.find((q) => q.concept.id === conceptId)?.detected.evidence ?? [];
-    const files = [...new Set(evidence.map((e) => e.file).filter(Boolean))].slice(0, 3) as string[];
-    const fileHint = files.length ? ` Use the code you just wrote in ${files.map((f) => `\`${path.basename(f)}\``).join(' and ')} as the example.` : '';
-    const prompt = `Explain ${concept.label} like I'm new to coding. Start with what problem it solves, then walk through what each part of the code does in plain language, and finish with one thing I could try changing myself.${fileHint}`;
-    await vscode.env.clipboard.writeText(prompt);
-    const candidates = ['composer.newAgentChat', 'composer.openAgentChat', 'aichat.newchataction', 'workbench.action.chat.open'];
-    for (const cmd of candidates) {
-      try {
-        await vscode.commands.executeCommand(cmd);
-        break;
-      } catch {
-        /* try next */
-      }
-    }
-    void vscode.window.showInformationMessage('Decipher: teaching prompt copied — paste it into the agent chat (Cmd+V).');
-    this.toast('Prompt copied to clipboard. Paste it into the chat.');
-  }
-
-  async exportLearningPlan(): Promise<void> {
-    const state = this.state;
-    if (!state?.debt) {
-      void vscode.window.showInformationMessage('Decipher: nothing to export yet — no concepts detected in this chat.');
-      return;
-    }
-    const md = this.debt.toMarkdown(state.debt, state.turns.map((t) => t.userRequest ?? '').filter(Boolean));
-    const doc = await vscode.workspace.openTextDocument({ content: md, language: 'markdown' });
-    await vscode.window.showTextDocument(doc, { preview: false });
-  }
-
-  async resetProfile(): Promise<void> {
-    const ok = await vscode.window.showWarningMessage('Reset your Decipher learning profile? This forgets which concepts you marked as learned.', { modal: true }, 'Reset');
-    if (ok === 'Reset') {
-      this.profile.reset();
-      this.toast('Learning profile reset.');
-    }
-  }
-
   /** Copy the bundled plugin into ~/.cursor/plugins/local so Cursor loads its hooks. */
   async installHooks(): Promise<void> {
     const src = vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'plugin').fsPath;
@@ -324,7 +371,7 @@ class DecipherController implements vscode.Disposable {
 
   dispose(): void {
     this.watcher?.stop();
-    this.llmAbort?.abort();
+    this.asyncAbort?.abort();
     this.listeners.clear();
   }
 }

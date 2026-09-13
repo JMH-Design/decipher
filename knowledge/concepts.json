@@ -50,6 +50,11 @@
         "url": "https://gsap.com/docs/v3/Eases/"
       },
       {
+        "type": "video",
+        "title": "GreenSock Learning — official GSAP videos",
+        "url": "https://www.youtube.com/@GreenSockLearning"
+      },
+      {
         "type": "skill",
         "title": "Your gsap-core skill",
         "path": "~/.claude/skills/gsap-core/SKILL.md"
@@ -112,6 +117,11 @@
         "url": "https://gsap.com/docs/v3/GSAP/Timeline/"
       },
       {
+        "type": "video",
+        "title": "GreenSock Learning — official GSAP videos",
+        "url": "https://www.youtube.com/@GreenSockLearning"
+      },
+      {
         "type": "skill",
         "title": "Your gsap-timeline skill",
         "path": "~/.claude/skills/gsap-timeline/SKILL.md"
@@ -169,6 +179,11 @@
         "url": "https://gsap.com/scroll/"
       },
       {
+        "type": "video",
+        "title": "GreenSock Learning — official GSAP videos",
+        "url": "https://www.youtube.com/@GreenSockLearning"
+      },
+      {
         "type": "skill",
         "title": "Your gsap-scrolltrigger skill",
         "path": "~/.claude/skills/gsap-scrolltrigger/SKILL.md"
@@ -220,6 +235,11 @@
         "url": "https://gsap.com/resources/React/"
       },
       {
+        "type": "video",
+        "title": "GreenSock Learning — official GSAP videos",
+        "url": "https://www.youtube.com/@GreenSockLearning"
+      },
+      {
         "type": "skill",
         "title": "Your gsap-react skill",
         "path": "~/.claude/skills/gsap-react/SKILL.md"
@@ -268,6 +288,11 @@
         "type": "official",
         "title": "GSAP plugins",
         "url": "https://gsap.com/docs/v3/Plugins/"
+      },
+      {
+        "type": "video",
+        "title": "GreenSock Learning — official GSAP videos",
+        "url": "https://www.youtube.com/@GreenSockLearning"
       },
       {
         "type": "skill",
@@ -329,6 +354,11 @@
         "type": "tutorial",
         "title": "web.dev: CSS animation",
         "url": "https://web.dev/learn/css/animations"
+      },
+      {
+        "type": "video",
+        "title": "Kevin Powell — CSS on YouTube",
+        "url": "https://www.youtube.com/@KevinPowell"
       }
     ],
     "detection": {
@@ -372,6 +402,11 @@
         "type": "official",
         "title": "MDN: Using CSS transitions",
         "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_transitions/Using_CSS_transitions"
+      },
+      {
+        "type": "video",
+        "title": "Kevin Powell — CSS on YouTube",
+        "url": "https://www.youtube.com/@KevinPowell"
       }
     ],
     "detection": {
@@ -411,6 +446,11 @@
         "type": "official",
         "title": "MDN: transform",
         "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/transform"
+      },
+      {
+        "type": "video",
+        "title": "Kevin Powell — CSS on YouTube",
+        "url": "https://www.youtube.com/@KevinPowell"
       }
     ],
     "detection": {
@@ -485,6 +525,11 @@
         "type": "official",
         "title": "MDN: prefers-reduced-motion",
         "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion"
+      },
+      {
+        "type": "video",
+        "title": "Kevin Powell — CSS on YouTube",
+        "url": "https://www.youtube.com/@KevinPowell"
       }
     ],
     "detection": {
@@ -560,6 +605,11 @@
         "type": "tutorial",
         "title": "web.dev: Learn HTML",
         "url": "https://web.dev/learn/html"
+      },
+      {
+        "type": "course",
+        "title": "freeCodeCamp: Responsive Web Design (free)",
+        "url": "https://www.freecodecamp.org/learn/responsive-web-design/"
       }
     ],
     "detection": {
@@ -597,6 +647,11 @@
         "type": "official",
         "title": "MDN: Semantics",
         "url": "https://developer.mozilla.org/en-US/docs/Glossary/Semantics"
+      },
+      {
+        "type": "course",
+        "title": "freeCodeCamp: Responsive Web Design (free)",
+        "url": "https://www.freecodecamp.org/learn/responsive-web-design/"
       }
     ],
     "detection": {
@@ -647,6 +702,16 @@
         "type": "tutorial",
         "title": "web.dev: Learn CSS",
         "url": "https://web.dev/learn/css"
+      },
+      {
+        "type": "video",
+        "title": "Kevin Powell — CSS on YouTube",
+        "url": "https://www.youtube.com/@KevinPowell"
+      },
+      {
+        "type": "course",
+        "title": "freeCodeCamp: Responsive Web Design (free)",
+        "url": "https://www.freecodecamp.org/learn/responsive-web-design/"
       }
     ],
     "detection": {
@@ -726,6 +791,16 @@
         "type": "tutorial",
         "title": "CSS-Tricks: A complete guide to Flexbox",
         "url": "https://css-tricks.com/snippets/css/a-guide-to-flexbox/"
+      },
+      {
+        "type": "video",
+        "title": "Kevin Powell — CSS on YouTube",
+        "url": "https://www.youtube.com/@KevinPowell"
+      },
+      {
+        "type": "workshop",
+        "title": "Flexbox Froggy — learn by playing",
+        "url": "https://flexboxfroggy.com/"
       }
     ],
     "detection": {
@@ -759,6 +834,16 @@
         "type": "tutorial",
         "title": "CSS-Tricks: A complete guide to Grid",
         "url": "https://css-tricks.com/snippets/css/complete-guide-grid/"
+      },
+      {
+        "type": "video",
+        "title": "Kevin Powell — CSS on YouTube",
+        "url": "https://www.youtube.com/@KevinPowell"
+      },
+      {
+        "type": "workshop",
+        "title": "Grid Garden — learn by playing",
+        "url": "https://cssgridgarden.com/"
       }
     ],
     "detection": {
@@ -798,6 +883,11 @@
         "type": "official",
         "title": "MDN: Using media queries",
         "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_media_queries/Using_media_queries"
+      },
+      {
+        "type": "video",
+        "title": "Kevin Powell — CSS on YouTube",
+        "url": "https://www.youtube.com/@KevinPowell"
       }
     ],
     "detection": {
@@ -845,6 +935,16 @@
         "type": "tutorial",
         "title": "javascript.info",
         "url": "https://javascript.info/"
+      },
+      {
+        "type": "course",
+        "title": "freeCodeCamp: JavaScript Algorithms and Data Structures (free)",
+        "url": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/"
+      },
+      {
+        "type": "workshop",
+        "title": "JavaScript30 — 30 free build-alongs",
+        "url": "https://javascript30.com/"
       }
     ],
     "detection": {
@@ -888,6 +988,11 @@
         "type": "official",
         "title": "TypeScript for the new programmer",
         "url": "https://www.typescriptlang.org/docs/handbook/typescript-from-scratch.html"
+      },
+      {
+        "type": "course",
+        "title": "Total TypeScript by Matt Pocock",
+        "url": "https://www.totaltypescript.com/"
       }
     ],
     "detection": {
@@ -978,6 +1083,11 @@
         "type": "official",
         "title": "MDN: Asynchronous JavaScript",
         "url": "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous"
+      },
+      {
+        "type": "video",
+        "title": "Net Ninja — free video series",
+        "url": "https://www.youtube.com/@NetNinja"
       }
     ],
     "detection": {
@@ -1119,6 +1229,11 @@
         "type": "official",
         "title": "React: Quick start",
         "url": "https://react.dev/learn"
+      },
+      {
+        "type": "video",
+        "title": "Net Ninja — free video series",
+        "url": "https://www.youtube.com/@NetNinja"
       }
     ],
     "detection": {
@@ -1173,6 +1288,16 @@
         "type": "official",
         "title": "React: Built-in hooks",
         "url": "https://react.dev/reference/react/hooks"
+      },
+      {
+        "type": "video",
+        "title": "Web Dev Simplified — React explainers",
+        "url": "https://www.youtube.com/@WebDevSimplified"
+      },
+      {
+        "type": "course",
+        "title": "Epic React by Kent C. Dodds",
+        "url": "https://www.epicreact.dev/"
       }
     ],
     "detection": {
@@ -1219,6 +1344,11 @@
         "type": "official",
         "title": "Astro docs",
         "url": "https://docs.astro.build/en/getting-started/"
+      },
+      {
+        "type": "course",
+        "title": "Astro: build a blog (official tutorial)",
+        "url": "https://docs.astro.build/en/tutorial/0-introduction/"
       }
     ],
     "detection": {
@@ -1266,6 +1396,11 @@
         "type": "official",
         "title": "Next.js docs",
         "url": "https://nextjs.org/docs"
+      },
+      {
+        "type": "course",
+        "title": "Next.js: Learn (official free course)",
+        "url": "https://nextjs.org/learn"
       }
     ],
     "detection": {
@@ -1310,6 +1445,11 @@
         "type": "official",
         "title": "Tailwind docs",
         "url": "https://tailwindcss.com/docs"
+      },
+      {
+        "type": "video",
+        "title": "Tailwind Labs on YouTube",
+        "url": "https://www.youtube.com/@TailwindLabs"
       }
     ],
     "detection": {
@@ -1399,6 +1539,16 @@
         "type": "official",
         "title": "Node.js: Introduction",
         "url": "https://nodejs.org/en/learn/getting-started/introduction-to-nodejs"
+      },
+      {
+        "type": "course",
+        "title": "Node.js: Learn (official)",
+        "url": "https://nodejs.org/en/learn"
+      },
+      {
+        "type": "workshop",
+        "title": "NodeSchool — self-guided workshops",
+        "url": "https://nodeschool.io/"
       }
     ],
     "detection": {
@@ -1463,6 +1613,16 @@
         "type": "tutorial",
         "title": "GitHub: Git guides",
         "url": "https://github.com/git-guides"
+      },
+      {
+        "type": "video",
+        "title": "freeCodeCamp on YouTube — long-form courses",
+        "url": "https://www.youtube.com/@freeCodeCamp"
+      },
+      {
+        "type": "workshop",
+        "title": "Learn Git Branching — interactive exercises",
+        "url": "https://learngitbranching.js.org/"
       }
     ],
     "detection": {
@@ -1503,6 +1663,11 @@
         "type": "official",
         "title": "Pro Git: Branching",
         "url": "https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell"
+      },
+      {
+        "type": "workshop",
+        "title": "Learn Git Branching — interactive exercises",
+        "url": "https://learngitbranching.js.org/"
       }
     ],
     "detection": {
@@ -1706,6 +1871,11 @@
         "type": "official",
         "title": "MDN: Command line crash course",
         "url": "https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Understanding_client-side_tools/Command_line"
+      },
+      {
+        "type": "video",
+        "title": "freeCodeCamp on YouTube — long-form courses",
+        "url": "https://www.youtube.com/@freeCodeCamp"
       }
     ],
     "detection": {
@@ -1938,6 +2108,11 @@
         "type": "tutorial",
         "title": "React: Thinking in React",
         "url": "https://react.dev/learn/thinking-in-react"
+      },
+      {
+        "type": "course",
+        "title": "Epic React by Kent C. Dodds",
+        "url": "https://www.epicreact.dev/"
       }
     ],
     "detection": {
@@ -1988,6 +2163,11 @@
         "type": "tutorial",
         "title": "web.dev: Learn Accessibility",
         "url": "https://web.dev/learn/accessibility"
+      },
+      {
+        "type": "workshop",
+        "title": "The A11Y Project — accessibility checklist",
+        "url": "https://www.a11yproject.com/checklist/"
       }
     ],
     "detection": {
@@ -2031,6 +2211,11 @@
         "type": "official",
         "title": "Vitest guide",
         "url": "https://vitest.dev/guide/"
+      },
+      {
+        "type": "course",
+        "title": "Testing JavaScript by Kent C. Dodds",
+        "url": "https://www.testingjavascript.com/"
       }
     ],
     "detection": {
@@ -2435,6 +2620,11 @@
         "type": "official",
         "title": "Figma MCP server",
         "url": "https://help.figma.com/hc/en-us/articles/32132100833559"
+      },
+      {
+        "type": "video",
+        "title": "Figma on YouTube",
+        "url": "https://www.youtube.com/@Figma"
       }
     ],
     "detection": {
@@ -2467,6 +2657,11 @@
         "type": "tutorial",
         "title": "SQLBolt interactive lessons",
         "url": "https://sqlbolt.com/"
+      },
+      {
+        "type": "workshop",
+        "title": "PostgreSQL Exercises — practice queries",
+        "url": "https://pgexercises.com/"
       }
     ],
     "detection": {

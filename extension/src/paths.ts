@@ -9,7 +9,8 @@ export interface DecipherPaths {
   transcriptsDir: string;
   decipherDir: string;
   eventsDir: string;
-  profilePath: string;
+  /** Cached research results, one file per conversation. */
+  researchDir: string;
   hooksJsonPath: string;
 }
 
@@ -47,7 +48,7 @@ export function resolvePaths(workspacePath: string, projectsDirOverride?: string
     transcriptsDir: path.join(projectDir, 'agent-transcripts'),
     decipherDir,
     eventsDir: path.join(decipherDir, 'events'),
-    profilePath: path.join(decipherDir, 'profile.json'),
+    researchDir: path.join(decipherDir, 'research'),
     hooksJsonPath: path.join(os.homedir(), '.cursor', 'hooks.json'),
   };
 }

@@ -11,7 +11,6 @@ export interface LlmProvider {
 export interface LlmSummarizerOptions {
   enabled: boolean;
   alwaysExplainInDepth: boolean;
-  conceptExtraction: boolean;
 }
 
 export interface TurnSummaryInput {
@@ -27,9 +26,6 @@ Rules:
 - Describe outcomes ("searched for leftover references and found none"), not tools ("ran rg").
 - Never invent results you were not given. If an outcome is unknown, describe the action only.
 - Do not mention file paths longer than a file name. Do not use markdown.`;
-
-const SYSTEM_CONCEPTS = `You label code snippets with the technologies or concepts a beginner would need to learn to understand them.
-Return ONLY a JSON array of 1–3 short labels (2–4 words each), most important first. Prefer well-known names (e.g. "CSS Grid", "React hooks", "Intersection Observer"). No explanations.`;
 
 /**
  * Layer 2 of the hybrid explainer. Templates run first and always; the LLM only rewrites
@@ -97,26 +93,6 @@ export class LlmSummarizer {
     return final;
   }
 
-  /** v0.2 fallback: ask the model to name concepts for code the graph did not recognize. */
-  async extractConcepts(snippet: string, signal?: AbortSignal): Promise<string[]> {
-    if (!this.options.conceptExtraction || !(await this.isAvailable())) return [];
-    const trimmed = snippet.slice(0, 1200);
-    if (trimmed.trim().length < 40) return [];
-    const key = `concepts:${hash(trimmed)}`;
-    if (this.cache.has(key)) return JSON.parse(this.cache.get(key) ?? '[]');
-    const result = await this.safeComplete(SYSTEM_CONCEPTS, trimmed, signal);
-    let labels: string[] = [];
-    try {
-      const m = result?.match(/\[[\s\S]*\]/);
-      const parsed = m ? (JSON.parse(m[0]) as unknown) : [];
-      if (Array.isArray(parsed)) labels = parsed.filter((x): x is string => typeof x === 'string').slice(0, 3);
-    } catch {
-      labels = [];
-    }
-    this.cache.set(key, JSON.stringify(labels));
-    return labels;
-  }
-
   private async safeComplete(system: string, user: string, signal?: AbortSignal): Promise<string | undefined> {
     try {
       return await this.provider.complete(system, user, signal);
@@ -133,10 +109,4 @@ export class NoopLlmProvider implements LlmProvider {
   async complete(): Promise<string | undefined> {
     return undefined;
   }
-}
-
-function hash(s: string): string {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-  return (h >>> 0).toString(36);
 }

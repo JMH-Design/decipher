@@ -33,11 +33,9 @@ export function StepCard({ step, state, childSteps, onOpenConcept }: { step: Exp
               {step.conceptIds.slice(0, 4).map((id) => {
                 const c = state.concepts[id];
                 if (!c) return null;
-                const status = state.profile.concepts[id]?.status ?? 'new';
                 return (
-                  <button key={id} className={`tag status-${status}`} onClick={() => onOpenConcept(id)} title={c.plainSummary}>
+                  <button key={id} className="tag" onClick={() => onOpenConcept(id)} title={c.plainSummary}>
                     {c.label}
-                    {status === 'new' && <span className="tag-new">new</span>}
                   </button>
                 );
               })}

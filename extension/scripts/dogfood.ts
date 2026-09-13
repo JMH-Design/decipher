@@ -8,7 +8,8 @@
  *   npm run dogfood -- ... --grep "home-field"                     # only chats whose first request matches
  *   npm run dogfood -- ... --json                                   # dump SessionState
  *
- * Uses a throwaway profile (never touches ~/.cursor/projects/<slug>/decipher/profile.json).
+ * Runs offline: no language model and no web search, so recommendations come from the
+ * curated catalog only. Research output is cached to a throwaway directory.
  */
 import * as fs from 'node:fs';
 import * as os from 'node:os';
@@ -17,10 +18,11 @@ import type { ExplainedStep, SessionState } from '../../shared/activity-schema';
 import { LlmSummarizer, NoopLlmProvider } from '../src/explainer/llmSummarizer';
 import { TemplateEngine } from '../src/explainer/templateEngine';
 import { GlossaryService } from '../src/glossary/glossaryService';
-import { DebtTracker } from '../src/knowledge/debtTracker';
 import { KnowledgeGraph } from '../src/knowledge/knowledgeGraph';
-import { ProfileStore } from '../src/knowledge/profileStore';
 import { listTranscripts, resolvePaths } from '../src/paths';
+import { RecommendationCatalog } from '../src/research/catalog';
+import { ResearchService } from '../src/research/researchService';
+import { NoopSearchClient } from '../src/research/webSearchClient';
 import { SessionBuilder, titleFromRawHead } from '../src/session/sessionBuilder';
 
 const args = process.argv.slice(2);
@@ -33,7 +35,7 @@ const flag = (name: string) => args.includes(`--${name}`);
 const workspace = opt('workspace') ?? process.cwd();
 const file = opt('file');
 const paths = resolvePaths(workspace);
-const tmpProfile = path.join(os.tmpdir(), `decipher-dogfood-${process.pid}.json`);
+paths.researchDir = fs.mkdtempSync(path.join(os.tmpdir(), 'decipher-research-'));
 
 if (file) {
   // Point the builder at a fake project dir containing just this transcript.
@@ -55,17 +57,20 @@ if (flag('list')) {
 
 const glossary = new GlossaryService();
 const graph = new KnowledgeGraph();
-const profile = new ProfileStore(tmpProfile);
+const research = new ResearchService({
+  catalog: new RecommendationCatalog(),
+  search: new NoopSearchClient(),
+  cacheDir: paths.researchDir,
+  options: { enabled: true, webSearch: false, trigger: 'auto', maxResults: 6 },
+});
 const builder = new SessionBuilder({
   paths,
   workspaceName: path.basename(workspace),
   engine: new TemplateEngine({ glossary, workspaceRoot: workspace }),
   glossary,
   graph,
-  debt: new DebtTracker(graph),
-  profile,
-  llm: new LlmSummarizer(new NoopLlmProvider(), { enabled: false, alwaysExplainInDepth: false, conceptExtraction: false }),
-  maxQueue: 5,
+  llm: new LlmSummarizer(new NoopLlmProvider(), { enabled: false, alwaysExplainInDepth: false }),
+  research,
 });
 
 let conversationId = opt('id') ?? null;
@@ -81,18 +86,22 @@ if (!conversationId && grep) {
 }
 if (file) conversationId = path.basename(file, '.jsonl');
 
-const state = builder.build({ conversationId, mode: 'advanced', hooksInstalled: false, llmAvailable: false });
-try {
-  fs.unlinkSync(tmpProfile);
-} catch {
-  /* not written */
-}
+const buildOptions = { conversationId, mode: 'advanced', hooksInstalled: false, llmAvailable: false, webSearchConfigured: false, loadingRotateMs: 3500 } as const;
 
-if (flag('json')) {
-  // Large payload: let the pipe drain instead of calling process.exit().
-  process.stdout.write(JSON.stringify(state, null, 2));
-} else {
-  print(state);
+void main();
+
+async function main(): Promise<void> {
+  // Curated recommendations only — no model, no network.
+  await builder.enhanceWithResearch(builder.build(buildOptions));
+  const state: SessionState = { ...builder.build(buildOptions), loadingPhase: 'ready' };
+  fs.rmSync(paths.researchDir, { recursive: true, force: true });
+
+  if (flag('json')) {
+    // Large payload: let the pipe drain instead of calling process.exit().
+    process.stdout.write(JSON.stringify(state, null, 2));
+  } else {
+    print(state);
+  }
 }
 
 function print(s: SessionState): void {
@@ -120,13 +129,17 @@ function print(s: SessionState): void {
     console.log('');
   }
 
-  if (s.debt) {
-    console.log(`── Knowledge debt: ${s.debt.totalDebt} pts · ${s.debt.newConcepts} new · ~${s.debt.estimatedMinutes} min`);
-    s.debt.queue.forEach((q, i) => {
-      const ev = q.detected.evidence.slice(0, 3).map((e) => `${e.kind}:${e.detail}`).join(', ');
-      console.log(`   ${i + 1}. ${q.concept.label.padEnd(28)} debt=${q.debt}  rel=${q.relevance.toFixed(2)}  ${q.status}  [${ev}]`);
+  if (s.sessionConcepts.length) {
+    console.log(`── Concepts to learn (${s.sessionConcepts.length}) · ${s.resources.length} resources`);
+    s.sessionConcepts.forEach((c, i) => {
+      const ev = c.detected.evidence.slice(0, 3).map((e) => `${e.kind}:${e.detail}`).join(', ');
+      console.log(`   ${i + 1}. ${c.concept.label.padEnd(28)} rel=${c.detected.relevance.toFixed(2)}  ${c.concept.resources.length} resources  [${ev}]`);
     });
-  } else console.log('── Knowledge debt: no concepts detected');
+  } else console.log('── Concepts to learn: none detected');
+
+  console.log(`\n── Suggested tools (${s.recommendations.length}) [${s.researchStatus}]`);
+  for (const rec of s.recommendations) console.log(`   · ${rec.kind.padEnd(7)} ${rec.title.padEnd(28)} (${rec.source}) ${rec.url ?? ''}`);
+  if (s.researchNote) console.log(`   note: ${s.researchNote}`);
 
   const total = s.steps.filter((st) => !st.subagentId).length;
   console.log(`\n── Coverage: ${total ? Math.round((coverage / total) * 100) : 0}% of ${total} steps matched a confident template · ${edits ? Math.round((conceptEdits / edits) * 100) : 0}% of ${edits} edits matched ≥1 concept`);

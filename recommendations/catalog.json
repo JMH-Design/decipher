@@ -1,0 +1,893 @@
+{
+  "$comment": "Curated tools, MCP servers, kits, and services Decipher suggests based on what you asked for and what the agent used. Matched by concept id, request keyword, package, or concept category. `whyForYou` is written to complete the sentence 'Worth a look because …'.",
+  "entries": [
+    {
+      "id": "rive",
+      "kind": "tool",
+      "title": "Rive",
+      "summary": "A visual editor for interactive animations that exports a tiny runtime for the web, iOS, and Android.",
+      "whyForYou": "you are hand-coding motion — Rive lets you design the animation visually and skip most of the timing code.",
+      "url": "https://rive.app",
+      "match": {
+        "categories": [
+          "animation"
+        ],
+        "keywords": [
+          "animation",
+          "animate",
+          "motion",
+          "interactive",
+          "rive"
+        ]
+      }
+    },
+    {
+      "id": "lottie",
+      "kind": "tool",
+      "title": "Lottie",
+      "summary": "Plays After Effects animations on the web as JSON, so complex illustrated motion stays small and sharp.",
+      "whyForYou": "illustrated or looping animations are far easier to ship as Lottie files than to rebuild in code.",
+      "url": "https://airbnb.io/lottie/",
+      "match": {
+        "categories": [
+          "animation"
+        ],
+        "keywords": [
+          "animation",
+          "illustration",
+          "loading",
+          "icon",
+          "lottie",
+          "after effects"
+        ]
+      }
+    },
+    {
+      "id": "motion",
+      "kind": "tool",
+      "title": "Motion (formerly Framer Motion)",
+      "summary": "An animation library built around React components, with layout and gesture animations handled for you.",
+      "whyForYou": "you are animating inside React — Motion removes most of the manual ref and cleanup work.",
+      "url": "https://motion.dev",
+      "match": {
+        "concepts": [
+          "react-basics",
+          "react-hooks",
+          "gsap-react"
+        ],
+        "keywords": [
+          "animation",
+          "motion",
+          "transition",
+          "gesture",
+          "framer motion",
+          "framer"
+        ]
+      }
+    },
+    {
+      "id": "theatre-js",
+      "kind": "tool",
+      "title": "Theatre.js",
+      "summary": "A visual timeline editor that sits on top of your own code, so you can tweak animation timing by dragging keyframes.",
+      "whyForYou": "tuning easing and timing by editing numbers is slow; a timeline UI gets you there much faster.",
+      "url": "https://www.theatrejs.com",
+      "match": {
+        "concepts": [
+          "gsap-timeline",
+          "gsap-core"
+        ],
+        "keywords": [
+          "timeline",
+          "keyframe",
+          "sequence",
+          "easing",
+          "theatre.js"
+        ]
+      }
+    },
+    {
+      "id": "scroll-driven-animations",
+      "kind": "kit",
+      "title": "Scroll-driven Animations (Chrome guide + demos)",
+      "summary": "A gallery of scroll-linked effects built with native CSS scroll-driven animations, no JavaScript library needed.",
+      "whyForYou": "some scroll effects now work in pure CSS, which is lighter and smoother than a JS scroll listener.",
+      "url": "https://scroll-driven-animations.style",
+      "match": {
+        "concepts": [
+          "gsap-scrolltrigger",
+          "intersection-observer"
+        ],
+        "keywords": [
+          "scroll",
+          "parallax",
+          "sticky",
+          "pin"
+        ]
+      }
+    },
+    {
+      "id": "figma-mcp",
+      "kind": "mcp",
+      "title": "Figma MCP server",
+      "summary": "Connects Cursor to Figma so the agent can read your real designs and push generated screens back into a file.",
+      "whyForYou": "the agent can build from your actual Figma frames instead of guessing at spacing, colour, and type.",
+      "url": "https://developers.figma.com/docs/figma-mcp-server/",
+      "match": {
+        "concepts": [
+          "figma-to-code"
+        ],
+        "keywords": [
+          "figma",
+          "design",
+          "mockup",
+          "ui",
+          "component library",
+          "design system",
+          "figma mcp"
+        ]
+      }
+    },
+    {
+      "id": "mobbin",
+      "kind": "service",
+      "title": "Mobbin",
+      "summary": "A searchable library of screenshots from real production apps, organised by flow and UI pattern.",
+      "whyForYou": "before designing a flow from scratch, it is much quicker to see how shipped apps already solve it.",
+      "url": "https://mobbin.com",
+      "match": {
+        "concepts": [
+          "figma-to-code",
+          "component-architecture"
+        ],
+        "keywords": [
+          "design",
+          "ui",
+          "ux",
+          "onboarding",
+          "flow",
+          "pattern",
+          "layout",
+          "mobbin"
+        ]
+      }
+    },
+    {
+      "id": "tailwind",
+      "kind": "tool",
+      "title": "Tailwind CSS",
+      "summary": "Styles elements with small utility classes in your markup instead of separate stylesheets.",
+      "whyForYou": "you are writing a lot of custom CSS by hand, which utilities would make shorter and more consistent.",
+      "url": "https://tailwindcss.com",
+      "match": {
+        "concepts": [
+          "css-basics",
+          "css-flexbox",
+          "css-grid"
+        ],
+        "keywords": [
+          "css",
+          "styling",
+          "style",
+          "layout",
+          "tailwind"
+        ]
+      }
+    },
+    {
+      "id": "open-props",
+      "kind": "kit",
+      "title": "Open Props",
+      "summary": "A ready-made set of CSS custom properties for spacing, colour, easing, and shadows.",
+      "whyForYou": "it gives you a consistent design-token scale without inventing every value yourself.",
+      "url": "https://open-props.style",
+      "match": {
+        "concepts": [
+          "css-custom-properties",
+          "css-basics"
+        ],
+        "keywords": [
+          "design token",
+          "variable",
+          "spacing",
+          "theme",
+          "colour",
+          "color",
+          "open props"
+        ]
+      }
+    },
+    {
+      "id": "radix-primitives",
+      "kind": "kit",
+      "title": "Radix Primitives",
+      "summary": "Unstyled, accessible React components for menus, dialogs, tooltips, and other fiddly widgets.",
+      "whyForYou": "hand-built dropdowns and modals almost always miss keyboard and screen-reader behaviour that Radix handles.",
+      "url": "https://www.radix-ui.com/primitives",
+      "match": {
+        "concepts": [
+          "react-basics",
+          "component-architecture",
+          "accessibility"
+        ],
+        "keywords": [
+          "modal",
+          "dialog",
+          "dropdown",
+          "menu",
+          "tooltip",
+          "accordion",
+          "component",
+          "radix"
+        ]
+      }
+    },
+    {
+      "id": "shadcn-ui",
+      "kind": "kit",
+      "title": "shadcn/ui",
+      "summary": "Copy-paste React components built on Radix and Tailwind that you own and restyle freely.",
+      "whyForYou": "you get a working component set to start from, without taking on a dependency you cannot customise.",
+      "url": "https://ui.shadcn.com",
+      "match": {
+        "concepts": [
+          "react-basics",
+          "tailwind",
+          "component-architecture"
+        ],
+        "keywords": [
+          "component",
+          "ui kit",
+          "design system",
+          "button",
+          "form",
+          "shadcn"
+        ]
+      }
+    },
+    {
+      "id": "axe-devtools",
+      "kind": "tool",
+      "title": "axe DevTools",
+      "summary": "A browser extension that audits a page for accessibility problems and explains how to fix each one.",
+      "whyForYou": "it catches contrast, label, and focus issues that are invisible until someone cannot use your site.",
+      "url": "https://www.deque.com/axe/devtools/",
+      "match": {
+        "concepts": [
+          "accessibility",
+          "semantic-html",
+          "reduced-motion"
+        ],
+        "keywords": [
+          "accessibility",
+          "a11y",
+          "screen reader",
+          "contrast",
+          "keyboard",
+          "axe"
+        ]
+      }
+    },
+    {
+      "id": "playwright",
+      "kind": "tool",
+      "title": "Playwright",
+      "summary": "Drives a real browser to test your site end to end, and can record the test by watching you click.",
+      "whyForYou": "it turns the manual clicking you do after each change into a check that runs automatically.",
+      "url": "https://playwright.dev",
+      "match": {
+        "concepts": [
+          "testing-basics",
+          "browser-devtools"
+        ],
+        "keywords": [
+          "test",
+          "testing",
+          "e2e",
+          "browser",
+          "regression",
+          "playwright"
+        ]
+      }
+    },
+    {
+      "id": "vitest",
+      "kind": "tool",
+      "title": "Vitest",
+      "summary": "A fast test runner for JavaScript and TypeScript projects that share a Vite config.",
+      "whyForYou": "small unit tests around your logic catch breakage sooner than clicking through the UI.",
+      "url": "https://vitest.dev",
+      "match": {
+        "concepts": [
+          "testing-basics",
+          "vite",
+          "typescript"
+        ],
+        "keywords": [
+          "test",
+          "unit test",
+          "coverage",
+          "vitest"
+        ]
+      }
+    },
+    {
+      "id": "lighthouse",
+      "kind": "tool",
+      "title": "Lighthouse",
+      "summary": "Built into Chrome DevTools; scores a page on performance, accessibility, and best practices.",
+      "whyForYou": "it turns vague 'feels slow' into a specific list of what to fix first.",
+      "url": "https://developer.chrome.com/docs/lighthouse/overview",
+      "match": {
+        "concepts": [
+          "browser-devtools",
+          "local-dev-server"
+        ],
+        "keywords": [
+          "performance",
+          "slow",
+          "speed",
+          "optimise",
+          "optimize",
+          "lighthouse",
+          "core web vitals"
+        ]
+      }
+    },
+    {
+      "id": "sharp-squoosh",
+      "kind": "tool",
+      "title": "Squoosh and Sharp",
+      "summary": "Squoosh compresses images in the browser; Sharp does the same job in a build script.",
+      "whyForYou": "unoptimised images are usually the single biggest thing slowing a site down.",
+      "url": "https://squoosh.app",
+      "match": {
+        "keywords": [
+          "image",
+          "photo",
+          "png",
+          "jpg",
+          "webp",
+          "performance",
+          "asset",
+          "squoosh",
+          "sharp"
+        ]
+      }
+    },
+    {
+      "id": "vercel",
+      "kind": "service",
+      "title": "Vercel",
+      "summary": "Hosts front-end projects with preview URLs for every branch and no server setup.",
+      "whyForYou": "a live preview link per change is much easier to review than describing what you built.",
+      "url": "https://vercel.com",
+      "match": {
+        "concepts": [
+          "nextjs",
+          "astro",
+          "vite",
+          "git-remotes"
+        ],
+        "keywords": [
+          "deploy",
+          "hosting",
+          "publish",
+          "live",
+          "production",
+          "preview",
+          "vercel"
+        ]
+      }
+    },
+    {
+      "id": "cloudflare-pages",
+      "kind": "service",
+      "title": "Cloudflare Pages",
+      "summary": "Free static and edge hosting with generous bandwidth and built-in analytics.",
+      "whyForYou": "a strong free alternative if you want hosting that stays cheap as traffic grows.",
+      "url": "https://pages.cloudflare.com",
+      "match": {
+        "concepts": [
+          "astro",
+          "vite",
+          "git-remotes"
+        ],
+        "keywords": [
+          "deploy",
+          "hosting",
+          "static site",
+          "cdn",
+          "cloudflare"
+        ]
+      }
+    },
+    {
+      "id": "astro",
+      "kind": "tool",
+      "title": "Astro",
+      "summary": "A site framework that ships almost no JavaScript by default and lets you drop in React where needed.",
+      "whyForYou": "for content-heavy or portfolio sites this is usually faster and simpler than a full app framework.",
+      "url": "https://astro.build",
+      "match": {
+        "concepts": [
+          "html-basics",
+          "markdown",
+          "yaml-frontmatter"
+        ],
+        "keywords": [
+          "portfolio",
+          "blog",
+          "static site",
+          "content",
+          "landing page",
+          "astro"
+        ]
+      }
+    },
+    {
+      "id": "neon-postgres",
+      "kind": "service",
+      "title": "Neon Postgres",
+      "summary": "Serverless Postgres with instant database branching, so each feature can have its own copy of the data.",
+      "whyForYou": "you are working with SQL — branching databases means you can experiment without risking real data.",
+      "url": "https://neon.com",
+      "match": {
+        "concepts": [
+          "sql-databases"
+        ],
+        "keywords": [
+          "database",
+          "postgres",
+          "sql",
+          "schema",
+          "migration",
+          "neon"
+        ]
+      }
+    },
+    {
+      "id": "drizzle",
+      "kind": "tool",
+      "title": "Drizzle ORM",
+      "summary": "Writes type-safe SQL in TypeScript and generates migrations from your schema.",
+      "whyForYou": "typed queries catch column and table mistakes before the code ever runs.",
+      "url": "https://orm.drizzle.team",
+      "match": {
+        "concepts": [
+          "sql-databases",
+          "typescript"
+        ],
+        "keywords": [
+          "database",
+          "orm",
+          "query",
+          "migration",
+          "schema",
+          "drizzle"
+        ]
+      }
+    },
+    {
+      "id": "zod",
+      "kind": "tool",
+      "title": "Zod",
+      "summary": "Describes the shape of data once and validates it at runtime with matching TypeScript types.",
+      "whyForYou": "it stops malformed API responses and form input from turning into confusing downstream bugs.",
+      "url": "https://zod.dev",
+      "match": {
+        "concepts": [
+          "typescript",
+          "fetch-api",
+          "http-and-apis",
+          "json"
+        ],
+        "keywords": [
+          "validation",
+          "form",
+          "api",
+          "schema",
+          "type safety",
+          "zod"
+        ]
+      }
+    },
+    {
+      "id": "tanstack-query",
+      "kind": "tool",
+      "title": "TanStack Query",
+      "summary": "Handles fetching, caching, retries, and refetching of server data in React.",
+      "whyForYou": "it replaces most hand-rolled loading and error state around data fetching.",
+      "url": "https://tanstack.com/query",
+      "match": {
+        "concepts": [
+          "react-hooks",
+          "fetch-api",
+          "async-javascript"
+        ],
+        "keywords": [
+          "fetch",
+          "api",
+          "loading",
+          "cache",
+          "data",
+          "tanstack",
+          "react query"
+        ]
+      }
+    },
+    {
+      "id": "sentry",
+      "kind": "service",
+      "title": "Sentry",
+      "summary": "Captures errors from real users with the stack trace and the steps that led to them.",
+      "whyForYou": "without it you only hear about bugs when someone remembers to tell you.",
+      "url": "https://sentry.io",
+      "match": {
+        "concepts": [
+          "nodejs",
+          "nextjs",
+          "react-basics"
+        ],
+        "keywords": [
+          "error",
+          "crash",
+          "bug",
+          "monitoring",
+          "production",
+          "sentry"
+        ]
+      }
+    },
+    {
+      "id": "posthog",
+      "kind": "service",
+      "title": "PostHog",
+      "summary": "Product analytics with session replay and feature flags, generous free tier.",
+      "whyForYou": "watching where people actually get stuck beats guessing which part of the flow to improve.",
+      "url": "https://posthog.com",
+      "match": {
+        "keywords": [
+          "analytics",
+          "tracking",
+          "conversion",
+          "funnel",
+          "metric",
+          "user behaviour",
+          "user behavior",
+          "posthog"
+        ]
+      }
+    },
+    {
+      "id": "resend",
+      "kind": "service",
+      "title": "Resend and React Email",
+      "summary": "Sends transactional email, with templates you build as React components.",
+      "whyForYou": "email templates are notoriously painful in raw HTML; this keeps them in familiar code.",
+      "url": "https://resend.com",
+      "match": {
+        "keywords": [
+          "email",
+          "contact form",
+          "notification",
+          "newsletter",
+          "transactional",
+          "resend"
+        ]
+      }
+    },
+    {
+      "id": "clerk",
+      "kind": "service",
+      "title": "Clerk",
+      "summary": "Drop-in sign-in, sign-up, and user management with prebuilt UI components.",
+      "whyForYou": "authentication is high-risk to hand-roll; a managed provider handles sessions and resets for you.",
+      "url": "https://clerk.com",
+      "match": {
+        "keywords": [
+          "auth",
+          "authentication",
+          "login",
+          "sign in",
+          "sign up",
+          "user account",
+          "session",
+          "password",
+          "clerk"
+        ]
+      }
+    },
+    {
+      "id": "sanity",
+      "kind": "service",
+      "title": "Sanity",
+      "summary": "A hosted content backend with a customisable editing interface.",
+      "whyForYou": "it lets you change site copy and images without editing code or redeploying.",
+      "url": "https://www.sanity.io",
+      "match": {
+        "concepts": [
+          "markdown",
+          "yaml-frontmatter",
+          "astro",
+          "nextjs"
+        ],
+        "keywords": [
+          "cms",
+          "content",
+          "blog",
+          "copy",
+          "editor",
+          "sanity"
+        ]
+      }
+    },
+    {
+      "id": "context-dev-mcp",
+      "kind": "mcp",
+      "title": "Context.dev MCP",
+      "summary": "Gives the agent live web search, page scraping, brand data, and design-system extraction.",
+      "whyForYou": "the agent can look up current documentation and real sites instead of relying on memory.",
+      "url": "https://context.dev",
+      "match": {
+        "concepts": [
+          "cursor-hooks-mcp",
+          "http-and-apis"
+        ],
+        "keywords": [
+          "research",
+          "search",
+          "scrape",
+          "competitor",
+          "documentation",
+          "look up",
+          "context.dev"
+        ]
+      }
+    },
+    {
+      "id": "cursor-rules-skills",
+      "kind": "kit",
+      "title": "Cursor rules and skills",
+      "summary": "Reusable instruction files that teach the agent your conventions once instead of every chat.",
+      "whyForYou": "if you keep repeating the same guidance to the agent, a rule or skill makes it stick.",
+      "url": "https://cursor.com/docs/context/rules",
+      "match": {
+        "concepts": [
+          "cursor-agent",
+          "cursor-skills-rules"
+        ],
+        "keywords": [
+          "rule",
+          "skill",
+          "convention",
+          "instruction",
+          "prompt",
+          "repeat"
+        ]
+      }
+    },
+    {
+      "id": "cursor-hooks",
+      "kind": "kit",
+      "title": "Cursor hooks",
+      "summary": "Scripts that run on agent events, so you can log, audit, or block what the agent does.",
+      "whyForYou": "hooks are how you observe and constrain agent behaviour rather than trusting it blindly.",
+      "url": "https://cursor.com/docs/hooks",
+      "match": {
+        "concepts": [
+          "cursor-hooks-mcp",
+          "shell-scripting"
+        ],
+        "keywords": [
+          "hook",
+          "audit",
+          "guardrail",
+          "observe",
+          "automation"
+        ]
+      }
+    },
+    {
+      "id": "bugbot",
+      "kind": "tool",
+      "title": "Cursor Bugbot",
+      "summary": "Reviews pull requests automatically and comments on likely bugs before a human looks.",
+      "whyForYou": "an automated first-pass review catches obvious mistakes when you have nobody to review your code.",
+      "url": "https://cursor.com/docs/bugbot",
+      "match": {
+        "concepts": [
+          "git-branching",
+          "git-remotes"
+        ],
+        "keywords": [
+          "review",
+          "pull request",
+          "pr",
+          "code review",
+          "bug",
+          "bugbot"
+        ]
+      }
+    },
+    {
+      "id": "github-actions",
+      "kind": "tool",
+      "title": "GitHub Actions",
+      "summary": "Runs your tests, builds, and deploys automatically whenever you push code.",
+      "whyForYou": "it removes the chance of forgetting a build or test step before you ship.",
+      "url": "https://docs.github.com/actions",
+      "match": {
+        "concepts": [
+          "git-remotes",
+          "git-branching",
+          "testing-basics"
+        ],
+        "keywords": [
+          "ci",
+          "pipeline",
+          "automate",
+          "deploy",
+          "workflow",
+          "github actions"
+        ]
+      }
+    },
+    {
+      "id": "lazygit",
+      "kind": "tool",
+      "title": "lazygit",
+      "summary": "A keyboard-driven visual interface for git that runs in the terminal.",
+      "whyForYou": "seeing branches and staged changes laid out makes git far less intimidating than raw commands.",
+      "url": "https://github.com/jesseduffield/lazygit",
+      "match": {
+        "concepts": [
+          "git-basics",
+          "git-branching",
+          "terminal-basics"
+        ],
+        "keywords": [
+          "git",
+          "commit",
+          "branch",
+          "merge",
+          "history",
+          "lazygit"
+        ]
+      }
+    },
+    {
+      "id": "direnv-dotenvx",
+      "kind": "tool",
+      "title": "dotenvx",
+      "summary": "Loads and encrypts environment variables per project so secrets never sit in plain text.",
+      "whyForYou": "you are handling API keys and config — this keeps them out of your commits.",
+      "url": "https://dotenvx.com",
+      "match": {
+        "concepts": [
+          "environment-variables",
+          "gitignore"
+        ],
+        "keywords": [
+          "env",
+          "secret",
+          "api key",
+          "token",
+          "credential",
+          "config",
+          "dotenv",
+          "dotenvx"
+        ]
+      }
+    },
+    {
+      "id": "biome",
+      "kind": "tool",
+      "title": "Biome",
+      "summary": "One fast tool that both formats and lints JavaScript and TypeScript, replacing Prettier plus ESLint.",
+      "whyForYou": "a single formatter and linter means fewer config files and fewer style arguments.",
+      "url": "https://biomejs.dev",
+      "match": {
+        "concepts": [
+          "linting-formatting",
+          "typescript"
+        ],
+        "keywords": [
+          "lint",
+          "format",
+          "prettier",
+          "eslint",
+          "style guide",
+          "biome"
+        ]
+      }
+    },
+    {
+      "id": "storybook",
+      "kind": "tool",
+      "title": "Storybook",
+      "summary": "Renders each component in isolation so you can see every state without clicking through the app.",
+      "whyForYou": "it is the fastest way to review and document a growing component library.",
+      "url": "https://storybook.js.org",
+      "match": {
+        "concepts": [
+          "component-architecture",
+          "react-basics"
+        ],
+        "keywords": [
+          "component",
+          "design system",
+          "documentation",
+          "variant",
+          "state",
+          "storybook"
+        ]
+      }
+    },
+    {
+      "id": "react-three-fiber",
+      "kind": "kit",
+      "title": "React Three Fiber",
+      "summary": "Write Three.js 3D scenes as React components, with a large helper library in Drei.",
+      "whyForYou": "raw Three.js needs a lot of boilerplate that React Three Fiber handles for you.",
+      "url": "https://r3f.docs.pmnd.rs",
+      "match": {
+        "concepts": [
+          "react-basics",
+          "css-transforms"
+        ],
+        "keywords": [
+          "3d",
+          "three",
+          "webgl",
+          "shader",
+          "scene",
+          "canvas",
+          "three.js",
+          "react three fiber"
+        ]
+      }
+    },
+    {
+      "id": "spline",
+      "kind": "tool",
+      "title": "Spline",
+      "summary": "A browser-based 3D design tool that exports interactive scenes for the web.",
+      "whyForYou": "it gets you a usable 3D scene without learning a full 3D pipeline first.",
+      "url": "https://spline.design",
+      "match": {
+        "keywords": [
+          "3d",
+          "hero",
+          "interactive",
+          "scene",
+          "webgl",
+          "spline"
+        ]
+      }
+    },
+    {
+      "id": "excalidraw",
+      "kind": "tool",
+      "title": "Excalidraw",
+      "summary": "Quick hand-drawn-style diagrams for architecture and flows, free and shareable.",
+      "whyForYou": "sketching the structure before building usually surfaces problems earlier than code does.",
+      "url": "https://excalidraw.com",
+      "match": {
+        "concepts": [
+          "component-architecture",
+          "markdown"
+        ],
+        "keywords": [
+          "diagram",
+          "architecture",
+          "plan",
+          "flow",
+          "sketch",
+          "map",
+          "excalidraw"
+        ]
+      }
+    }
+  ]
+}

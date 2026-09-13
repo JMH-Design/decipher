@@ -1,8 +1,8 @@
 {
   "name": "decipher-monorepo",
   "private": true,
-  "version": "0.1.0",
-  "description": "Decipher: plain-language agent activity explainer for Cursor (extension + plugin)",
+  "version": "0.2.0",
+  "description": "Decipher: plain-language agent activity explainer, learning resources, and tool recommendations for Cursor (extension + plugin)",
   "workspaces": [
     "extension"
   ],
