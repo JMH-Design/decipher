@@ -1,0 +1,22 @@
+{
+  "$comment": "Cross-cutting detection rules. Per-concept import/symbol rules live inside each concept's `detection` block in concepts.json. Keywords here boost relevance when they appear in the user's request.",
+  "requestDomains": [
+    { "id": "animation", "keywords": ["animate", "animation", "motion", "transition", "stagger", "scroll effect", "reveal", "parallax", "gsap", "keyframes"], "concepts": ["gsap-core", "gsap-timeline", "gsap-scrolltrigger", "gsap-react", "gsap-plugins", "css-animations", "css-transitions", "css-transforms", "waapi", "reduced-motion", "intersection-observer"] },
+    { "id": "styling", "keywords": ["style", "css", "color", "font", "spacing", "layout", "responsive", "mobile", "theme", "dark mode", "design token"], "concepts": ["css-basics", "css-custom-properties", "css-flexbox", "css-grid", "media-queries", "tailwind"] },
+    { "id": "components", "keywords": ["component", "button", "card", "hero", "header", "footer", "nav", "modal", "page"], "concepts": ["component-architecture", "react-basics", "astro", "semantic-html", "html-basics"] },
+    { "id": "version-control", "keywords": ["commit", "push", "github", "branch", "merge", "pull request", "pr", "save changes", "git"], "concepts": ["git-basics", "git-branching", "git-remotes", "gitignore"] },
+    { "id": "setup", "keywords": ["install", "set up", "setup", "scaffold", "create a project", "dependency", "package"], "concepts": ["npm-packages", "package-json", "vite", "nodejs"] },
+    { "id": "testing", "keywords": ["test", "verify", "check", "bug", "fix", "broken", "error"], "concepts": ["testing-basics", "browser-devtools", "linting-formatting"] },
+    { "id": "data", "keywords": ["api", "fetch", "database", "sql", "endpoint", "json"], "concepts": ["fetch-api", "http-and-apis", "sql-databases", "json"] },
+    { "id": "cursor", "keywords": ["skill", "rule", "hook", "mcp", "plugin", "extension", "agent"], "concepts": ["cursor-agent", "cursor-skills-rules", "cursor-hooks-mcp", "vscode-extensions"] },
+    { "id": "figma", "keywords": ["figma", "design file", "mockup"], "concepts": ["figma-to-code"] },
+    { "id": "accessibility", "keywords": ["accessible", "accessibility", "a11y", "screen reader", "keyboard"], "concepts": ["accessibility", "semantic-html", "reduced-motion"] }
+  ],
+  "incidentalConcepts": {
+    "$comment": "Concepts that show up in almost every session as scaffolding. Their relevance is capped unless the user's request is about them.",
+    "ids": ["terminal-basics", "git-basics", "ripgrep-search", "markdown", "json", "local-dev-server", "es-modules"],
+    "relevanceCap": 0.7
+  },
+  "ignoredPaths": ["/node_modules/", "/dist/", "/.git/", "/out/", "/build/", "/.next/", "/coverage/"],
+  "ignoredFileNames": ["package-lock.json", "pnpm-lock.yaml", "yarn.lock", "bun.lockb"]
+}

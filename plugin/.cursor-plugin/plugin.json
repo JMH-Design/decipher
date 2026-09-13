@@ -1,0 +1,17 @@
+{
+  "name": "decipher-hooks",
+  "displayName": "Decipher Hooks",
+  "description": "Captures agent tool activity (commands, outputs, edits) so the Decipher sidebar can explain it in plain language. All data stays on your machine.",
+  "version": "0.1.0",
+  "author": {
+    "name": "haggitjm"
+  },
+  "license": "MIT",
+  "keywords": [
+    "decipher",
+    "explainer",
+    "learning",
+    "hooks"
+  ],
+  "hooks": "./hooks/hooks.json"
+}

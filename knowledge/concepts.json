@@ -1,0 +1,2492 @@
+[
+  {
+    "id": "gsap-core",
+    "label": "GSAP",
+    "category": "animation",
+    "depth": "intermediate",
+    "plainSummary": "A JavaScript animation library that moves things on the page smoothly with precise timing and easing.",
+    "whyUsed": "GSAP gives fine control over timing, easing, and sequencing that plain CSS makes awkward, and it works the same in every browser.",
+    "prerequisites": [
+      "javascript-basics",
+      "dom-basics",
+      "css-basics"
+    ],
+    "topics": [
+      {
+        "id": "gsap-what",
+        "label": "What GSAP is and when to use it",
+        "minutes": 10
+      },
+      {
+        "id": "gsap-to",
+        "label": "gsap.to(), from(), fromTo() — the three basic moves",
+        "minutes": 15
+      },
+      {
+        "id": "gsap-ease",
+        "label": "Duration, delay, and easing curves",
+        "minutes": 10
+      },
+      {
+        "id": "gsap-stagger",
+        "label": "Staggering many elements",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "GSAP getting started",
+        "url": "https://gsap.com/resources/get-started/"
+      },
+      {
+        "type": "official",
+        "title": "gsap.to() docs",
+        "url": "https://gsap.com/docs/v3/GSAP/gsap.to()"
+      },
+      {
+        "type": "tutorial",
+        "title": "GSAP ease visualizer",
+        "url": "https://gsap.com/docs/v3/Eases/"
+      },
+      {
+        "type": "skill",
+        "title": "Your gsap-core skill",
+        "path": "~/.claude/skills/gsap-core/SKILL.md"
+      }
+    ],
+    "detection": {
+      "imports": [
+        "gsap",
+        "gsap/all",
+        "gsap/dist/gsap"
+      ],
+      "symbols": [
+        "gsap.to(",
+        "gsap.from(",
+        "gsap.fromTo(",
+        "gsap.set(",
+        "gsap.registerPlugin(",
+        "gsap.matchMedia(",
+        "gsap.defaults("
+      ],
+      "packages": [
+        "gsap"
+      ],
+      "keywords": [
+        "gsap",
+        "greensock"
+      ]
+    }
+  },
+  {
+    "id": "gsap-timeline",
+    "label": "GSAP Timelines",
+    "category": "animation",
+    "depth": "intermediate",
+    "plainSummary": "A way to chain several animations so they play in sequence or overlap, controlled as one unit.",
+    "prerequisites": [
+      "gsap-core"
+    ],
+    "topics": [
+      {
+        "id": "tl-basics",
+        "label": "Creating a timeline and adding tweens",
+        "minutes": 15
+      },
+      {
+        "id": "tl-position",
+        "label": "The position parameter (\"<\", \"+=0.5\")",
+        "minutes": 15
+      },
+      {
+        "id": "tl-control",
+        "label": "Play, pause, reverse, seek",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "Timeline docs",
+        "url": "https://gsap.com/docs/v3/GSAP/Timeline/"
+      },
+      {
+        "type": "skill",
+        "title": "Your gsap-timeline skill",
+        "path": "~/.claude/skills/gsap-timeline/SKILL.md"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "gsap.timeline(",
+        "tl.to(",
+        "timeline.to(",
+        ".add("
+      ],
+      "keywords": [
+        "timeline"
+      ]
+    }
+  },
+  {
+    "id": "gsap-scrolltrigger",
+    "label": "ScrollTrigger",
+    "category": "animation",
+    "depth": "intermediate",
+    "plainSummary": "Ties animations to scroll position — things animate as you scroll down the page.",
+    "whyUsed": "Scroll-driven reveals need to know exactly where an element is relative to the viewport; ScrollTrigger handles that math and the edge cases.",
+    "prerequisites": [
+      "gsap-core",
+      "dom-basics"
+    ],
+    "topics": [
+      {
+        "id": "st-basics",
+        "label": "What ScrollTrigger does",
+        "minutes": 10
+      },
+      {
+        "id": "st-scrub",
+        "label": "Scrub vs toggle animations",
+        "minutes": 15
+      },
+      {
+        "id": "st-pin",
+        "label": "Pinning elements while scrolling",
+        "minutes": 20
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "ScrollTrigger docs",
+        "url": "https://gsap.com/docs/v3/Plugins/ScrollTrigger/"
+      },
+      {
+        "type": "tutorial",
+        "title": "ScrollTrigger demos",
+        "url": "https://gsap.com/scroll/"
+      },
+      {
+        "type": "skill",
+        "title": "Your gsap-scrolltrigger skill",
+        "path": "~/.claude/skills/gsap-scrolltrigger/SKILL.md"
+      }
+    ],
+    "detection": {
+      "imports": [
+        "gsap/ScrollTrigger",
+        "gsap/dist/ScrollTrigger"
+      ],
+      "symbols": [
+        "ScrollTrigger.create(",
+        "ScrollTrigger.batch(",
+        "scrollTrigger:",
+        "ScrollTrigger.refresh("
+      ],
+      "keywords": [
+        "scrolltrigger",
+        "scroll trigger"
+      ]
+    }
+  },
+  {
+    "id": "gsap-react",
+    "label": "GSAP in React",
+    "category": "animation",
+    "depth": "advanced",
+    "plainSummary": "Using GSAP safely inside React components, where elements get created and destroyed.",
+    "prerequisites": [
+      "gsap-core",
+      "react-hooks"
+    ],
+    "topics": [
+      {
+        "id": "gr-usegsap",
+        "label": "The useGSAP() hook",
+        "minutes": 15
+      },
+      {
+        "id": "gr-cleanup",
+        "label": "Cleaning up animations when components unmount",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "GSAP + React guide",
+        "url": "https://gsap.com/resources/React/"
+      },
+      {
+        "type": "skill",
+        "title": "Your gsap-react skill",
+        "path": "~/.claude/skills/gsap-react/SKILL.md"
+      }
+    ],
+    "detection": {
+      "imports": [
+        "@gsap/react"
+      ],
+      "symbols": [
+        "useGSAP("
+      ],
+      "packages": [
+        "@gsap/react"
+      ]
+    }
+  },
+  {
+    "id": "gsap-plugins",
+    "label": "GSAP Plugins",
+    "category": "animation",
+    "depth": "advanced",
+    "plainSummary": "Add-ons for GSAP: Flip for layout transitions, Draggable for drag interactions, SplitText for per-letter effects, and more.",
+    "prerequisites": [
+      "gsap-core"
+    ],
+    "topics": [
+      {
+        "id": "gp-register",
+        "label": "Registering a plugin",
+        "minutes": 5
+      },
+      {
+        "id": "gp-flip",
+        "label": "Flip: animate between layouts",
+        "minutes": 20
+      },
+      {
+        "id": "gp-split",
+        "label": "SplitText: per-letter and per-word animation",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "GSAP plugins",
+        "url": "https://gsap.com/docs/v3/Plugins/"
+      },
+      {
+        "type": "skill",
+        "title": "Your gsap-plugins skill",
+        "path": "~/.claude/skills/gsap-plugins/SKILL.md"
+      }
+    ],
+    "detection": {
+      "imports": [
+        "gsap/Flip",
+        "gsap/Draggable",
+        "gsap/SplitText",
+        "gsap/MotionPathPlugin",
+        "gsap/TextPlugin",
+        "gsap/Observer"
+      ],
+      "symbols": [
+        "Flip.from(",
+        "Draggable.create(",
+        "SplitText.create(",
+        "new SplitText("
+      ]
+    }
+  },
+  {
+    "id": "css-animations",
+    "label": "CSS animations",
+    "category": "animation",
+    "depth": "beginner",
+    "plainSummary": "Making elements move or change using only stylesheets: @keyframes define the steps, `animation` plays them.",
+    "whyUsed": "For simple, self-contained motion CSS is lighter than a JavaScript library and keeps styling and motion together.",
+    "prerequisites": [
+      "css-basics"
+    ],
+    "topics": [
+      {
+        "id": "ca-keyframes",
+        "label": "@keyframes and the animation property",
+        "minutes": 15
+      },
+      {
+        "id": "ca-timing",
+        "label": "Duration, delay, easing, fill-mode",
+        "minutes": 10
+      },
+      {
+        "id": "ca-stagger",
+        "label": "Staggering with animation-delay",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: Using CSS animations",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_animations/Using_CSS_animations"
+      },
+      {
+        "type": "tutorial",
+        "title": "web.dev: CSS animation",
+        "url": "https://web.dev/learn/css/animations"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "@keyframes",
+        "animation:",
+        "animation-name",
+        "animation-delay",
+        "animation-duration",
+        "animation-timing-function"
+      ],
+      "keywords": [
+        "keyframes",
+        "animation"
+      ]
+    }
+  },
+  {
+    "id": "css-transitions",
+    "label": "CSS transitions",
+    "category": "animation",
+    "depth": "beginner",
+    "plainSummary": "Smoothly animating a style change (like a hover color) instead of snapping instantly.",
+    "prerequisites": [
+      "css-basics"
+    ],
+    "topics": [
+      {
+        "id": "ct-basics",
+        "label": "transition-property, duration, and easing",
+        "minutes": 10
+      },
+      {
+        "id": "ct-hover",
+        "label": "Hover and focus transitions",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: Using CSS transitions",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_transitions/Using_CSS_transitions"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "transition:",
+        "transition-property",
+        "transition-duration"
+      ],
+      "keywords": [
+        "transition"
+      ]
+    }
+  },
+  {
+    "id": "css-transforms",
+    "label": "CSS transforms",
+    "category": "animation",
+    "depth": "beginner",
+    "plainSummary": "Moving, scaling, and rotating elements without affecting the layout around them — the fastest properties to animate.",
+    "prerequisites": [
+      "css-basics"
+    ],
+    "topics": [
+      {
+        "id": "tf-basics",
+        "label": "translate, scale, rotate",
+        "minutes": 10
+      },
+      {
+        "id": "tf-perf",
+        "label": "Why transform and opacity animate smoothly",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: transform",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/transform"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "transform:",
+        "translate:",
+        "scale:",
+        "rotate:",
+        "translateX(",
+        "translateY(",
+        "translate3d("
+      ]
+    }
+  },
+  {
+    "id": "waapi",
+    "label": "Web Animations API",
+    "category": "animation",
+    "depth": "intermediate",
+    "plainSummary": "The browser's built-in JavaScript animation engine (element.animate()), the thing libraries like GSAP build on.",
+    "prerequisites": [
+      "javascript-basics",
+      "dom-basics",
+      "css-animations"
+    ],
+    "topics": [
+      {
+        "id": "wa-animate",
+        "label": "element.animate() and keyframe objects",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: Web Animations API",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        ".animate(",
+        "KeyframeEffect",
+        "document.timeline"
+      ],
+      "keywords": [
+        "waapi",
+        "web animations"
+      ]
+    }
+  },
+  {
+    "id": "reduced-motion",
+    "label": "Reduced motion preference",
+    "category": "animation",
+    "depth": "beginner",
+    "plainSummary": "Respecting the user's operating-system setting that asks websites to minimize animation.",
+    "whyUsed": "Motion can cause discomfort for some people; honoring the preference is an accessibility requirement.",
+    "prerequisites": [
+      "css-basics",
+      "media-queries"
+    ],
+    "topics": [
+      {
+        "id": "rm-query",
+        "label": "The prefers-reduced-motion media query",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: prefers-reduced-motion",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "prefers-reduced-motion"
+      ],
+      "keywords": [
+        "reduced motion"
+      ]
+    }
+  },
+  {
+    "id": "intersection-observer",
+    "label": "IntersectionObserver",
+    "category": "animation",
+    "depth": "intermediate",
+    "plainSummary": "A browser feature that tells you when an element scrolls into view — the usual trigger for reveal-on-scroll effects.",
+    "prerequisites": [
+      "javascript-basics",
+      "dom-basics"
+    ],
+    "topics": [
+      {
+        "id": "io-basics",
+        "label": "Observing elements and reacting when they appear",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: Intersection Observer API",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "new IntersectionObserver(",
+        "IntersectionObserver"
+      ],
+      "keywords": [
+        "in view",
+        "in-view"
+      ]
+    }
+  },
+  {
+    "id": "html-basics",
+    "label": "HTML",
+    "category": "web fundamentals",
+    "depth": "beginner",
+    "plainSummary": "The language that defines a page's structure and content: headings, paragraphs, links, images.",
+    "prerequisites": [],
+    "topics": [
+      {
+        "id": "html-elements",
+        "label": "Elements, tags, and attributes",
+        "minutes": 15
+      },
+      {
+        "id": "html-structure",
+        "label": "Nesting and document structure",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: HTML basics",
+        "url": "https://developer.mozilla.org/en-US/docs/Learn/Getting_started_with_the_web/HTML_basics"
+      },
+      {
+        "type": "tutorial",
+        "title": "web.dev: Learn HTML",
+        "url": "https://web.dev/learn/html"
+      }
+    ],
+    "detection": {
+      "fileExtensions": [
+        ".html",
+        ".htm"
+      ],
+      "symbols": [
+        "<div",
+        "<section",
+        "<h1",
+        "<p>",
+        "<span"
+      ]
+    }
+  },
+  {
+    "id": "semantic-html",
+    "label": "Semantic HTML",
+    "category": "web fundamentals",
+    "depth": "beginner",
+    "plainSummary": "Using tags that describe meaning (<nav>, <main>, <article>, <button>) instead of generic <div>s, so browsers and assistive tech understand the page.",
+    "prerequisites": [
+      "html-basics"
+    ],
+    "topics": [
+      {
+        "id": "sh-landmarks",
+        "label": "Landmark elements and headings order",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: Semantics",
+        "url": "https://developer.mozilla.org/en-US/docs/Glossary/Semantics"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "<nav",
+        "<main",
+        "<article",
+        "<aside",
+        "<header",
+        "<footer",
+        "<figure"
+      ]
+    }
+  },
+  {
+    "id": "css-basics",
+    "label": "CSS",
+    "category": "web fundamentals",
+    "depth": "beginner",
+    "plainSummary": "The language that controls how a page looks: colors, fonts, spacing, layout.",
+    "prerequisites": [
+      "html-basics"
+    ],
+    "topics": [
+      {
+        "id": "css-selectors",
+        "label": "Selectors: targeting elements",
+        "minutes": 15
+      },
+      {
+        "id": "css-box",
+        "label": "The box model: margin, border, padding",
+        "minutes": 15
+      },
+      {
+        "id": "css-cascade",
+        "label": "Cascade and specificity: which rule wins",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: CSS basics",
+        "url": "https://developer.mozilla.org/en-US/docs/Learn/Getting_started_with_the_web/CSS_basics"
+      },
+      {
+        "type": "tutorial",
+        "title": "web.dev: Learn CSS",
+        "url": "https://web.dev/learn/css"
+      }
+    ],
+    "detection": {
+      "fileExtensions": [
+        ".css",
+        ".scss",
+        ".sass",
+        ".less"
+      ]
+    }
+  },
+  {
+    "id": "css-custom-properties",
+    "label": "CSS variables (design tokens)",
+    "category": "design & engineering",
+    "depth": "beginner",
+    "plainSummary": "Named values like --surface or --ease-snap that are defined once and reused everywhere, so a single change updates the whole site.",
+    "whyUsed": "Tokens keep colors, spacing, and timing consistent and make theme changes trivial.",
+    "prerequisites": [
+      "css-basics"
+    ],
+    "topics": [
+      {
+        "id": "cp-define",
+        "label": "Defining and using var()",
+        "minutes": 10
+      },
+      {
+        "id": "cp-tokens",
+        "label": "Organising tokens as a design system",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: Using CSS custom properties",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties"
+      },
+      {
+        "type": "tutorial",
+        "title": "Design tokens explained",
+        "url": "https://www.designtokens.org/"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "var(--",
+        "--",
+        ":root {"
+      ],
+      "keywords": [
+        "design token",
+        "design tokens",
+        "css variable"
+      ]
+    }
+  },
+  {
+    "id": "css-flexbox",
+    "label": "Flexbox",
+    "category": "web fundamentals",
+    "depth": "beginner",
+    "plainSummary": "A layout system for arranging items in a row or column and controlling spacing and alignment.",
+    "prerequisites": [
+      "css-basics"
+    ],
+    "topics": [
+      {
+        "id": "fb-basics",
+        "label": "display: flex, direction, justify, align",
+        "minutes": 20
+      }
+    ],
+    "resources": [
+      {
+        "type": "tutorial",
+        "title": "CSS-Tricks: A complete guide to Flexbox",
+        "url": "https://css-tricks.com/snippets/css/a-guide-to-flexbox/"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "display: flex",
+        "display:flex",
+        "justify-content",
+        "align-items",
+        "flex-direction"
+      ]
+    }
+  },
+  {
+    "id": "css-grid",
+    "label": "CSS Grid",
+    "category": "web fundamentals",
+    "depth": "intermediate",
+    "plainSummary": "A two-dimensional layout system for rows and columns — ideal for page layouts and card grids.",
+    "prerequisites": [
+      "css-basics"
+    ],
+    "topics": [
+      {
+        "id": "gr-basics",
+        "label": "grid-template-columns, gap, placing items",
+        "minutes": 25
+      }
+    ],
+    "resources": [
+      {
+        "type": "tutorial",
+        "title": "CSS-Tricks: A complete guide to Grid",
+        "url": "https://css-tricks.com/snippets/css/complete-guide-grid/"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "display: grid",
+        "display:grid",
+        "grid-template-columns",
+        "grid-template-areas",
+        "grid-column",
+        "grid-row"
+      ]
+    }
+  },
+  {
+    "id": "media-queries",
+    "label": "Responsive design & media queries",
+    "category": "web fundamentals",
+    "depth": "beginner",
+    "plainSummary": "Applying different styles depending on screen size or user preferences so a site works on phones and desktops.",
+    "prerequisites": [
+      "css-basics"
+    ],
+    "topics": [
+      {
+        "id": "mq-basics",
+        "label": "@media (min-width) breakpoints",
+        "minutes": 15
+      },
+      {
+        "id": "mq-mobile-first",
+        "label": "Mobile-first thinking",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: Using media queries",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_media_queries/Using_media_queries"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "@media"
+      ],
+      "keywords": [
+        "responsive",
+        "breakpoint",
+        "mobile"
+      ]
+    }
+  },
+  {
+    "id": "javascript-basics",
+    "label": "JavaScript",
+    "category": "web fundamentals",
+    "depth": "beginner",
+    "plainSummary": "The programming language that makes web pages interactive.",
+    "prerequisites": [],
+    "topics": [
+      {
+        "id": "js-vars",
+        "label": "Variables, values, and types",
+        "minutes": 20
+      },
+      {
+        "id": "js-functions",
+        "label": "Functions and arrow functions",
+        "minutes": 20
+      },
+      {
+        "id": "js-arrays",
+        "label": "Arrays, objects, and loops",
+        "minutes": 25
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: JavaScript first steps",
+        "url": "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/First_steps"
+      },
+      {
+        "type": "tutorial",
+        "title": "javascript.info",
+        "url": "https://javascript.info/"
+      }
+    ],
+    "detection": {
+      "fileExtensions": [
+        ".js",
+        ".mjs",
+        ".cjs",
+        ".jsx"
+      ]
+    }
+  },
+  {
+    "id": "typescript",
+    "label": "TypeScript",
+    "category": "web fundamentals",
+    "depth": "intermediate",
+    "plainSummary": "JavaScript with type labels that catch mistakes before the code runs. Files end in .ts / .tsx.",
+    "whyUsed": "Types act like guardrails — the editor can flag a wrong value immediately instead of failing later in the browser.",
+    "prerequisites": [
+      "javascript-basics"
+    ],
+    "topics": [
+      {
+        "id": "ts-types",
+        "label": "Type annotations and inference",
+        "minutes": 20
+      },
+      {
+        "id": "ts-interfaces",
+        "label": "interface and type for shapes of data",
+        "minutes": 20
+      },
+      {
+        "id": "ts-generics",
+        "label": "Generics (the <T> syntax)",
+        "minutes": 20
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "TypeScript for the new programmer",
+        "url": "https://www.typescriptlang.org/docs/handbook/typescript-from-scratch.html"
+      }
+    ],
+    "detection": {
+      "fileExtensions": [
+        ".ts",
+        ".tsx"
+      ],
+      "symbols": [
+        "interface ",
+        ": string",
+        ": number",
+        "as const",
+        "<T>"
+      ],
+      "commands": [
+        "tsc"
+      ]
+    }
+  },
+  {
+    "id": "dom-basics",
+    "label": "The DOM",
+    "category": "web fundamentals",
+    "depth": "beginner",
+    "plainSummary": "The live tree of everything on the page that JavaScript can find, read, and change.",
+    "prerequisites": [
+      "html-basics",
+      "javascript-basics"
+    ],
+    "topics": [
+      {
+        "id": "dom-query",
+        "label": "querySelector and finding elements",
+        "minutes": 15
+      },
+      {
+        "id": "dom-events",
+        "label": "Listening for clicks and other events",
+        "minutes": 15
+      },
+      {
+        "id": "dom-attrs",
+        "label": "Changing classes, attributes, and data-*",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: Introduction to the DOM",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Introduction"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "document.querySelector",
+        "querySelectorAll(",
+        "addEventListener(",
+        "getElementById(",
+        "dataset.",
+        "classList."
+      ]
+    }
+  },
+  {
+    "id": "async-javascript",
+    "label": "Async JavaScript",
+    "category": "web fundamentals",
+    "depth": "intermediate",
+    "plainSummary": "Handling things that take time (network requests, timers) without freezing the page, using promises and async/await.",
+    "prerequisites": [
+      "javascript-basics"
+    ],
+    "topics": [
+      {
+        "id": "async-promises",
+        "label": "Promises: then and catch",
+        "minutes": 20
+      },
+      {
+        "id": "async-await",
+        "label": "async / await",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: Asynchronous JavaScript",
+        "url": "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "async ",
+        "await ",
+        ".then(",
+        "new Promise(",
+        "Promise.all("
+      ]
+    }
+  },
+  {
+    "id": "es-modules",
+    "label": "Imports & modules",
+    "category": "web fundamentals",
+    "depth": "beginner",
+    "plainSummary": "Splitting code into files and pulling pieces in with import/export.",
+    "prerequisites": [
+      "javascript-basics"
+    ],
+    "topics": [
+      {
+        "id": "esm-basics",
+        "label": "import, export, default exports",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: JavaScript modules",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "import ",
+        "export default",
+        "export const",
+        "export function",
+        "require("
+      ]
+    }
+  },
+  {
+    "id": "fetch-api",
+    "label": "Fetching data (APIs)",
+    "category": "web fundamentals",
+    "depth": "intermediate",
+    "plainSummary": "Asking a server for data from JavaScript with fetch(), and reading the JSON that comes back.",
+    "prerequisites": [
+      "async-javascript",
+      "json"
+    ],
+    "topics": [
+      {
+        "id": "fetch-basics",
+        "label": "fetch(), response.json(), and error handling",
+        "minutes": 20
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: Using the Fetch API",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "fetch(",
+        "response.json(",
+        "axios."
+      ],
+      "packages": [
+        "axios",
+        "ky"
+      ]
+    }
+  },
+  {
+    "id": "json",
+    "label": "JSON",
+    "category": "web fundamentals",
+    "depth": "beginner",
+    "plainSummary": "A plain-text format for structured data using braces and quotes; used for settings files and API responses.",
+    "prerequisites": [],
+    "topics": [
+      {
+        "id": "json-shape",
+        "label": "Objects, arrays, and valid syntax",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: Working with JSON",
+        "url": "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/JSON"
+      }
+    ],
+    "detection": {
+      "fileExtensions": [
+        ".json",
+        ".jsonl"
+      ],
+      "symbols": [
+        "JSON.parse(",
+        "JSON.stringify("
+      ]
+    }
+  },
+  {
+    "id": "react-basics",
+    "label": "React",
+    "category": "frameworks",
+    "depth": "intermediate",
+    "plainSummary": "A library for building user interfaces out of reusable components that re-render when data changes.",
+    "prerequisites": [
+      "javascript-basics",
+      "dom-basics",
+      "es-modules"
+    ],
+    "topics": [
+      {
+        "id": "react-components",
+        "label": "Components and JSX",
+        "minutes": 25
+      },
+      {
+        "id": "react-props",
+        "label": "Props: passing data in",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "React: Quick start",
+        "url": "https://react.dev/learn"
+      }
+    ],
+    "detection": {
+      "imports": [
+        "react",
+        "react-dom",
+        "react-dom/client"
+      ],
+      "fileExtensions": [
+        ".jsx",
+        ".tsx"
+      ],
+      "symbols": [
+        "className=",
+        "ReactDOM",
+        "createRoot(",
+        "React."
+      ],
+      "packages": [
+        "react"
+      ]
+    }
+  },
+  {
+    "id": "react-hooks",
+    "label": "React hooks",
+    "category": "frameworks",
+    "depth": "intermediate",
+    "plainSummary": "Functions like useState and useEffect that let components remember values and react to changes.",
+    "prerequisites": [
+      "react-basics"
+    ],
+    "topics": [
+      {
+        "id": "hooks-state",
+        "label": "useState: remembering values",
+        "minutes": 20
+      },
+      {
+        "id": "hooks-effect",
+        "label": "useEffect: running code after render",
+        "minutes": 25
+      },
+      {
+        "id": "hooks-ref",
+        "label": "useRef: reaching real DOM elements",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "React: Built-in hooks",
+        "url": "https://react.dev/reference/react/hooks"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "useState(",
+        "useEffect(",
+        "useRef(",
+        "useMemo(",
+        "useCallback(",
+        "useContext("
+      ]
+    }
+  },
+  {
+    "id": "astro",
+    "label": "Astro",
+    "category": "frameworks",
+    "depth": "intermediate",
+    "plainSummary": "A framework for content-focused websites that ships plain HTML by default and only adds JavaScript where needed.",
+    "prerequisites": [
+      "html-basics",
+      "css-basics",
+      "es-modules"
+    ],
+    "topics": [
+      {
+        "id": "astro-components",
+        "label": ".astro files: frontmatter + template",
+        "minutes": 20
+      },
+      {
+        "id": "astro-props",
+        "label": "Astro.props and slots",
+        "minutes": 15
+      },
+      {
+        "id": "astro-islands",
+        "label": "Islands: adding interactivity selectively",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "Astro docs",
+        "url": "https://docs.astro.build/en/getting-started/"
+      }
+    ],
+    "detection": {
+      "fileExtensions": [
+        ".astro"
+      ],
+      "symbols": [
+        "Astro.props",
+        "class:list",
+        "astro dev",
+        "astro build"
+      ],
+      "packages": [
+        "astro"
+      ],
+      "commands": [
+        "astro"
+      ]
+    }
+  },
+  {
+    "id": "nextjs",
+    "label": "Next.js",
+    "category": "frameworks",
+    "depth": "advanced",
+    "plainSummary": "A React framework that adds pages, routing, server rendering, and API routes.",
+    "prerequisites": [
+      "react-basics",
+      "react-hooks"
+    ],
+    "topics": [
+      {
+        "id": "next-routing",
+        "label": "File-based routing (app/ and pages/)",
+        "minutes": 20
+      },
+      {
+        "id": "next-server",
+        "label": "Server vs client components",
+        "minutes": 25
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "Next.js docs",
+        "url": "https://nextjs.org/docs"
+      }
+    ],
+    "detection": {
+      "imports": [
+        "next",
+        "next/link",
+        "next/image",
+        "next/navigation",
+        "next/server"
+      ],
+      "symbols": [
+        "'use client'",
+        "\"use client\"",
+        "getServerSideProps"
+      ],
+      "packages": [
+        "next"
+      ],
+      "commands": [
+        "next"
+      ]
+    }
+  },
+  {
+    "id": "tailwind",
+    "label": "Tailwind CSS",
+    "category": "frameworks",
+    "depth": "beginner",
+    "plainSummary": "A styling approach where you compose small utility classes (flex, p-4, text-lg) directly in markup.",
+    "prerequisites": [
+      "css-basics"
+    ],
+    "topics": [
+      {
+        "id": "tw-utilities",
+        "label": "Utility classes and responsive prefixes",
+        "minutes": 20
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "Tailwind docs",
+        "url": "https://tailwindcss.com/docs"
+      }
+    ],
+    "detection": {
+      "imports": [
+        "tailwindcss"
+      ],
+      "fileNames": [
+        "tailwind.config.js",
+        "tailwind.config.ts",
+        "tailwind.config.mjs"
+      ],
+      "symbols": [
+        "@tailwind",
+        "@apply"
+      ],
+      "packages": [
+        "tailwindcss"
+      ]
+    }
+  },
+  {
+    "id": "vite",
+    "label": "Vite & bundlers",
+    "category": "tooling",
+    "depth": "intermediate",
+    "plainSummary": "Tools that turn your many source files into the optimized files a browser loads, with a fast local dev server.",
+    "prerequisites": [
+      "es-modules",
+      "npm-packages"
+    ],
+    "topics": [
+      {
+        "id": "vite-dev",
+        "label": "Dev server vs production build",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "Vite guide",
+        "url": "https://vite.dev/guide/"
+      }
+    ],
+    "detection": {
+      "fileNames": [
+        "vite.config.ts",
+        "vite.config.js",
+        "esbuild.mjs",
+        "webpack.config.js"
+      ],
+      "packages": [
+        "vite",
+        "esbuild",
+        "webpack",
+        "rollup"
+      ],
+      "commands": [
+        "vite",
+        "esbuild"
+      ]
+    }
+  },
+  {
+    "id": "nodejs",
+    "label": "Node.js",
+    "category": "tooling",
+    "depth": "intermediate",
+    "plainSummary": "JavaScript running outside the browser — on your computer or a server — used for build tools and scripts.",
+    "prerequisites": [
+      "javascript-basics"
+    ],
+    "topics": [
+      {
+        "id": "node-run",
+        "label": "Running scripts with node",
+        "minutes": 10
+      },
+      {
+        "id": "node-fs",
+        "label": "Reading and writing files (fs, path)",
+        "minutes": 20
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "Node.js: Introduction",
+        "url": "https://nodejs.org/en/learn/getting-started/introduction-to-nodejs"
+      }
+    ],
+    "detection": {
+      "imports": [
+        "node:fs",
+        "node:path",
+        "node:os",
+        "fs",
+        "path",
+        "child_process"
+      ],
+      "symbols": [
+        "process.env",
+        "process.argv",
+        "__dirname"
+      ],
+      "commands": [
+        "node",
+        "tsx"
+      ]
+    }
+  },
+  {
+    "id": "git-basics",
+    "label": "Git basics",
+    "category": "tooling",
+    "depth": "beginner",
+    "plainSummary": "Saving checkpoints of your project (commits) and seeing what changed (status, diff, log).",
+    "whyUsed": "Every safe workflow starts with knowing what changed and being able to undo it.",
+    "prerequisites": [
+      "terminal-basics"
+    ],
+    "topics": [
+      {
+        "id": "git-mental",
+        "label": "The mental model: working tree, staging, commits",
+        "minutes": 15
+      },
+      {
+        "id": "git-status-diff",
+        "label": "git status and git diff",
+        "minutes": 10
+      },
+      {
+        "id": "git-commit",
+        "label": "git add and git commit",
+        "minutes": 15
+      },
+      {
+        "id": "git-log",
+        "label": "Reading history with git log",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "Pro Git: Getting started",
+        "url": "https://git-scm.com/book/en/v2/Getting-Started-What-is-Git%3F"
+      },
+      {
+        "type": "tutorial",
+        "title": "GitHub: Git guides",
+        "url": "https://github.com/git-guides"
+      }
+    ],
+    "detection": {
+      "commands": [
+        "git status",
+        "git diff",
+        "git add",
+        "git commit",
+        "git log",
+        "git show",
+        "git init"
+      ]
+    }
+  },
+  {
+    "id": "git-branching",
+    "label": "Branches & merging",
+    "category": "tooling",
+    "depth": "intermediate",
+    "plainSummary": "Working on separate lines of history and combining them back together.",
+    "prerequisites": [
+      "git-basics"
+    ],
+    "topics": [
+      {
+        "id": "gb-branch",
+        "label": "Creating and switching branches",
+        "minutes": 15
+      },
+      {
+        "id": "gb-merge",
+        "label": "Merging and resolving conflicts",
+        "minutes": 25
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "Pro Git: Branching",
+        "url": "https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell"
+      }
+    ],
+    "detection": {
+      "commands": [
+        "git branch",
+        "git checkout",
+        "git switch",
+        "git merge",
+        "git rebase",
+        "git stash"
+      ]
+    }
+  },
+  {
+    "id": "git-remotes",
+    "label": "GitHub & remotes",
+    "category": "tooling",
+    "depth": "beginner",
+    "plainSummary": "Syncing your local checkpoints with an online copy (push) and getting others' changes (pull).",
+    "prerequisites": [
+      "git-basics"
+    ],
+    "topics": [
+      {
+        "id": "gr-push-pull",
+        "label": "push, pull, fetch, and origin",
+        "minutes": 15
+      },
+      {
+        "id": "gr-pr",
+        "label": "Pull requests and code review",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "GitHub: Hello World",
+        "url": "https://docs.github.com/en/get-started/start-your-journey/hello-world"
+      },
+      {
+        "type": "official",
+        "title": "Pro Git: Working with remotes",
+        "url": "https://git-scm.com/book/en/v2/Git-Basics-Working-with-Remotes"
+      }
+    ],
+    "detection": {
+      "commands": [
+        "git push",
+        "git pull",
+        "git fetch",
+        "git remote",
+        "git clone",
+        "gh pr",
+        "gh repo"
+      ]
+    }
+  },
+  {
+    "id": "gitignore",
+    "label": ".gitignore",
+    "category": "tooling",
+    "depth": "beginner",
+    "plainSummary": "Telling git which files to leave out of history — downloaded packages, build output, secrets.",
+    "prerequisites": [
+      "git-basics"
+    ],
+    "topics": [
+      {
+        "id": "gi-patterns",
+        "label": "Ignore patterns and what belongs in them",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "git-scm: gitignore",
+        "url": "https://git-scm.com/docs/gitignore"
+      }
+    ],
+    "detection": {
+      "fileNames": [
+        ".gitignore"
+      ]
+    }
+  },
+  {
+    "id": "npm-packages",
+    "label": "npm & packages",
+    "category": "tooling",
+    "depth": "beginner",
+    "plainSummary": "Downloading reusable code others wrote (packages) and recording which ones your project needs.",
+    "whyUsed": "Almost every capability — an animation library, a UI kit — arrives as a package.",
+    "prerequisites": [
+      "terminal-basics"
+    ],
+    "topics": [
+      {
+        "id": "npm-install",
+        "label": "npm install and node_modules",
+        "minutes": 10
+      },
+      {
+        "id": "npm-semver",
+        "label": "Version numbers (^1.2.3) and lock files",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "npm docs: About npm",
+        "url": "https://docs.npmjs.com/about-npm"
+      }
+    ],
+    "detection": {
+      "commands": [
+        "npm install",
+        "npm i",
+        "npm add",
+        "pnpm add",
+        "pnpm install",
+        "yarn add",
+        "bun add",
+        "npx",
+        "pnpm dlx"
+      ]
+    }
+  },
+  {
+    "id": "package-json",
+    "label": "package.json & scripts",
+    "category": "tooling",
+    "depth": "beginner",
+    "plainSummary": "The project's manifest: its name, dependencies, and named shortcut commands like npm run dev.",
+    "prerequisites": [
+      "npm-packages",
+      "json"
+    ],
+    "topics": [
+      {
+        "id": "pj-fields",
+        "label": "dependencies vs devDependencies",
+        "minutes": 10
+      },
+      {
+        "id": "pj-scripts",
+        "label": "The scripts section",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "npm docs: package.json",
+        "url": "https://docs.npmjs.com/cli/v10/configuring-npm/package-json"
+      }
+    ],
+    "detection": {
+      "fileNames": [
+        "package.json"
+      ],
+      "commands": [
+        "npm run",
+        "pnpm run",
+        "yarn run",
+        "npm test",
+        "npm start",
+        "npm run build",
+        "npm run dev"
+      ]
+    }
+  },
+  {
+    "id": "terminal-basics",
+    "label": "Terminal basics",
+    "category": "tooling",
+    "depth": "beginner",
+    "plainSummary": "Typing commands to move around folders, list files, and run programs.",
+    "prerequisites": [],
+    "topics": [
+      {
+        "id": "term-nav",
+        "label": "cd, ls, pwd: where am I?",
+        "minutes": 15
+      },
+      {
+        "id": "term-flags",
+        "label": "Flags and arguments",
+        "minutes": 10
+      },
+      {
+        "id": "term-chain",
+        "label": "Chaining with && and pipes |",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: Command line crash course",
+        "url": "https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Understanding_client-side_tools/Command_line"
+      }
+    ],
+    "detection": {
+      "commands": [
+        "ls",
+        "cd",
+        "pwd",
+        "cat",
+        "head",
+        "tail",
+        "mkdir",
+        "rm",
+        "cp",
+        "mv",
+        "echo",
+        "chmod",
+        "which"
+      ]
+    }
+  },
+  {
+    "id": "shell-scripting",
+    "label": "Shell scripting",
+    "category": "tooling",
+    "depth": "intermediate",
+    "plainSummary": "Combining terminal commands into small programs with variables, loops, and conditions.",
+    "prerequisites": [
+      "terminal-basics"
+    ],
+    "topics": [
+      {
+        "id": "sh-basics",
+        "label": "Variables, if/for, and exit codes",
+        "minutes": 25
+      }
+    ],
+    "resources": [
+      {
+        "type": "tutorial",
+        "title": "Bash guide for beginners",
+        "url": "https://tldp.org/LDP/Bash-Beginners-Guide/html/"
+      }
+    ],
+    "detection": {
+      "fileExtensions": [
+        ".sh",
+        ".zsh",
+        ".bash"
+      ],
+      "symbols": [
+        "#!/bin/bash",
+        "#!/bin/sh",
+        "#!/usr/bin/env bash"
+      ],
+      "commands": [
+        "for ",
+        "while ",
+        "if [",
+        "sed",
+        "awk",
+        "xargs"
+      ]
+    }
+  },
+  {
+    "id": "ripgrep-search",
+    "label": "Searching code (ripgrep & regex)",
+    "category": "tooling",
+    "depth": "beginner",
+    "plainSummary": "Finding text across every file in a project, and writing search patterns (regular expressions).",
+    "prerequisites": [
+      "terminal-basics"
+    ],
+    "topics": [
+      {
+        "id": "rg-basics",
+        "label": "rg pattern path and useful flags (-n, -i, -g)",
+        "minutes": 15
+      },
+      {
+        "id": "rg-regex",
+        "label": "Regex essentials: |, ., *, groups",
+        "minutes": 20
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "ripgrep user guide",
+        "url": "https://github.com/BurntSushi/ripgrep/blob/master/GUIDE.md"
+      },
+      {
+        "type": "tutorial",
+        "title": "RegexOne interactive tutorial",
+        "url": "https://regexone.com/"
+      }
+    ],
+    "detection": {
+      "commands": [
+        "rg ",
+        "grep "
+      ]
+    }
+  },
+  {
+    "id": "environment-variables",
+    "label": "Environment variables & secrets",
+    "category": "tooling",
+    "depth": "beginner",
+    "plainSummary": "Named settings (often API keys) kept outside the code, usually in a .env file that is never committed.",
+    "prerequisites": [
+      "terminal-basics"
+    ],
+    "topics": [
+      {
+        "id": "env-basics",
+        "label": ".env files and process.env",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "tutorial",
+        "title": "12-factor: Config",
+        "url": "https://12factor.net/config"
+      }
+    ],
+    "detection": {
+      "fileNames": [
+        ".env",
+        ".env.local",
+        ".env.example"
+      ],
+      "symbols": [
+        "process.env.",
+        "import.meta.env"
+      ],
+      "commands": [
+        "export "
+      ]
+    }
+  },
+  {
+    "id": "markdown",
+    "label": "Markdown",
+    "category": "tooling",
+    "depth": "beginner",
+    "plainSummary": "A lightweight way to write formatted text with plain characters — used for READMEs, docs, plans, and agent skills.",
+    "prerequisites": [],
+    "topics": [
+      {
+        "id": "md-syntax",
+        "label": "Headings, lists, links, code blocks",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "tutorial",
+        "title": "Markdown Guide: Basic syntax",
+        "url": "https://www.markdownguide.org/basic-syntax/"
+      }
+    ],
+    "detection": {
+      "fileExtensions": [
+        ".md",
+        ".mdx",
+        ".mdc"
+      ]
+    }
+  },
+  {
+    "id": "yaml-frontmatter",
+    "label": "YAML & frontmatter",
+    "category": "tooling",
+    "depth": "beginner",
+    "plainSummary": "An indentation-based settings format, often placed between --- lines at the top of Markdown files.",
+    "prerequisites": [
+      "markdown"
+    ],
+    "topics": [
+      {
+        "id": "yaml-basics",
+        "label": "Keys, lists, and nesting",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "tutorial",
+        "title": "Learn YAML in Y minutes",
+        "url": "https://learnxinyminutes.com/docs/yaml/"
+      }
+    ],
+    "detection": {
+      "fileExtensions": [
+        ".yml",
+        ".yaml"
+      ],
+      "symbols": [
+        "---\nname:",
+        "---\ndescription:"
+      ]
+    }
+  },
+  {
+    "id": "component-architecture",
+    "label": "Component architecture",
+    "category": "design & engineering",
+    "depth": "intermediate",
+    "plainSummary": "Breaking an interface into reusable pieces (Card, Button, Hero) that each own their markup, style, and behavior.",
+    "prerequisites": [
+      "html-basics",
+      "css-basics"
+    ],
+    "topics": [
+      {
+        "id": "comp-split",
+        "label": "Deciding where to split components",
+        "minutes": 20
+      },
+      {
+        "id": "comp-props",
+        "label": "Props and variants",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "tutorial",
+        "title": "React: Thinking in React",
+        "url": "https://react.dev/learn/thinking-in-react"
+      }
+    ],
+    "detection": {
+      "keywords": [
+        "component",
+        "variant"
+      ],
+      "symbols": [
+        "interface Props",
+        "Astro.props",
+        "props."
+      ]
+    }
+  },
+  {
+    "id": "accessibility",
+    "label": "Accessibility (a11y)",
+    "category": "design & engineering",
+    "depth": "intermediate",
+    "plainSummary": "Making sure everyone can use the site — keyboard users, screen-reader users, people sensitive to motion.",
+    "prerequisites": [
+      "semantic-html"
+    ],
+    "topics": [
+      {
+        "id": "a11y-aria",
+        "label": "ARIA labels and roles",
+        "minutes": 20
+      },
+      {
+        "id": "a11y-focus",
+        "label": "Keyboard focus and visible focus states",
+        "minutes": 15
+      },
+      {
+        "id": "a11y-contrast",
+        "label": "Color contrast",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: Accessibility",
+        "url": "https://developer.mozilla.org/en-US/docs/Learn/Accessibility"
+      },
+      {
+        "type": "tutorial",
+        "title": "web.dev: Learn Accessibility",
+        "url": "https://web.dev/learn/accessibility"
+      }
+    ],
+    "detection": {
+      "symbols": [
+        "aria-",
+        "role=",
+        "tabindex",
+        "sr-only",
+        "alt="
+      ],
+      "keywords": [
+        "accessibility",
+        "a11y",
+        "screen reader"
+      ]
+    }
+  },
+  {
+    "id": "testing-basics",
+    "label": "Automated testing",
+    "category": "design & engineering",
+    "depth": "intermediate",
+    "plainSummary": "Writing small checks that run automatically to confirm code still behaves after changes.",
+    "prerequisites": [
+      "javascript-basics"
+    ],
+    "topics": [
+      {
+        "id": "test-unit",
+        "label": "Unit tests: describe, it, expect",
+        "minutes": 20
+      },
+      {
+        "id": "test-why",
+        "label": "What to test and why",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "Vitest guide",
+        "url": "https://vitest.dev/guide/"
+      }
+    ],
+    "detection": {
+      "imports": [
+        "vitest",
+        "jest",
+        "@playwright/test",
+        "@testing-library/react"
+      ],
+      "symbols": [
+        "describe(",
+        "it(",
+        "test(",
+        "expect("
+      ],
+      "commands": [
+        "vitest",
+        "jest",
+        "npm test",
+        "playwright test"
+      ]
+    }
+  },
+  {
+    "id": "linting-formatting",
+    "label": "Linting & formatting",
+    "category": "design & engineering",
+    "depth": "beginner",
+    "plainSummary": "Automatic proofreading (lint) and tidying (format) so code stays consistent and obvious mistakes are flagged.",
+    "prerequisites": [],
+    "topics": [
+      {
+        "id": "lint-basics",
+        "label": "ESLint and Prettier: what each does",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "ESLint: Getting started",
+        "url": "https://eslint.org/docs/latest/use/getting-started"
+      }
+    ],
+    "detection": {
+      "fileNames": [
+        ".eslintrc",
+        "eslint.config.js",
+        "eslint.config.mjs",
+        ".prettierrc",
+        "biome.json"
+      ],
+      "commands": [
+        "eslint",
+        "prettier",
+        "biome",
+        "npm run lint"
+      ],
+      "packages": [
+        "eslint",
+        "prettier",
+        "@biomejs/biome"
+      ]
+    }
+  },
+  {
+    "id": "http-and-apis",
+    "label": "HTTP & APIs",
+    "category": "design & engineering",
+    "depth": "intermediate",
+    "plainSummary": "How programs talk over the web: requests, responses, status codes like 200 and 404, and JSON payloads.",
+    "prerequisites": [
+      "json"
+    ],
+    "topics": [
+      {
+        "id": "http-basics",
+        "label": "Requests, responses, and status codes",
+        "minutes": 15
+      },
+      {
+        "id": "http-rest",
+        "label": "REST endpoints and methods (GET, POST)",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: An overview of HTTP",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview"
+      }
+    ],
+    "detection": {
+      "commands": [
+        "curl",
+        "wget",
+        "http "
+      ],
+      "symbols": [
+        "http_code",
+        "status: 200",
+        "404",
+        "res.status("
+      ],
+      "keywords": [
+        "endpoint",
+        "api"
+      ]
+    }
+  },
+  {
+    "id": "local-dev-server",
+    "label": "Local dev servers",
+    "category": "tooling",
+    "depth": "beginner",
+    "plainSummary": "Previewing your site on your own machine at an address like localhost:4321 while you work.",
+    "prerequisites": [
+      "terminal-basics"
+    ],
+    "topics": [
+      {
+        "id": "dev-localhost",
+        "label": "localhost, ports, and hot reload",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "MDN: What is a web server?",
+        "url": "https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Web_mechanics/What_is_a_web_server"
+      }
+    ],
+    "detection": {
+      "commands": [
+        "npm run dev",
+        "astro dev",
+        "vite",
+        "next dev",
+        "npm start"
+      ],
+      "symbols": [
+        "localhost:",
+        "127.0.0.1:"
+      ]
+    }
+  },
+  {
+    "id": "browser-devtools",
+    "label": "Browser DevTools & testing in the browser",
+    "category": "tooling",
+    "depth": "intermediate",
+    "plainSummary": "Inspecting a live page — computed styles, console errors, element positions — and automating a browser to verify behavior.",
+    "prerequisites": [
+      "dom-basics",
+      "css-basics"
+    ],
+    "topics": [
+      {
+        "id": "dt-inspect",
+        "label": "Inspecting elements and computed styles",
+        "minutes": 15
+      },
+      {
+        "id": "dt-console",
+        "label": "Reading console errors",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "Chrome DevTools overview",
+        "url": "https://developer.chrome.com/docs/devtools/overview"
+      }
+    ],
+    "detection": {
+      "mcpNamespaces": [
+        "cursor-ide-browser"
+      ],
+      "symbols": [
+        "getComputedStyle(",
+        "console.log(",
+        "Runtime.evaluate"
+      ],
+      "keywords": [
+        "screenshot",
+        "devtools"
+      ]
+    }
+  },
+  {
+    "id": "cursor-agent",
+    "label": "How the Cursor agent works",
+    "category": "cursor",
+    "depth": "beginner",
+    "plainSummary": "The agent reads files, searches, runs commands, and edits code in a loop of tool calls until your request is done.",
+    "prerequisites": [],
+    "topics": [
+      {
+        "id": "ca-loop",
+        "label": "The tool-call loop: read → decide → act",
+        "minutes": 10
+      },
+      {
+        "id": "ca-modes",
+        "label": "Agent mode vs Plan mode vs Ask mode",
+        "minutes": 10
+      },
+      {
+        "id": "ca-subagents",
+        "label": "Sub-agents and parallel work",
+        "minutes": 10
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "Cursor docs: Agent",
+        "url": "https://cursor.com/docs/agent/overview"
+      }
+    ],
+    "detection": {
+      "keywords": [
+        "subagent",
+        "plan mode"
+      ]
+    }
+  },
+  {
+    "id": "cursor-skills-rules",
+    "label": "Skills & rules",
+    "category": "cursor",
+    "depth": "beginner",
+    "plainSummary": "Reusable instruction files (SKILL.md, .mdc rules) that teach the agent how to do specific tasks your way.",
+    "prerequisites": [
+      "markdown",
+      "cursor-agent"
+    ],
+    "topics": [
+      {
+        "id": "sk-what",
+        "label": "What a skill is and when the agent reads one",
+        "minutes": 10
+      },
+      {
+        "id": "sk-write",
+        "label": "Writing your own skill",
+        "minutes": 20
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "Cursor docs: Skills",
+        "url": "https://cursor.com/docs/skills"
+      },
+      {
+        "type": "official",
+        "title": "Cursor docs: Rules",
+        "url": "https://cursor.com/docs/context/rules"
+      }
+    ],
+    "detection": {
+      "skillPaths": [
+        "/skills/",
+        "/skills-cursor/"
+      ],
+      "fileNames": [
+        "SKILL.md"
+      ],
+      "fileExtensions": [
+        ".mdc"
+      ]
+    }
+  },
+  {
+    "id": "cursor-hooks-mcp",
+    "label": "Hooks, MCP & plugins",
+    "category": "cursor",
+    "depth": "advanced",
+    "plainSummary": "Ways to extend the agent: hooks run scripts at moments in its loop, MCP connects outside services as tools, plugins bundle these up.",
+    "prerequisites": [
+      "cursor-agent",
+      "json"
+    ],
+    "topics": [
+      {
+        "id": "hm-hooks",
+        "label": "Hooks: observe or gate agent actions",
+        "minutes": 15
+      },
+      {
+        "id": "hm-mcp",
+        "label": "MCP servers as tools (Figma, Slack, databases)",
+        "minutes": 15
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "Cursor docs: Hooks",
+        "url": "https://cursor.com/docs/hooks"
+      },
+      {
+        "type": "official",
+        "title": "Cursor docs: MCP",
+        "url": "https://cursor.com/docs/mcp"
+      },
+      {
+        "type": "official",
+        "title": "Cursor docs: Plugins",
+        "url": "https://cursor.com/docs/plugins"
+      }
+    ],
+    "detection": {
+      "fileNames": [
+        "hooks.json",
+        "plugin.json",
+        "mcp.json"
+      ],
+      "mcpNamespaces": [
+        "plugin-figma-figma",
+        "plugin-slack-slack",
+        "plugin-gmail-gmail",
+        "plugin-neon-postgres-neon",
+        "user-Mobbin",
+        "plugin-context-dev-context"
+      ],
+      "keywords": [
+        "mcp",
+        "hook"
+      ]
+    }
+  },
+  {
+    "id": "vscode-extensions",
+    "label": "Editor extensions",
+    "category": "cursor",
+    "depth": "advanced",
+    "plainSummary": "Add-ons built with the VS Code extension API that give Cursor new panels, commands, and views.",
+    "prerequisites": [
+      "typescript",
+      "nodejs",
+      "json"
+    ],
+    "topics": [
+      {
+        "id": "ext-manifest",
+        "label": "package.json contributes: views, commands",
+        "minutes": 20
+      },
+      {
+        "id": "ext-webview",
+        "label": "Webviews: HTML panels inside the editor",
+        "minutes": 25
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "VS Code Extension API",
+        "url": "https://code.visualstudio.com/api"
+      }
+    ],
+    "detection": {
+      "imports": [
+        "vscode"
+      ],
+      "symbols": [
+        "vscode.window.",
+        "vscode.commands.",
+        "WebviewViewProvider",
+        "\"contributes\""
+      ],
+      "packages": [
+        "@types/vscode",
+        "@vscode/vsce"
+      ]
+    }
+  },
+  {
+    "id": "figma-to-code",
+    "label": "Figma design-to-code",
+    "category": "design & engineering",
+    "depth": "intermediate",
+    "plainSummary": "Turning a Figma design into working components, or pushing code back into Figma, using the Figma MCP tools.",
+    "prerequisites": [
+      "component-architecture",
+      "css-basics"
+    ],
+    "topics": [
+      {
+        "id": "f2c-flow",
+        "label": "Reading design context and mapping to components",
+        "minutes": 20
+      }
+    ],
+    "resources": [
+      {
+        "type": "official",
+        "title": "Figma MCP server",
+        "url": "https://help.figma.com/hc/en-us/articles/32132100833559"
+      }
+    ],
+    "detection": {
+      "mcpNamespaces": [
+        "plugin-figma-figma"
+      ],
+      "keywords": [
+        "figma"
+      ]
+    }
+  },
+  {
+    "id": "sql-databases",
+    "label": "Databases & SQL",
+    "category": "design & engineering",
+    "depth": "intermediate",
+    "plainSummary": "Storing structured data in tables and asking questions of it with SQL.",
+    "prerequisites": [
+      "json"
+    ],
+    "topics": [
+      {
+        "id": "sql-basics",
+        "label": "SELECT, INSERT, and tables",
+        "minutes": 25
+      }
+    ],
+    "resources": [
+      {
+        "type": "tutorial",
+        "title": "SQLBolt interactive lessons",
+        "url": "https://sqlbolt.com/"
+      }
+    ],
+    "detection": {
+      "fileExtensions": [
+        ".sql"
+      ],
+      "symbols": [
+        "SELECT ",
+        "INSERT INTO",
+        "CREATE TABLE"
+      ],
+      "mcpNamespaces": [
+        "plugin-neon-postgres-neon"
+      ],
+      "packages": [
+        "pg",
+        "prisma",
+        "drizzle-orm",
+        "@neondatabase/serverless"
+      ]
+    }
+  }
+]

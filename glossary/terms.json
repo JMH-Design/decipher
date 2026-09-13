@@ -1,0 +1,1055 @@
+[
+  {
+    "id": "git",
+    "term": "git",
+    "aliases": [
+      "Git"
+    ],
+    "category": "version control",
+    "definition": "A tool that keeps a history of every change to your project so you can go back in time, compare versions, or work with others.",
+    "analogy": "Like 'Track Changes' in a document, but for an entire folder of files."
+  },
+  {
+    "id": "commit",
+    "term": "commit",
+    "aliases": [
+      "git commit",
+      "commits",
+      "committed"
+    ],
+    "category": "version control",
+    "definition": "A saved checkpoint of your project with a short message describing what changed.",
+    "analogy": "Saving a named version of a document you can always return to."
+  },
+  {
+    "id": "push",
+    "term": "push",
+    "aliases": [
+      "git push",
+      "pushed"
+    ],
+    "category": "version control",
+    "definition": "Uploads your saved checkpoints to an online copy of the project (usually GitHub).",
+    "analogy": "Syncing your local folder to the cloud."
+  },
+  {
+    "id": "pull",
+    "term": "pull",
+    "aliases": [
+      "git pull"
+    ],
+    "category": "version control",
+    "definition": "Downloads changes other people (or other machines) have uploaded so your copy is up to date."
+  },
+  {
+    "id": "fetch",
+    "term": "fetch",
+    "aliases": [
+      "git fetch"
+    ],
+    "category": "version control",
+    "definition": "Checks the online copy for new changes without applying them yet."
+  },
+  {
+    "id": "branch",
+    "term": "branch",
+    "aliases": [
+      "branches",
+      "git branch"
+    ],
+    "category": "version control",
+    "definition": "A separate line of work so you can try something without touching the main version.",
+    "analogy": "Making a copy of a document to experiment in, then merging the good parts back."
+  },
+  {
+    "id": "main-branch",
+    "term": "main",
+    "aliases": [
+      "main branch",
+      "master"
+    ],
+    "category": "version control",
+    "definition": "The primary, 'official' version of the project that other branches are compared against."
+  },
+  {
+    "id": "merge",
+    "term": "merge",
+    "aliases": [
+      "git merge",
+      "merged"
+    ],
+    "category": "version control",
+    "definition": "Combines the work from one branch into another."
+  },
+  {
+    "id": "rebase",
+    "term": "rebase",
+    "aliases": [
+      "git rebase"
+    ],
+    "category": "version control",
+    "definition": "Replays your changes on top of the latest version of another branch to keep history tidy."
+  },
+  {
+    "id": "diff",
+    "term": "diff",
+    "aliases": [
+      "git diff",
+      "difference"
+    ],
+    "category": "version control",
+    "definition": "A side-by-side view of exactly which lines were added or removed.",
+    "analogy": "A red-pen markup showing what changed between two drafts."
+  },
+  {
+    "id": "diff-stat",
+    "term": "--stat",
+    "aliases": [
+      "diff --stat"
+    ],
+    "category": "version control",
+    "definition": "A compact summary of the diff: how many lines changed in each file, rather than the lines themselves."
+  },
+  {
+    "id": "status",
+    "term": "git status",
+    "aliases": [
+      "status"
+    ],
+    "category": "version control",
+    "definition": "Lists which files have been changed, added, or deleted since the last checkpoint.",
+    "analogy": "A quick health check: 'what's different right now?'"
+  },
+  {
+    "id": "modified",
+    "term": "M (modified)",
+    "aliases": [
+      "modified",
+      " M "
+    ],
+    "category": "version control",
+    "definition": "In a status list, 'M' marks a file that already existed and has been edited."
+  },
+  {
+    "id": "untracked",
+    "term": "?? (untracked)",
+    "aliases": [
+      "untracked",
+      "??"
+    ],
+    "category": "version control",
+    "definition": "In a status list, '??' marks a brand-new file that git isn't watching yet."
+  },
+  {
+    "id": "staged",
+    "term": "staged",
+    "aliases": [
+      "staging",
+      "git add",
+      "stage"
+    ],
+    "category": "version control",
+    "definition": "Changes you've selected to include in the next checkpoint.",
+    "analogy": "Putting items in a shopping basket before checking out."
+  },
+  {
+    "id": "log",
+    "term": "git log",
+    "aliases": [
+      "log",
+      "--oneline"
+    ],
+    "category": "version control",
+    "definition": "The list of past checkpoints, newest first, each with its message and a short ID."
+  },
+  {
+    "id": "commit-hash",
+    "term": "commit hash",
+    "aliases": [
+      "hash",
+      "SHA",
+      "fa473f0"
+    ],
+    "category": "version control",
+    "definition": "A short code like 'fa473f0' that uniquely identifies one checkpoint."
+  },
+  {
+    "id": "remote",
+    "term": "remote",
+    "aliases": [
+      "origin",
+      "origin/main"
+    ],
+    "category": "version control",
+    "definition": "The online copy of your project. 'origin' is the default nickname for it."
+  },
+  {
+    "id": "checkout",
+    "term": "checkout",
+    "aliases": [
+      "git checkout",
+      "git switch",
+      "switch"
+    ],
+    "category": "version control",
+    "definition": "Moves your working files to a different branch or an older checkpoint."
+  },
+  {
+    "id": "stash",
+    "term": "stash",
+    "aliases": [
+      "git stash"
+    ],
+    "category": "version control",
+    "definition": "Temporarily sets aside your uncommitted changes so you can come back to them later."
+  },
+  {
+    "id": "clone",
+    "term": "clone",
+    "aliases": [
+      "git clone"
+    ],
+    "category": "version control",
+    "definition": "Downloads a complete copy of a project, including its history."
+  },
+  {
+    "id": "github",
+    "term": "GitHub",
+    "aliases": [
+      "github"
+    ],
+    "category": "version control",
+    "definition": "A website that hosts git projects online so people can share, back up, and review code."
+  },
+  {
+    "id": "pull-request",
+    "term": "pull request",
+    "aliases": [
+      "PR",
+      "merge request"
+    ],
+    "category": "version control",
+    "definition": "A request to merge one branch into another, usually with review and discussion."
+  },
+  {
+    "id": "gitignore",
+    "term": ".gitignore",
+    "aliases": [
+      "gitignore"
+    ],
+    "category": "version control",
+    "definition": "A list of files git should ignore, like downloaded libraries or secret settings."
+  },
+  {
+    "id": "terminal",
+    "term": "terminal",
+    "aliases": [
+      "shell",
+      "command line",
+      "CLI"
+    ],
+    "category": "tooling",
+    "definition": "A text window where you type commands instead of clicking buttons.",
+    "analogy": "Talking to your computer in short typed sentences."
+  },
+  {
+    "id": "command",
+    "term": "command",
+    "aliases": [
+      "commands"
+    ],
+    "category": "tooling",
+    "definition": "A single instruction typed into the terminal, like 'ls' (list files) or 'git status'."
+  },
+  {
+    "id": "flag",
+    "term": "flag",
+    "aliases": [
+      "option",
+      "flags"
+    ],
+    "category": "tooling",
+    "definition": "An extra switch on a command that tweaks how it behaves, like '-n' for 'show line numbers'."
+  },
+  {
+    "id": "chained-commands",
+    "term": "&& (and then)",
+    "aliases": [
+      "&&",
+      "chained"
+    ],
+    "category": "tooling",
+    "definition": "Runs several commands in a row; each one only runs if the previous one succeeded."
+  },
+  {
+    "id": "pipe",
+    "term": "| (pipe)",
+    "aliases": [
+      "pipe",
+      "pipeline"
+    ],
+    "category": "tooling",
+    "definition": "Sends the output of one command into another, e.g. 'list files | count them'."
+  },
+  {
+    "id": "stdout",
+    "term": "output",
+    "aliases": [
+      "stdout",
+      "stderr",
+      "console output"
+    ],
+    "category": "tooling",
+    "definition": "The text a command prints back after running."
+  },
+  {
+    "id": "exit-code",
+    "term": "exit code",
+    "aliases": [
+      "exit status"
+    ],
+    "category": "tooling",
+    "definition": "A number a command returns when it finishes: 0 means success, anything else means something went wrong."
+  },
+  {
+    "id": "cwd",
+    "term": "working directory",
+    "aliases": [
+      "cwd",
+      "current directory",
+      "pwd"
+    ],
+    "category": "tooling",
+    "definition": "The folder the terminal is currently 'standing in'; commands act relative to it."
+  },
+  {
+    "id": "path",
+    "term": "file path",
+    "aliases": [
+      "path",
+      "absolute path",
+      "relative path"
+    ],
+    "category": "tooling",
+    "definition": "The address of a file, like 'src/styles/global.css' — folders separated by slashes."
+  },
+  {
+    "id": "ls",
+    "term": "ls",
+    "aliases": [
+      "list files"
+    ],
+    "category": "tooling",
+    "definition": "Lists the files in a folder."
+  },
+  {
+    "id": "cat",
+    "term": "cat",
+    "aliases": [
+      "head",
+      "tail"
+    ],
+    "category": "tooling",
+    "definition": "Prints a file's contents to the terminal. 'head' shows the beginning, 'tail' the end."
+  },
+  {
+    "id": "rg",
+    "term": "rg (ripgrep)",
+    "aliases": [
+      "rg",
+      "ripgrep",
+      "grep"
+    ],
+    "category": "tooling",
+    "definition": "A very fast text search across every file in a project.",
+    "analogy": "Ctrl+F for your entire project at once."
+  },
+  {
+    "id": "regex",
+    "term": "regular expression",
+    "aliases": [
+      "regex",
+      "pattern"
+    ],
+    "category": "tooling",
+    "definition": "A compact search pattern. For example 'home-field|data-home-field' means 'either of these two phrases'."
+  },
+  {
+    "id": "hidden-files",
+    "term": "--hidden",
+    "aliases": [
+      "hidden files",
+      "dotfiles"
+    ],
+    "category": "tooling",
+    "definition": "Files whose names start with a dot (like .env) are hidden by default; this flag includes them."
+  },
+  {
+    "id": "glob",
+    "term": "glob pattern",
+    "aliases": [
+      "glob",
+      "wildcard",
+      "**/*"
+    ],
+    "category": "tooling",
+    "definition": "A file-name pattern with wildcards, e.g. '*.css' means 'every file ending in .css'."
+  },
+  {
+    "id": "node-modules",
+    "term": "node_modules",
+    "aliases": [
+      "node_modules"
+    ],
+    "category": "tooling",
+    "definition": "The folder where downloaded third-party code (libraries) lives. Usually huge and safe to ignore."
+  },
+  {
+    "id": "curl",
+    "term": "curl",
+    "aliases": [
+      "wget"
+    ],
+    "category": "tooling",
+    "definition": "Fetches a web page or API response from the terminal, often to check that a server is responding."
+  },
+  {
+    "id": "localhost",
+    "term": "localhost",
+    "aliases": [
+      "127.0.0.1",
+      "local server",
+      "port"
+    ],
+    "category": "tooling",
+    "definition": "Your own computer acting as a web server so you can preview a site before publishing it."
+  },
+  {
+    "id": "dev-server",
+    "term": "dev server",
+    "aliases": [
+      "development server",
+      "astro dev",
+      "npm run dev",
+      "vite"
+    ],
+    "category": "tooling",
+    "definition": "A local preview of your site that refreshes automatically as files change."
+  },
+  {
+    "id": "npm",
+    "term": "npm",
+    "aliases": [
+      "pnpm",
+      "yarn",
+      "bun",
+      "package manager"
+    ],
+    "category": "tooling",
+    "definition": "A tool that downloads and manages the third-party code (packages) your project depends on.",
+    "analogy": "An app store for code building blocks."
+  },
+  {
+    "id": "package",
+    "term": "package",
+    "aliases": [
+      "library",
+      "dependency",
+      "dependencies"
+    ],
+    "category": "tooling",
+    "definition": "A bundle of reusable code written by someone else that your project uses, like GSAP or React."
+  },
+  {
+    "id": "package-json",
+    "term": "package.json",
+    "aliases": [
+      "package.json"
+    ],
+    "category": "tooling",
+    "definition": "The project's settings file: its name, the packages it needs, and shortcut commands (scripts)."
+  },
+  {
+    "id": "npm-script",
+    "term": "npm script",
+    "aliases": [
+      "npm run"
+    ],
+    "category": "tooling",
+    "definition": "A named shortcut in package.json, like 'npm run build', that runs a longer command."
+  },
+  {
+    "id": "npx",
+    "term": "npx",
+    "aliases": [
+      "npx"
+    ],
+    "category": "tooling",
+    "definition": "Runs a command from a package without permanently installing it."
+  },
+  {
+    "id": "build",
+    "term": "build",
+    "aliases": [
+      "compile",
+      "bundle",
+      "bundler"
+    ],
+    "category": "tooling",
+    "definition": "Turns your source files into the optimized files a browser actually loads."
+  },
+  {
+    "id": "lint",
+    "term": "lint",
+    "aliases": [
+      "linter",
+      "eslint",
+      "lints"
+    ],
+    "category": "tooling",
+    "definition": "An automatic proofreader that flags likely mistakes or style problems in code."
+  },
+  {
+    "id": "typecheck",
+    "term": "type check",
+    "aliases": [
+      "tsc",
+      "typecheck"
+    ],
+    "category": "tooling",
+    "definition": "Verifies that the pieces of code fit together correctly before running anything."
+  },
+  {
+    "id": "test",
+    "term": "tests",
+    "aliases": [
+      "test",
+      "unit test",
+      "vitest",
+      "jest"
+    ],
+    "category": "tooling",
+    "definition": "Small automatic checks that confirm code still behaves as expected after changes."
+  },
+  {
+    "id": "env-var",
+    "term": "environment variable",
+    "aliases": [
+      "env var",
+      ".env",
+      "API key"
+    ],
+    "category": "tooling",
+    "definition": "A named setting (often a secret like an API key) kept outside the code."
+  },
+  {
+    "id": "chmod",
+    "term": "chmod",
+    "aliases": [
+      "permissions",
+      "executable"
+    ],
+    "category": "tooling",
+    "definition": "Changes who is allowed to read, edit, or run a file."
+  },
+  {
+    "id": "background-process",
+    "term": "background process",
+    "aliases": [
+      "background",
+      "--background",
+      "nohup"
+    ],
+    "category": "tooling",
+    "definition": "A command left running (like a dev server) while other work continues."
+  },
+  {
+    "id": "source-code",
+    "term": "source code",
+    "aliases": [
+      "code",
+      "src"
+    ],
+    "category": "code",
+    "definition": "The human-written instructions that make up your project. Usually lives in a 'src' folder."
+  },
+  {
+    "id": "file-edit",
+    "term": "edit",
+    "aliases": [
+      "StrReplace",
+      "search and replace",
+      "patch"
+    ],
+    "category": "code",
+    "definition": "A targeted change that swaps one exact block of text in a file for another."
+  },
+  {
+    "id": "html",
+    "term": "HTML",
+    "aliases": [
+      "markup",
+      "html"
+    ],
+    "category": "code",
+    "definition": "The language that defines the structure and content of a web page: headings, paragraphs, images."
+  },
+  {
+    "id": "css",
+    "term": "CSS",
+    "aliases": [
+      "stylesheet",
+      "styles",
+      "css"
+    ],
+    "category": "code",
+    "definition": "The language that controls how a page looks: colors, spacing, fonts, layout, animation."
+  },
+  {
+    "id": "javascript",
+    "term": "JavaScript",
+    "aliases": [
+      "JS",
+      "js",
+      "script"
+    ],
+    "category": "code",
+    "definition": "The programming language that makes web pages interactive."
+  },
+  {
+    "id": "typescript",
+    "term": "TypeScript",
+    "aliases": [
+      "TS",
+      ".ts",
+      ".tsx"
+    ],
+    "category": "code",
+    "definition": "JavaScript with added labels ('types') that catch mistakes early. Files end in .ts or .tsx."
+  },
+  {
+    "id": "component",
+    "term": "component",
+    "aliases": [
+      "components",
+      ".astro",
+      "React component"
+    ],
+    "category": "code",
+    "definition": "A reusable building block of a page (a button, a card, a header) with its own markup, style, and logic."
+  },
+  {
+    "id": "props",
+    "term": "props",
+    "aliases": [
+      "properties",
+      "Props"
+    ],
+    "category": "code",
+    "definition": "Settings passed into a component to customize it, like the text on a button."
+  },
+  {
+    "id": "function",
+    "term": "function",
+    "aliases": [
+      "method",
+      "handler"
+    ],
+    "category": "code",
+    "definition": "A named chunk of code that does one job and can be reused."
+  },
+  {
+    "id": "variable",
+    "term": "variable",
+    "aliases": [
+      "const",
+      "let"
+    ],
+    "category": "code",
+    "definition": "A named container for a value the code can refer to later."
+  },
+  {
+    "id": "import",
+    "term": "import",
+    "aliases": [
+      "imports",
+      "require"
+    ],
+    "category": "code",
+    "definition": "A line at the top of a file that pulls in code from another file or package."
+  },
+  {
+    "id": "css-variable",
+    "term": "CSS variable",
+    "aliases": [
+      "custom property",
+      "--var",
+      "design token"
+    ],
+    "category": "code",
+    "definition": "A named value like --surface reused across styles so one change updates everything."
+  },
+  {
+    "id": "selector",
+    "term": "selector",
+    "aliases": [
+      "class",
+      "className",
+      "id selector"
+    ],
+    "category": "code",
+    "definition": "The part of a CSS rule that says which elements it applies to, e.g. '.card'."
+  },
+  {
+    "id": "media-query",
+    "term": "media query",
+    "aliases": [
+      "@media",
+      "breakpoint",
+      "responsive"
+    ],
+    "category": "code",
+    "definition": "A CSS rule that only applies at certain screen sizes or user preferences."
+  },
+  {
+    "id": "reduced-motion",
+    "term": "prefers-reduced-motion",
+    "aliases": [
+      "reduced motion"
+    ],
+    "category": "code",
+    "definition": "A user setting that asks websites to tone down animation; good sites respect it."
+  },
+  {
+    "id": "animation",
+    "term": "animation",
+    "aliases": [
+      "@keyframes",
+      "keyframes",
+      "transition",
+      "easing"
+    ],
+    "category": "code",
+    "definition": "Making things on the page move or change over time."
+  },
+  {
+    "id": "stagger",
+    "term": "stagger",
+    "aliases": [
+      "staggered"
+    ],
+    "category": "code",
+    "definition": "Starting each item's animation slightly after the previous one, creating a ripple effect."
+  },
+  {
+    "id": "dom",
+    "term": "DOM",
+    "aliases": [
+      "document",
+      "element",
+      "querySelector"
+    ],
+    "category": "code",
+    "definition": "The live, in-memory tree of everything on the page that JavaScript can read and change."
+  },
+  {
+    "id": "api",
+    "term": "API",
+    "aliases": [
+      "endpoint",
+      "REST"
+    ],
+    "category": "code",
+    "definition": "A defined way for two programs to talk to each other, e.g. your site asking a server for data."
+  },
+  {
+    "id": "json",
+    "term": "JSON",
+    "aliases": [
+      "json",
+      ".json"
+    ],
+    "category": "code",
+    "definition": "A plain-text format for structured data, using {curly braces} and \"quotes\". Used for settings and API responses."
+  },
+  {
+    "id": "jsonl",
+    "term": "JSONL",
+    "aliases": [
+      ".jsonl"
+    ],
+    "category": "code",
+    "definition": "A file with one JSON record per line — handy for logs and transcripts."
+  },
+  {
+    "id": "markdown",
+    "term": "Markdown",
+    "aliases": [
+      ".md",
+      "README"
+    ],
+    "category": "code",
+    "definition": "A lightweight way to write formatted text with plain characters (# for headings, ** for bold)."
+  },
+  {
+    "id": "yaml",
+    "term": "YAML",
+    "aliases": [
+      "frontmatter",
+      ".yml"
+    ],
+    "category": "code",
+    "definition": "A human-friendly settings format using indentation. Often appears at the top of Markdown files as 'frontmatter'."
+  },
+  {
+    "id": "framework",
+    "term": "framework",
+    "aliases": [
+      "Astro",
+      "React",
+      "Next.js",
+      "Vue",
+      "Svelte"
+    ],
+    "category": "code",
+    "definition": "A ready-made structure for building apps so you don't start from scratch. Astro, React, and Next.js are examples."
+  },
+  {
+    "id": "accessibility",
+    "term": "accessibility",
+    "aliases": [
+      "a11y",
+      "aria",
+      "screen reader"
+    ],
+    "category": "code",
+    "definition": "Making sure people using assistive tech (screen readers, keyboards only) can use the site."
+  },
+  {
+    "id": "refactor",
+    "term": "refactor",
+    "aliases": [
+      "refactoring",
+      "cleanup"
+    ],
+    "category": "code",
+    "definition": "Reorganizing code so it's cleaner without changing what it does."
+  },
+  {
+    "id": "bug",
+    "term": "bug",
+    "aliases": [
+      "error",
+      "exception",
+      "stack trace"
+    ],
+    "category": "code",
+    "definition": "A mistake that makes the code behave incorrectly. An 'error' is the message that reveals it."
+  },
+  {
+    "id": "debug",
+    "term": "debug",
+    "aliases": [
+      "debugging",
+      "console.log"
+    ],
+    "category": "code",
+    "definition": "Hunting down why something isn't working, often by printing values or stepping through code."
+  },
+  {
+    "id": "agent",
+    "term": "agent",
+    "aliases": [
+      "AI agent",
+      "Cursor agent"
+    ],
+    "category": "cursor",
+    "definition": "The AI assistant in Cursor that can read files, run commands, and edit code on your behalf."
+  },
+  {
+    "id": "tool-call",
+    "term": "tool call",
+    "aliases": [
+      "tool",
+      "tool_use",
+      "tools"
+    ],
+    "category": "cursor",
+    "definition": "One action the agent takes, like reading a file, searching, or running a command."
+  },
+  {
+    "id": "turn",
+    "term": "turn",
+    "aliases": [
+      "generation",
+      "response"
+    ],
+    "category": "cursor",
+    "definition": "One round of conversation: your message plus everything the agent does in response."
+  },
+  {
+    "id": "subagent",
+    "term": "subagent",
+    "aliases": [
+      "Task",
+      "sub-task",
+      "worker"
+    ],
+    "category": "cursor",
+    "definition": "A helper agent the main agent spins up to handle a focused job (like exploring the codebase) in parallel."
+  },
+  {
+    "id": "plan-mode",
+    "term": "plan mode",
+    "aliases": [
+      "plan",
+      "CreatePlan"
+    ],
+    "category": "cursor",
+    "definition": "A mode where the agent only researches and proposes a plan; it doesn't change files until you approve."
+  },
+  {
+    "id": "todo",
+    "term": "to-do list",
+    "aliases": [
+      "TodoWrite",
+      "todos"
+    ],
+    "category": "cursor",
+    "definition": "The agent's own checklist of steps for the current task, updated as it works."
+  },
+  {
+    "id": "skill",
+    "term": "skill",
+    "aliases": [
+      "SKILL.md",
+      "skills"
+    ],
+    "category": "cursor",
+    "definition": "A reusable instruction guide the agent reads to do a specific kind of task well (e.g. 'GSAP animations')."
+  },
+  {
+    "id": "rule",
+    "term": "rule",
+    "aliases": [
+      ".mdc",
+      "rules"
+    ],
+    "category": "cursor",
+    "definition": "Standing instructions that shape how the agent behaves in a project."
+  },
+  {
+    "id": "mcp",
+    "term": "MCP",
+    "aliases": [
+      "MCP server",
+      "dynamic tool",
+      "CallDynamicTool"
+    ],
+    "category": "cursor",
+    "definition": "A plug-in system that lets the agent use outside services (Figma, Slack, a database) as tools."
+  },
+  {
+    "id": "hook",
+    "term": "hook",
+    "aliases": [
+      "hooks",
+      "hooks.json"
+    ],
+    "category": "cursor",
+    "definition": "A small script that runs automatically at certain moments in the agent's work, e.g. after every command."
+  },
+  {
+    "id": "transcript",
+    "term": "transcript",
+    "aliases": [
+      "chat log",
+      "agent-transcripts"
+    ],
+    "category": "cursor",
+    "definition": "The saved record of a chat, including every tool call the agent made."
+  },
+  {
+    "id": "context",
+    "term": "context",
+    "aliases": [
+      "context window",
+      "attached files"
+    ],
+    "category": "cursor",
+    "definition": "Everything the agent can currently 'see': your messages, files it has read, and results so far."
+  },
+  {
+    "id": "prompt",
+    "term": "prompt",
+    "aliases": [
+      "query",
+      "user_query"
+    ],
+    "category": "cursor",
+    "definition": "The message you send the agent."
+  },
+  {
+    "id": "model",
+    "term": "model",
+    "aliases": [
+      "LLM",
+      "Claude",
+      "GPT"
+    ],
+    "category": "cursor",
+    "definition": "The underlying AI brain the agent uses to think and write."
+  },
+  {
+    "id": "web-search",
+    "term": "web search",
+    "aliases": [
+      "WebSearch",
+      "WebFetch"
+    ],
+    "category": "cursor",
+    "definition": "The agent looking up documentation or facts online before acting."
+  },
+  {
+    "id": "browser-automation",
+    "term": "browser automation",
+    "aliases": [
+      "browser_navigate",
+      "screenshot",
+      "browser-use"
+    ],
+    "category": "cursor",
+    "definition": "The agent opening a real browser tab to click around and verify a page works."
+  },
+  {
+    "id": "canvas",
+    "term": "canvas",
+    "aliases": [
+      "Canvas",
+      ".canvas.tsx"
+    ],
+    "category": "cursor",
+    "definition": "A live visual panel the agent can build beside the chat for charts, reports, or tools."
+  },
+  {
+    "id": "extension",
+    "term": "extension",
+    "aliases": [
+      "VS Code extension",
+      "plugin"
+    ],
+    "category": "cursor",
+    "definition": "An add-on that gives the editor new features, like this Decipher panel."
+  },
+  {
+    "id": "workspace",
+    "term": "workspace",
+    "aliases": [
+      "project folder",
+      "repo",
+      "repository"
+    ],
+    "category": "cursor",
+    "definition": "The folder you have open in Cursor — your whole project."
+  }
+]

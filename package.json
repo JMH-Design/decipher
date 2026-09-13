@@ -1,0 +1,19 @@
+{
+  "name": "decipher-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Decipher: plain-language agent activity explainer for Cursor (extension + plugin)",
+  "workspaces": [
+    "extension"
+  ],
+  "scripts": {
+    "build": "npm run build -w extension",
+    "watch": "npm run watch -w extension",
+    "test": "npm run test -w extension",
+    "typecheck": "npm run typecheck -w extension",
+    "dogfood": "npm run dogfood -w extension --"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

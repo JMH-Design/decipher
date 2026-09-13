@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [{ "command": "./hooks/capture-event.mjs" }],
+    "beforeSubmitPrompt": [{ "command": "./hooks/capture-event.mjs" }],
+    "postToolUse": [{ "command": "./hooks/capture-event.mjs" }],
+    "postToolUseFailure": [{ "command": "./hooks/capture-event.mjs" }],
+    "afterShellExecution": [{ "command": "./hooks/capture-event.mjs" }],
+    "afterMCPExecution": [{ "command": "./hooks/capture-event.mjs" }],
+    "afterFileEdit": [{ "command": "./hooks/capture-event.mjs" }],
+    "subagentStop": [{ "command": "./hooks/capture-event.mjs" }],
+    "afterAgentResponse": [{ "command": "./hooks/capture-event.mjs" }],
+    "stop": [{ "command": "./hooks/capture-event.mjs" }]
+  }
+}

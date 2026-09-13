@@ -1,0 +1,151 @@
+{
+  "name": "decipher",
+  "displayName": "Decipher — Plain-Language Agent Explainer",
+  "description": "See what the Cursor agent did in plain English, learn the vocabulary, and track your Knowledge Debt.",
+  "version": "0.1.0",
+  "publisher": "haggitjm",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "vscode": "^1.94.0"
+  },
+  "categories": [
+    "AI",
+    "Education",
+    "Visualization"
+  ],
+  "keywords": [
+    "cursor",
+    "agent",
+    "explainer",
+    "learning",
+    "plain language"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "decipher-sidebar",
+          "title": "Decipher",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "decipher-sidebar": [
+        {
+          "type": "webview",
+          "id": "decipher.activityView",
+          "name": "Agent activity",
+          "icon": "media/icon.svg",
+          "contextualTitle": "Decipher"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "decipher.open",
+        "title": "Decipher: Open activity explainer"
+      },
+      {
+        "command": "decipher.refresh",
+        "title": "Decipher: Refresh from transcripts",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "decipher.installHooks",
+        "title": "Decipher: Install Cursor hooks (richer explanations)"
+      },
+      {
+        "command": "decipher.exportLearningPlan",
+        "title": "Decipher: Export learning plan (Markdown)"
+      },
+      {
+        "command": "decipher.resetProfile",
+        "title": "Decipher: Reset learning profile"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "decipher.refresh",
+          "when": "view == decipher.activityView",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Decipher",
+      "properties": {
+        "decipher.mode": {
+          "type": "string",
+          "enum": [
+            "beginner",
+            "intermediate",
+            "advanced"
+          ],
+          "default": "beginner",
+          "enumDescriptions": [
+            "Hide raw commands behind Learn more; glossary on every step",
+            "Show a one-line technical hint inline",
+            "Show the full command inline"
+          ],
+          "description": "How much technical detail to show."
+        },
+        "decipher.llm.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use the editor's language model (when available) to summarize complex multi-step turns. Falls back to templates when unavailable."
+        },
+        "decipher.llm.alwaysExplainInDepth": {
+          "type": "boolean",
+          "default": false,
+          "description": "Ask the language model to rewrite every turn summary, not just complex ones."
+        },
+        "decipher.llm.conceptExtraction": {
+          "type": "boolean",
+          "default": false,
+          "description": "Let the language model suggest concepts for code the knowledge graph doesn't recognize. Only small diff snippets are sent."
+        },
+        "decipher.cursorProjectsDir": {
+          "type": "string",
+          "default": "",
+          "description": "Override the Cursor projects directory (defaults to ~/.cursor/projects)."
+        },
+        "decipher.maxVisibleQueue": {
+          "type": "number",
+          "default": 5,
+          "description": "Maximum number of concepts shown in the Knowledge Debt priority queue."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.webview.json",
+    "test": "vitest run",
+    "dogfood": "tsx scripts/dogfood.ts",
+    "package": "node esbuild.mjs --production && vsce package --no-dependencies",
+    "install:cursor": "npm run package && \"/Applications/Cursor.app/Contents/Resources/app/bin/cursor\" --install-extension decipher-0.1.0.vsix --force"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@types/vscode": "^1.94.0",
+    "@vscode/vsce": "^3.1.0",
+    "esbuild": "^0.23.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
