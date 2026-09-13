@@ -45,8 +45,13 @@ function state(over: Partial<SessionState> = {}): SessionState {
     loadingRotateMs: 3500,
     mode: 'beginner',
     hooksInstalled: false,
+    hooksSupported: true,
     llmAvailable: false,
     workspaceName: 'demo',
+    host: 'cursor',
+    agentSource: 'cursor',
+    agentLabel: 'the Cursor agent',
+    agentShortLabel: 'the agent',
     goal: 'Add a scroll animation to the hero',
     ...over,
   };

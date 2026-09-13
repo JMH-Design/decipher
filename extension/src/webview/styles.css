@@ -157,6 +157,13 @@ h4 {
   border-bottom: 1px solid var(--border);
 }
 
+/* An explanation rather than a call to action: same shape, quieter. */
+.banner.subtle {
+  background: transparent;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
 /* ---------------------------------------------------------------- turn recap */
 
 /*

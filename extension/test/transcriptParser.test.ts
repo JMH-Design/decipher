@@ -30,6 +30,23 @@ describe('parseTranscript', () => {
     expect(t.title).toBe('remove the bake-off page');
   });
 
+  it('closes the turn when the transcript ends text-only after tools, even without turn_ended', () => {
+    const jsonl = [
+      user('<user_query>fix the loader</user_query>'),
+      assistant([{ type: 'text', text: 'Checking the code.' }, { type: 'tool_use', name: 'Read', input: { path: 'App.tsx' } }]),
+      assistant([{ type: 'text', text: 'Fixed — reload the window.' }]),
+    ].join('\n');
+    const t = parseTranscript('conv', jsonl);
+    expect(t.turns[0].status).toBe('success');
+    expect(t.steps.every((s) => s.status === 'done')).toBe(true);
+  });
+
+  it('keeps the turn active when the last assistant line is planning text before any tools', () => {
+    const jsonl = [user('<user_query>fix it</user_query>'), assistant([{ type: 'text', text: 'Looking into it.' }])].join('\n');
+    const t = parseTranscript('conv', jsonl);
+    expect(t.turns[0].status).toBe('active');
+  });
+
   it('marks the last batch of an active turn as running and tolerates partial lines', () => {
     const jsonl = [user('<user_query>do it</user_query>'), assistant([{ type: 'tool_use', name: 'Grep', input: { pattern: 'x' } }]), '{"role":"assis'].join('\n');
     const t = parseTranscript('conv', jsonl);

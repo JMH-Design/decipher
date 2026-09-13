@@ -25,6 +25,8 @@ export interface ParsedTranscript {
   steps: ActivityStep[];
   /** Title derived from the first user request. */
   title: string;
+  /** The model driving the chat, when the transcript records it (Copilot and Claude Code do). */
+  agentModel?: string;
 }
 
 export interface ParseOptions {
@@ -63,6 +65,9 @@ export function parseTranscript(conversationId: string, jsonl: string, opts: Par
   let seq = opts.indexOffset ?? 0;
   let lastTimestamp: number | undefined;
   let title = '';
+  /** Whether the most recent assistant line included any tool_use blocks. */
+  let lastAssistantHadToolUse = false;
+  let sawAssistantMessage = false;
 
   const currentTurn = (): Turn => {
     if (turnIndex < 0) {
@@ -115,6 +120,8 @@ export function parseTranscript(conversationId: string, jsonl: string, opts: Par
     }
 
     if (obj.role === 'assistant') {
+      sawAssistantMessage = true;
+      lastAssistantHadToolUse = content.some((b) => b.type === 'tool_use');
       const turn = currentTurn();
       let narration = '';
       for (const block of content) {
@@ -151,8 +158,15 @@ export function parseTranscript(conversationId: string, jsonl: string, opts: Par
     }
   }
 
-  // All steps except the very last batch are necessarily done (the agent moved on).
+  // Cursor often omits `turn_ended` until the next user message. When the transcript ends with a
+  // text-only assistant reply after tools ran, the agent is done — close the turn so the loader
+  // can lift. A lone planning line before any tools stays active (more lines may still arrive).
   const lastTurn = turns[turns.length - 1];
+  if (lastTurn?.status === 'active' && sawAssistantMessage && !lastAssistantHadToolUse && lastTurn.stepIds.length > 0) {
+    lastTurn.status = 'success';
+  }
+
+  // All steps except the very last batch are necessarily done (the agent moved on).
   for (const s of steps) {
     if (s.status === 'running' && (!lastTurn || s.turnIndex !== lastTurn.index || lastTurn.status !== 'active')) {
       s.status = 'done';

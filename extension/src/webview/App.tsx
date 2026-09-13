@@ -74,7 +74,8 @@ export function App() {
         </nav>
       </header>
 
-      {!state.hooksInstalled && (
+      {/* Hooks only exist in Cursor; elsewhere the absence is expected, not a setup step. */}
+      {state.hooksSupported && !state.hooksInstalled && (
         <div className="banner">
           <span>Install Decipher hooks to see results (what a search found, whether a command succeeded).</span>
           <button className="link" onClick={() => post({ type: 'installHooks' })}>
@@ -82,6 +83,8 @@ export function App() {
           </button>
         </div>
       )}
+
+      {state.sourceNote && <div className="banner subtle">{state.sourceNote}</div>}
 
       {/* The cards build underneath the overlay, so the panel is complete the moment it shows. */}
       <div className="stage">
@@ -98,12 +101,14 @@ export function App() {
           {!openConcept && <TurnRecap state={state} />}
         </div>
 
-        {overlay.visible && <LoadingOverlay phase={state.loadingPhase} model={state.agentModel} rotateMs={state.loadingRotateMs} fading={overlay.fading} />}
+        {overlay.visible && <LoadingOverlay phase={state.loadingPhase} model={state.agentModel} rotateMs={state.loadingRotateMs} fading={overlay.fading} agent={state.agentShortLabel} />}
       </div>
 
       {toast && <div className="toast">{toast}</div>}
       <footer className="footer">
         <span title={conversationTitle}>{state.workspaceName}</span>
+        <span className="dot">·</span>
+        <span title={`Explaining ${state.agentLabel}`}>{state.agentShortLabel}</span>
         <span className="dot">·</span>
         <span>{state.steps.length} actions</span>
         {state.llmAvailable && (

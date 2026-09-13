@@ -2,14 +2,16 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
-import type { ExplainMode, FromWebviewMessage, LoadingPhase, Resource, SessionState, ToWebviewMessage } from '../../shared/activity-schema';
+import type { DataSourcePreference, ExplainMode, FromWebviewMessage, HostKind, LoadingPhase, Resource, SessionState, ToWebviewMessage } from '../../shared/activity-schema';
 import { LlmSummarizer } from './explainer/llmSummarizer';
 import { TemplateEngine } from './explainer/templateEngine';
 import { VscodeLmProvider } from './explainer/vscodeLmProvider';
 import { GlossaryService } from './glossary/glossaryService';
+import { detectHost, HOST_LABEL } from './host/detectHost';
+import { resolveStore, type StoreContext, type TranscriptStore } from './host/transcriptStore';
 import { KnowledgeGraph } from './knowledge/knowledgeGraph';
 import { resolveLoadingPhase } from './loading/resolveLoadingPhase';
-import { expandHome, resolvePaths, type DecipherPaths } from './paths';
+import { expandHome } from './paths';
 import { RecommendationCatalog } from './research/catalog';
 import { ResearchService } from './research/researchService';
 import { resourceSheetMarkdown } from './research/resourceSheet';
@@ -19,6 +21,7 @@ import { ActivityWatcher } from './session/watcher';
 
 const VIEW_ID = 'decipher.activityView';
 const LOCAL_PLUGIN_DIR = path.join(os.homedir(), '.cursor', 'plugins', 'local', 'decipher-hooks');
+const CURSOR_HOOKS_JSON = path.join(os.homedir(), '.cursor', 'hooks.json');
 /** Secret storage key for the Context.dev token used by live web search. */
 const SEARCH_KEY_SECRET = 'decipher.contextDevApiKey';
 
@@ -60,7 +63,8 @@ export function deactivate(): void {
 // ---------------------------------------------------------------------------
 
 class DecipherController implements vscode.Disposable {
-  private paths: DecipherPaths;
+  private readonly host: HostKind;
+  private store: TranscriptStore;
   private readonly glossary = new GlossaryService();
   private readonly graph = new KnowledgeGraph();
   private readonly lmProvider = new VscodeLmProvider();
@@ -85,17 +89,30 @@ class DecipherController implements vscode.Disposable {
     private readonly workspaceRoot: string,
     private readonly output: vscode.OutputChannel,
   ) {
-    this.paths = resolvePaths(workspaceRoot, this.config<string>('cursorProjectsDir') || undefined);
+    this.host = detectHost(vscode.env.appName);
+    this.store = resolveStore(this.storeContext());
     this.engine = new TemplateEngine({ glossary: this.glossary, workspaceRoot });
     this.llm = new LlmSummarizer(this.lmProvider, this.llmOptions());
     this.search = new ContextDevSearchClient(async () => this.context.secrets.get(SEARCH_KEY_SECRET));
     this.research = this.makeResearch();
     this.builder = this.makeBuilder();
-    output.appendLine(`Cursor project dir: ${this.paths.projectDir}`);
+    output.appendLine(`Host: ${HOST_LABEL[this.host]} · reading ${this.store.label} from ${this.store.location}`);
   }
 
   private config<T>(key: string): T | undefined {
     return vscode.workspace.getConfiguration('decipher').get<T>(key);
+  }
+
+  private storeContext(): StoreContext {
+    return {
+      host: this.host,
+      workspacePath: this.workspaceRoot,
+      preference: this.config<DataSourcePreference>('dataSource') ?? 'auto',
+      storageDir: this.context.globalStorageUri.fsPath,
+      // `cursorProjectsDir` predates multi-host support and is kept as an alias.
+      cursorProjectsDir: this.config<string>('projectsDirOverride') || this.config<string>('cursorProjectsDir') || undefined,
+      claudeConfigDir: this.config<string>('claudeConfigDir') || undefined,
+    };
   }
 
   private llmOptions() {
@@ -119,7 +136,7 @@ class DecipherController implements vscode.Disposable {
       catalog: new RecommendationCatalog(),
       provider: this.lmProvider,
       search: this.search,
-      cacheDir: this.paths.researchDir,
+      cacheDir: this.store.researchDir,
       options: this.researchOptions(),
       log: (m) => this.output.appendLine(m),
     });
@@ -127,7 +144,7 @@ class DecipherController implements vscode.Disposable {
 
   private makeBuilder(): SessionBuilder {
     return new SessionBuilder({
-      paths: this.paths,
+      store: this.store,
       workspaceName: path.basename(this.workspaceRoot),
       engine: this.engine,
       glossary: this.glossary,
@@ -138,8 +155,7 @@ class DecipherController implements vscode.Disposable {
   }
 
   start(): void {
-    this.watcher = new ActivityWatcher([this.paths.transcriptsDir, this.paths.eventsDir], () => this.refresh('watch'));
-    this.watcher.start();
+    this.startWatching();
     void this.search.isConfigured().then((ok) => {
       this.webSearchConfigured = ok;
       this.refresh('search-key');
@@ -152,13 +168,31 @@ class DecipherController implements vscode.Disposable {
     this.refresh('start');
   }
 
+  private startWatching(): void {
+    // Gates the "Install Cursor hooks" command so it never shows up where it cannot work.
+    void vscode.commands.executeCommand('setContext', 'decipher.hooksSupported', this.store.hooksSupported);
+    this.watcher?.stop();
+    // Only Cursor's directories are ours to create; another agent's are watched as-is.
+    this.watcher = new ActivityWatcher(this.store.watchDirs, () => this.refresh('watch'), 250, this.store.provider === 'cursor');
+    this.watcher.start();
+  }
+
   reloadConfig(): void {
-    this.paths = resolvePaths(this.workspaceRoot, this.config<string>('cursorProjectsDir') || undefined);
+    this.rewire(resolveStore(this.storeContext()));
     this.llm.setOptions(this.llmOptions());
+    this.start();
+  }
+
+  /**
+   * Point the pipeline at a transcript source. Both the research cache and the session
+   * builder are tied to the store, so swapping one means rebuilding both. Callers restart
+   * the watcher and refresh.
+   */
+  private rewire(store: TranscriptStore): void {
+    this.store = store;
+    this.output.appendLine(`Reading ${store.label} from ${store.location}`);
     this.research = this.makeResearch();
     this.builder = this.makeBuilder();
-    this.watcher?.stop();
-    this.start();
   }
 
   get mode(): ExplainMode {
@@ -189,9 +223,11 @@ class DecipherController implements vscode.Disposable {
   refresh(reason: string): void {
     const generation = ++this.generation;
     try {
+      this.adoptStoreIfSourceAppeared();
       const state = this.builder.build({
         conversationId: this.selectedConversation,
         mode: this.mode,
+        host: this.host,
         hooksInstalled: this.hooksInstalled(),
         llmAvailable: this.llmAvailable,
         webSearchConfigured: this.webSearchConfigured,
@@ -208,6 +244,19 @@ class DecipherController implements vscode.Disposable {
       // Never leave the webview stuck behind the loader.
       if (this.state) this.publish({ ...this.state, loadingPhase: 'ready' });
     }
+  }
+
+  /**
+   * The first chat of a session can arrive after Decipher starts, and it may belong to a
+   * different agent than the one we guessed. Re-resolving while empty costs two directory
+   * listings and saves the user a window reload.
+   */
+  private adoptStoreIfSourceAppeared(): void {
+    if (this.store.list().some((s) => s.hasMessages)) return;
+    const resolved = resolveStore(this.storeContext());
+    if (resolved.provider === this.store.provider) return;
+    this.rewire(resolved);
+    this.startWatching();
   }
 
   private publish(state: SessionState): void {
@@ -229,15 +278,17 @@ class DecipherController implements vscode.Disposable {
     this.refresh('enriched');
   }
 
+  /** Hooks are a Cursor plugin. Everywhere else the answer is "not applicable", not "missing". */
   private hooksInstalled(): boolean {
+    if (!this.store.hooksSupported) return false;
     if (fs.existsSync(path.join(LOCAL_PLUGIN_DIR, 'hooks', 'capture-event.mjs'))) return true;
     try {
-      const hooks = fs.readFileSync(this.paths.hooksJsonPath, 'utf8');
-      if (/decipher/i.test(hooks)) return true;
+      if (/decipher/i.test(fs.readFileSync(CURSOR_HOOKS_JSON, 'utf8'))) return true;
     } catch {
       /* no user hooks */
     }
-    return fs.existsSync(this.paths.eventsDir) && fs.readdirSync(this.paths.eventsDir).length > 0;
+    const eventsDir = this.store.eventsDir;
+    return Boolean(eventsDir) && fs.existsSync(eventsDir!) && fs.readdirSync(eventsDir!).length > 0;
   }
 
   handleMessage(msg: FromWebviewMessage): void {
@@ -355,6 +406,12 @@ class DecipherController implements vscode.Disposable {
 
   /** Copy the bundled plugin into ~/.cursor/plugins/local so Cursor loads its hooks. */
   async installHooks(): Promise<void> {
+    if (!this.store.hooksSupported) {
+      void vscode.window.showInformationMessage(
+        `Decipher: hooks are a Cursor plugin, and ${HOST_LABEL[this.host]} has no equivalent yet. Step cards still work — only tool output, durations, and exit codes are missing.`,
+      );
+      return;
+    }
     const src = vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'plugin').fsPath;
     if (!fs.existsSync(src)) {
       void vscode.window.showErrorMessage('Decipher: bundled plugin not found. Run the extension build first.');

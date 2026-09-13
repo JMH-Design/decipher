@@ -5,22 +5,30 @@ import { initialOverlayVisibility, nextOverlayVisibility, OVERLAY_FADE_MS, type 
 
 const DEFAULT_ROTATE_MS = 3500;
 
-const STAGE_LABEL: Record<LoadingPhase, string> = {
-  boot: 'Starting up',
-  working: 'Watching the agent work',
-  parsing: 'Writing up what happened',
-  research: 'Looking for resources and tools',
-  ready: '',
-};
+/** `agent` is the short name of whichever agent is being watched: "the agent", "Copilot", "Claude". */
+function stageLabel(phase: LoadingPhase, agent: string): string {
+  switch (phase) {
+    case 'boot':
+      return 'Starting up';
+    case 'working':
+      return `Watching ${agent} work`;
+    case 'parsing':
+      return 'Writing up what happened';
+    case 'research':
+      return 'Looking for resources and tools';
+    default:
+      return '';
+  }
+}
 
 /**
  * Covers the timeline until the agent's turn is over and Decipher has finished writing it up,
  * so the user never reads a panel that is still changing underneath them.
  */
-export function LoadingOverlay({ phase, model, rotateMs, fading }: { phase: LoadingPhase; model?: string; rotateMs?: number; fading: boolean }) {
+export function LoadingOverlay({ phase, model, rotateMs, fading, agent }: { phase: LoadingPhase; model?: string; rotateMs?: number; fading: boolean; agent?: string }) {
   return (
     <div className={`loading-overlay${fading ? ' fading' : ''}`} aria-hidden={fading}>
-      <LoadingState phase={phase} model={model} rotateMs={rotateMs} />
+      <LoadingState phase={phase} model={model} rotateMs={rotateMs} agent={agent} />
     </div>
   );
 }
@@ -52,14 +60,14 @@ export function useLoadingOverlay(phase: LoadingPhase, viewVisible = true): { vi
 }
 
 /** The loader itself: branded spinner, rotating phrase, and which stage we are waiting on. */
-export function LoadingState({ phase, model, rotateMs = DEFAULT_ROTATE_MS }: { phase: LoadingPhase; model?: string; rotateMs?: number }) {
+export function LoadingState({ phase, model, rotateMs = DEFAULT_ROTATE_MS, agent = 'the agent' }: { phase: LoadingPhase; model?: string; rotateMs?: number; agent?: string }) {
   const phrase = useRotatingPhrase(model, rotateMs);
 
   return (
     <div className="loading-state" role="status" aria-live="polite">
       <DecipherSpinner />
       <p className="loading-phrase">{phrase}</p>
-      <p className="loading-stage">{STAGE_LABEL[phase]}</p>
+      <p className="loading-stage">{stageLabel(phase, agent)}</p>
     </div>
   );
 }

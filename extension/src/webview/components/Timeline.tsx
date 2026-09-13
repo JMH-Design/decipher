@@ -34,11 +34,17 @@ export function Timeline({ state, onOpenConcept }: { state: SessionState; onOpen
   }, [state.steps.length]);
 
   if (!state.conversationId) {
-    return <div className="empty">Start a chat with the agent — I’ll explain everything here.</div>;
+    return <div className="empty">Start a chat with {state.agentLabel} — I’ll explain everything here.</div>;
   }
   if (!state.steps.length) {
     const t = state.turns[state.turns.length - 1];
-    return <div className="empty">{t?.finalResponse ? 'The agent replied without taking any actions in this chat.' : 'No agent actions recorded yet. As soon as the agent reads, searches, edits, or runs something, it will show up here.'}</div>;
+    return (
+      <div className="empty">
+        {t?.finalResponse
+          ? `${capitalize(state.agentLabel)} replied without taking any actions in this chat.`
+          : `No actions recorded yet. As soon as ${state.agentLabel} reads, searches, edits, or runs something, it will show up here.`}
+      </div>
+    );
   }
 
   return (
@@ -69,6 +75,8 @@ export function Timeline({ state, onOpenConcept }: { state: SessionState; onOpen
     </div>
   );
 }
+
+const capitalize = (s: string) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
 function groupByTurn(steps: ExplainedStep[], turns: Turn[]): Array<{ turn: Turn | undefined; steps: ExplainedStep[] }> {
   const out: Array<{ turn: Turn | undefined; steps: ExplainedStep[] }> = [];

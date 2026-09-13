@@ -91,6 +91,8 @@ export function categorizeTool(toolName: string, input: Record<string, unknown>)
     case 'Shell':
       return categorizeShell(String(input.command ?? ''));
     case 'AwaitShell':
+    case 'KillShell':
+    case 'RunTests':
       return 'running';
     case 'AskQuestion':
       return 'asking';
@@ -99,6 +101,8 @@ export function categorizeTool(toolName: string, input: Record<string, unknown>)
     case 'UpdateCurrentStep':
     case 'SwitchMode':
       return 'planning';
+    case 'Skill':
+      return 'reading';
     case 'Task':
       return 'delegating';
     case 'WebSearch':
@@ -109,6 +113,7 @@ export function categorizeTool(toolName: string, input: Record<string, unknown>)
     case 'FetchMcpResource':
       return 'external';
     case 'SendToUser':
+    case 'Think':
       return 'thinking';
     default:
       if (/^mcp_|^browser_/i.test(name)) return 'external';

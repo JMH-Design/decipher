@@ -1,8 +1,8 @@
 {
   "name": "decipher-monorepo",
   "private": true,
-  "version": "0.2.1",
-  "description": "Decipher: plain-language agent activity explainer, learning resources, and tool recommendations for Cursor (extension + plugin)",
+  "version": "0.3.0",
+  "description": "Decipher: plain-language agent activity explainer, learning resources, and tool recommendations for Cursor and VS Code (extension + plugin)",
   "workspaces": [
     "extension"
   ],
@@ -11,7 +11,10 @@
     "watch": "npm run watch -w extension",
     "test": "npm run test -w extension",
     "typecheck": "npm run typecheck -w extension",
-    "dogfood": "npm run dogfood -w extension --"
+    "dogfood": "npm run dogfood -w extension --",
+    "package": "npm run package -w extension",
+    "install:cursor": "npm run install:cursor -w extension",
+    "install:vscode": "npm run install:vscode -w extension"
   },
   "engines": {
     "node": ">=18"

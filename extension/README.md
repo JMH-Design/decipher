@@ -1,6 +1,18 @@
 # Decipher — Plain-Language Agent Explainer
 
-Decipher adds a **Decipher** icon to the Cursor activity bar. Open it and you get a live, plain-English timeline of everything the agent is doing in the current chat — plus a **Learn & improve** tab that explains the concepts behind that work and suggests tools which could get you a better result with less effort.
+Decipher adds a **Decipher** icon to the activity bar of Cursor and VS Code. Open it and you get a live, plain-English timeline of everything your coding agent is doing in the current chat — plus a **Learn & improve** tab that explains the concepts behind that work and suggests tools which could get you a better result with less effort.
+
+## Supported agents
+
+| Editor | Agent | Where Decipher reads it |
+| --- | --- | --- |
+| Cursor | Cursor agent | `~/.cursor/projects/<workspace>/agent-transcripts/` |
+| VS Code, VS Code Insiders | GitHub Copilot Chat, agent mode | `<user data>/workspaceStorage/<hash>/GitHub.copilot-chat/transcripts/` |
+| Cursor or VS Code | Claude Code | `~/.claude/projects/<encoded-workspace-path>/` |
+
+`decipher.dataSource` is `auto` by default: the editor's own agent first, then Claude Code, which can run in either. Set it explicitly to pin one source.
+
+Hooks are a Cursor plugin, so command output, edit diffs, and exit codes are Cursor-only. Copilot's transcript records tool durations and pass/fail; Claude Code's records tool results. Everywhere else the timeline is built from tool names and inputs alone, and the hooks banner stays hidden rather than asking for something that cannot be installed.
 
 ## What you see
 
@@ -13,20 +25,23 @@ Decipher adds a **Decipher** icon to the Cursor activity bar. Open it and you ge
 
 ## How it works
 
-1. **Transcripts** — the extension watches `~/.cursor/projects/<workspace>/agent-transcripts/**.jsonl`, which Cursor writes for every chat. This gives every tool call and its input.
-2. **Hooks (optional, recommended)** — a small companion Cursor plugin captures what transcripts lack: command output, edit diffs, durations, failures, and the active model. The sidebar prompts you to install it with one click (it copies to `~/.cursor/plugins/local/decipher-hooks`). Events are written locally to `~/.cursor/projects/<workspace>/decipher/events/`. Nothing leaves your machine.
-3. **Explanation engine** — ~60 rule-based templates cover git, search, file reads/edits, package managers, dev servers, and Cursor's built-in tools. When the editor's language model is available it writes the recap for each finished turn; otherwise the recap is composed from the templates.
+1. **Transcripts** — a host adapter locates the agent's own log and normalises it. Each agent writes a different format (Cursor's Anthropic-style messages, Copilot's typed event stream, Claude Code's message records with interleaved subagent work), and every adapter produces the same steps and turns, so nothing downstream knows which editor it is in.
+2. **Hooks (optional, Cursor only)** — a small companion Cursor plugin captures what transcripts lack: command output, edit diffs, durations, failures, and the active model. The sidebar prompts you to install it with one click (it copies to `~/.cursor/plugins/local/decipher-hooks`). Events are written locally to `~/.cursor/projects/<workspace>/decipher/events/`. Nothing leaves your machine. In VS Code, Decipher keeps its own cache under the extension's global storage instead.
+3. **Explanation engine** — ~60 rule-based templates cover git, search, file reads/edits, package managers, dev servers, and the agents' built-in tools. Each adapter maps its agent's tool names and argument keys onto one canonical set, so Copilot's `read_file` and Claude's `Read` hit the same template. When the editor's language model is available it writes the recap for each finished turn; otherwise the recap is composed from the templates.
 4. **Learning catalog** — a concept detector reads imports, API symbols, package installs, file types, MCP namespaces, and skill reads; a curated catalog (`knowledge/concepts.json`, ~57 concepts) supplies prerequisites, an ordered study path, and resources tagged `official`, `tutorial`, `video`, `course`, `workshop`, or `skill`.
-5. **Improvement research** — after each agent turn, Decipher matches your request and detected concepts against a curated catalog (`recommendations/catalog.json`), optionally searches the live web through Context.dev, and asks the language model to merge both into plain-English suggestions. Results are cached per turn in `~/.cursor/projects/<workspace>/decipher/research/`.
+5. **Improvement research** — after each agent turn, Decipher matches your request and detected concepts against a curated catalog (`recommendations/catalog.json`), optionally searches the live web through Context.dev, and asks the language model to merge both into plain-English suggestions. Results are cached per turn next to the agent's data in Cursor, and under the extension's global storage elsewhere.
 
 ## Install
+
+From the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=haggitjm.decipher) or [Open VSX](https://open-vsx.org/extension/haggitjm/decipher), or from source:
 
 ```bash
 npm install
 npm run install:cursor      # builds, packages and installs into Cursor
+npm run install:vscode      # ...or into VS Code
 ```
 
-Then reload Cursor (`Developer: Reload Window`) and click the Decipher icon in the activity bar.
+Then reload the editor (`Developer: Reload Window`) and click the Decipher icon in the activity bar.
 
 ## Develop
 
@@ -34,10 +49,32 @@ Then reload Cursor (`Developer: Reload Window`) and click the Decipher icon in t
 npm run watch               # rebuild on change
 npm test                    # vitest unit tests
 npm run typecheck
-npm run dogfood -- --workspace /path/to/project [--id <conversationId>] [--grep "text"] [--json]
+npm run dogfood -- --workspace /path/to/project [--source copilot|claude-code|cursor] [--id <conversationId>] [--grep "text"] [--json]
+npm run dogfood -- --file path/to/transcript.jsonl --format claude-code
+npm run icon                # re-render media/icon.png from media/icon-marketplace.svg
 ```
 
-`dogfood` runs the full pipeline (parse → merge hook events → explain → detect concepts → curated recommendations) against real transcripts and prints the timeline and coverage numbers without launching the editor. It runs offline: no language model, no web search.
+`dogfood` runs the full pipeline (parse → merge hook events → explain → detect concepts → curated recommendations) against real transcripts and prints the timeline and coverage numbers without launching the editor. It runs offline: no language model, no web search. `--source` picks the agent; `--file` with `--format` explains one transcript directly, which is the quickest way to check a new adapter.
+
+### Adding an agent
+
+Two files and one line of registration:
+
+1. A store in `src/host/transcriptStore.ts` that knows where the agent keeps its transcripts, which directories to watch, and whether hooks are available.
+2. A parser in `src/parser/adapters/` that turns that agent's records into `ParsedTranscript`, plus a tool-name map so its tools land on the existing templates.
+3. Register the format in `src/parser/adapters/index.ts` and the provider in `candidateProviders()`.
+
+Nothing downstream of `TranscriptStore` needs to change.
+
+## Release
+
+```bash
+npm run package             # decipher-<version>.vsix
+npm run publish:marketplace # needs VSCE_PAT (Azure DevOps, Marketplace → Manage scope)
+npm run publish:openvsx     # needs OVSX_PAT
+```
+
+Pushing a `v*` tag runs [`.github/workflows/release.yml`](../.github/workflows/release.yml), which tests, packages, attaches the VSIX to a GitHub release, and publishes to whichever registries have a token in repository secrets.
 
 ## Commands
 
@@ -45,7 +82,7 @@ npm run dogfood -- --workspace /path/to/project [--id <conversationId>] [--grep 
 | --- | --- |
 | `Decipher: Open activity explainer` | Focus the sidebar. |
 | `Decipher: Refresh from transcripts` | Re-read the transcript and hook events. |
-| `Decipher: Install Cursor hooks` | Copy the companion plugin into `~/.cursor/plugins/local`. |
+| `Decipher: Install Cursor hooks` | Copy the companion plugin into `~/.cursor/plugins/local`. Cursor only. |
 | `Decipher: Refresh tool suggestions` | Discard the cached research for this chat and look again. |
 | `Decipher: Set Context.dev API key` | Store (or clear) the key that enables live web search. |
 | `Decipher: Export resource sheet` | Open a Markdown summary of concepts, resources, and suggestions. |
@@ -55,9 +92,11 @@ npm run dogfood -- --workspace /path/to/project [--id <conversationId>] [--grep 
 | Setting | Default | Meaning |
 | --- | --- | --- |
 | `decipher.mode` | `beginner` | `beginner` hides commands behind *Learn more*; `intermediate` shows a one-line hint; `advanced` shows the full command. |
+| `decipher.dataSource` | `auto` | Which agent to explain: `auto`, `cursor`, `copilot`, or `claude-code`. |
 | `decipher.llm.enabled` | `true` | Use the editor's language model to write the recap for each finished turn. |
 | `decipher.llm.alwaysExplainInDepth` | `false` | Also recap turns where the agent took no actions and only replied. |
-| `decipher.cursorProjectsDir` | `""` | Override the Cursor projects directory. |
+| `decipher.projectsDirOverride` | `""` | Override the Cursor projects directory. Replaces `decipher.cursorProjectsDir`, which still works. |
+| `decipher.claudeConfigDir` | `""` | Override the Claude Code config directory. Defaults to `$CLAUDE_CONFIG_DIR`, then `~/.claude`. |
 | `decipher.research.enabled` | `true` | Suggest tools, MCP servers, and kits for what you asked for. |
 | `decipher.research.webSearch` | `true` | Search the live web via Context.dev. Needs an API key. |
 | `decipher.research.trigger` | `auto` | `auto` refreshes after each agent turn; `manual` waits for you to ask. |

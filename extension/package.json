@@ -1,11 +1,20 @@
 {
   "name": "decipher",
   "displayName": "Decipher — Plain-Language Agent Explainer",
-  "description": "See what the Cursor agent did in plain English, learn the concepts behind it, and discover tools that could help you build it better.",
-  "version": "0.2.1",
+  "description": "See what your coding agent did in plain English, learn the concepts behind it, and discover tools that could help you build it better. Works with the Cursor agent, GitHub Copilot, and Claude Code.",
+  "version": "0.3.0",
   "publisher": "haggitjm",
   "license": "MIT",
   "private": true,
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JMH-Design/decipher.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JMH-Design/decipher/issues"
+  },
+  "homepage": "https://github.com/JMH-Design/decipher#readme",
   "engines": {
     "vscode": "^1.94.0"
   },
@@ -16,6 +25,9 @@
   ],
   "keywords": [
     "cursor",
+    "copilot",
+    "claude",
+    "vscode",
     "agent",
     "explainer",
     "learning",
@@ -59,7 +71,8 @@
       },
       {
         "command": "decipher.installHooks",
-        "title": "Decipher: Install Cursor hooks (richer explanations)"
+        "title": "Decipher: Install Cursor hooks (richer explanations)",
+        "enablement": "decipher.hooksSupported"
       },
       {
         "command": "decipher.researchNow",
@@ -80,6 +93,12 @@
           "command": "decipher.refresh",
           "when": "view == decipher.activityView",
           "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "decipher.installHooks",
+          "when": "decipher.hooksSupported"
         }
       ]
     },
@@ -111,10 +130,38 @@
           "default": false,
           "description": "Also recap turns where the agent took no actions and only replied."
         },
+        "decipher.dataSource": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "cursor",
+            "copilot",
+            "claude-code"
+          ],
+          "default": "auto",
+          "enumDescriptions": [
+            "Use the editor's own agent, falling back to Claude Code",
+            "Read Cursor agent transcripts (~/.cursor/projects)",
+            "Read GitHub Copilot Chat transcripts for this workspace",
+            "Read Claude Code sessions (~/.claude/projects)"
+          ],
+          "markdownDescription": "Which agent's work to explain. `auto` prefers the editor's own agent — the Cursor agent in Cursor, GitHub Copilot in VS Code — and falls back to Claude Code, which can run in either."
+        },
+        "decipher.projectsDirOverride": {
+          "type": "string",
+          "default": "",
+          "description": "Override the Cursor projects directory (defaults to ~/.cursor/projects). Useful when reading Cursor transcripts from another editor."
+        },
         "decipher.cursorProjectsDir": {
           "type": "string",
           "default": "",
-          "description": "Override the Cursor projects directory (defaults to ~/.cursor/projects)."
+          "markdownDeprecationMessage": "Renamed to `#decipher.projectsDirOverride#`. The old key still works.",
+          "description": "Deprecated alias for decipher.projectsDirOverride."
+        },
+        "decipher.claudeConfigDir": {
+          "type": "string",
+          "default": "",
+          "description": "Override the Claude Code configuration directory (defaults to $CLAUDE_CONFIG_DIR, then ~/.claude)."
         },
         "decipher.research.enabled": {
           "type": "boolean",
@@ -158,8 +205,12 @@
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.webview.json",
     "test": "vitest run",
     "dogfood": "tsx scripts/dogfood.ts",
+    "icon": "node scripts/buildIcon.mjs",
     "package": "node esbuild.mjs --production && vsce package --no-dependencies",
-    "install:cursor": "npm run package && \"/Applications/Cursor.app/Contents/Resources/app/bin/cursor\" --install-extension decipher-0.2.1.vsix --force"
+    "install:cursor": "npm run package && \"/Applications/Cursor.app/Contents/Resources/app/bin/cursor\" --install-extension \"decipher-$npm_package_version.vsix\" --force",
+    "install:vscode": "npm run package && \"/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code\" --install-extension \"decipher-$npm_package_version.vsix\" --force",
+    "publish:marketplace": "npm run package && vsce publish --no-dependencies --packagePath \"decipher-$npm_package_version.vsix\"",
+    "publish:openvsx": "npm run package && ovsx publish \"decipher-$npm_package_version.vsix\""
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
@@ -168,6 +219,7 @@
     "@types/vscode": "^1.94.0",
     "@vscode/vsce": "^3.1.0",
     "esbuild": "^0.23.0",
+    "ovsx": "^0.10.0",
     "tsx": "^4.16.0",
     "typescript": "^5.5.0",
     "vitest": "^2.0.0"

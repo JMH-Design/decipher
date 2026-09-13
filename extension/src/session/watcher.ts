@@ -15,15 +15,26 @@ export class ActivityWatcher {
     private readonly dirs: string[],
     private readonly onChange: () => void,
     private readonly debounceMs = 250,
+    /**
+     * Decipher owns its Cursor directories and creates them eagerly. Another agent's data
+     * directory is not ours to conjure — a phantom `~/.claude/projects/<slug>` would make an
+     * absent agent look present, so those are watched by polling until they appear.
+     */
+    private readonly createMissing = true,
   ) {}
 
   start(): void {
     this.stop();
     for (const dir of this.dirs) {
-      try {
-        fs.mkdirSync(dir, { recursive: true });
-      } catch {
-        /* the dir may be read-only; polling covers it */
+      if (this.createMissing) {
+        try {
+          fs.mkdirSync(dir, { recursive: true });
+        } catch {
+          /* the dir may be read-only; polling covers it */
+        }
+      } else if (!fs.existsSync(dir)) {
+        this.ensurePolling();
+        continue;
       }
       try {
         const w = fs.watch(dir, { recursive: true, persistent: false }, () => this.schedule());

@@ -4,6 +4,7 @@ import { agentModelFromEvents } from '../src/loading/agentModel';
 import { GENERIC_NOUNS, VERBS, loadingPhrase, nounsForModel, renderPhrase } from '../src/loading/loadingPhrases';
 import { initialOverlayVisibility, nextOverlayVisibility } from '../src/loading/overlayVisibility';
 import { resolveLoadingPhase } from '../src/loading/resolveLoadingPhase';
+import { parseTranscript } from '../src/parser/transcriptParser';
 
 const event = (over: Partial<HookEvent>): HookEvent => ({ ts: '2026-09-13T00:00:00Z', hook: 'sessionStart', conversationId: 'c', ...over });
 const turns = (...statuses: TurnStatus[]): Turn[] => statuses.map((status, index) => ({ index, status, stepIds: [] }));
@@ -52,6 +53,20 @@ describe('loading phase', () => {
   it('keeps holding it after the turn while the recap and suggestions are written', () => {
     expect(resolveLoadingPhase(turns('success'), { llm: false, research: true })).toBe('research');
     expect(resolveLoadingPhase(turns('success'), { llm: true, research: false })).toBe('parsing');
+  });
+
+  it('is ready when a finished turn was inferred from a text-only tail (no turn_ended)', () => {
+    const jsonl = [
+      JSON.stringify({ role: 'user', message: { content: [{ type: 'text', text: '<user_query>ship it</user_query>' }] } }),
+      JSON.stringify({
+        role: 'assistant',
+        message: { content: [{ type: 'tool_use', name: 'Shell', input: { command: 'git push' } }] },
+      }),
+      JSON.stringify({ role: 'assistant', message: { content: [{ type: 'text', text: 'Pushed to main.' }] } }),
+    ].join('\n');
+    const { turns } = parseTranscript('c', jsonl);
+    expect(turns[0].status).toBe('success');
+    expect(resolveLoadingPhase(turns, nothingPending)).toBe('ready');
   });
 
   it('is ready once nothing is outstanding, including with no turns at all', () => {

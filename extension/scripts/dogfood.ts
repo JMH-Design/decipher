@@ -4,7 +4,8 @@
  *   npm run dogfood -- --workspace "/Users/me/Portfolio"           # newest chat in that workspace
  *   npm run dogfood -- --workspace "/Users/me/Portfolio" --list    # list chats
  *   npm run dogfood -- --workspace "/Users/me/Portfolio" --id <uuid>
- *   npm run dogfood -- --file path/to/transcript.jsonl
+ *   npm run dogfood -- ... --source copilot|claude-code|cursor     # which agent to read (default: auto)
+ *   npm run dogfood -- --file path/to/transcript.jsonl --format copilot
  *   npm run dogfood -- ... --grep "home-field"                     # only chats whose first request matches
  *   npm run dogfood -- ... --json                                   # dump SessionState
  *
@@ -14,17 +15,20 @@
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import type { ExplainedStep, SessionState } from '../../shared/activity-schema';
+import type { DataSourcePreference, ExplainedStep, HostKind, SessionState } from '../../shared/activity-schema';
 import { LLM_FALLBACK_THRESHOLD } from '../../shared/activity-schema';
 import { LlmSummarizer, NoopLlmProvider } from '../src/explainer/llmSummarizer';
 import { TemplateEngine } from '../src/explainer/templateEngine';
 import { GlossaryService } from '../src/glossary/glossaryService';
+import { AGENT_LABEL, AGENT_SHORT_LABEL } from '../src/host/detectHost';
+import { resolveStore, type TranscriptSource, type TranscriptStore } from '../src/host/transcriptStore';
 import { KnowledgeGraph } from '../src/knowledge/knowledgeGraph';
-import { listTranscripts, resolvePaths } from '../src/paths';
+import { parserFor, type TranscriptFormat } from '../src/parser/adapters';
+import type { ParsedTranscript } from '../src/parser/transcriptParser';
 import { RecommendationCatalog } from '../src/research/catalog';
 import { ResearchService } from '../src/research/researchService';
 import { NoopSearchClient } from '../src/research/webSearchClient';
-import { SessionBuilder, titleFromRawHead } from '../src/session/sessionBuilder';
+import { SessionBuilder } from '../src/session/sessionBuilder';
 
 const args = process.argv.slice(2);
 const opt = (name: string): string | undefined => {
@@ -35,23 +39,28 @@ const flag = (name: string) => args.includes(`--${name}`);
 
 const workspace = opt('workspace') ?? process.cwd();
 const file = opt('file');
-const paths = resolvePaths(workspace);
-paths.researchDir = fs.mkdtempSync(path.join(os.tmpdir(), 'decipher-research-'));
+const preference = (opt('source') as DataSourcePreference | undefined) ?? 'auto';
+const researchDir = fs.mkdtempSync(path.join(os.tmpdir(), 'decipher-research-'));
 
-if (file) {
-  // Point the builder at a fake project dir containing just this transcript.
-  const id = path.basename(file, '.jsonl');
-  const fake = fs.mkdtempSync(path.join(os.tmpdir(), 'decipher-'));
-  fs.mkdirSync(path.join(fake, 'agent-transcripts', id), { recursive: true });
-  fs.copyFileSync(file, path.join(fake, 'agent-transcripts', id, `${id}.jsonl`));
-  paths.transcriptsDir = path.join(fake, 'agent-transcripts');
-  paths.eventsDir = path.join(fake, 'events');
-}
+/** `--source` also picks the host, so `auto` still behaves the way it does in each editor. */
+const HOST_FOR_SOURCE: Record<DataSourcePreference, HostKind> = { auto: 'unknown', cursor: 'cursor', copilot: 'vscode', 'claude-code': 'unknown' };
+
+const store: TranscriptStore = file
+  ? singleFileStore(file, (opt('format') as TranscriptFormat | undefined) ?? 'cursor', researchDir)
+  : withResearchDir(
+      resolveStore({
+        host: HOST_FOR_SOURCE[preference],
+        workspacePath: workspace,
+        preference,
+        storageDir: fs.mkdtempSync(path.join(os.tmpdir(), 'decipher-storage-')),
+      }),
+      researchDir,
+    );
 
 if (flag('list')) {
-  for (const t of listTranscripts(paths.transcriptsDir)) {
-    const head = fs.readFileSync(t.file, 'utf8').slice(0, 8192);
-    console.log(`${t.id}  ${new Date(t.mtime).toISOString().slice(0, 16)}  ${titleFromRawHead(head)}`);
+  console.log(`${store.label} · ${store.location}`);
+  for (const t of store.list()) {
+    console.log(`${t.id}  ${new Date(t.mtime).toISOString().slice(0, 16)}  ${t.hasMessages ? '' : '(no messages) '}${t.title}`);
   }
   process.exit(0);
 }
@@ -61,11 +70,11 @@ const graph = new KnowledgeGraph();
 const research = new ResearchService({
   catalog: new RecommendationCatalog(),
   search: new NoopSearchClient(),
-  cacheDir: paths.researchDir,
+  cacheDir: researchDir,
   options: { enabled: true, webSearch: false, trigger: 'auto', maxResults: 6 },
 });
 const builder = new SessionBuilder({
-  paths,
+  store,
   workspaceName: path.basename(workspace),
   engine: new TemplateEngine({ glossary, workspaceRoot: workspace }),
   glossary,
@@ -78,24 +87,65 @@ let conversationId = opt('id') ?? null;
 const grep = opt('grep');
 if (!conversationId && grep) {
   const re = new RegExp(grep, 'i');
-  const match = listTranscripts(paths.transcriptsDir).find((t) => re.test(fs.readFileSync(t.file, 'utf8').slice(0, 20000)));
+  const match = store.list().find((t) => re.test(fs.readFileSync(t.file, 'utf8').slice(0, 20000)));
   if (!match) {
-    console.error(`No transcript matching /${grep}/ in ${paths.transcriptsDir}`);
+    console.error(`No transcript matching /${grep}/ in ${store.location}`);
     process.exit(1);
   }
   conversationId = match.id;
 }
 if (file) conversationId = path.basename(file, '.jsonl');
 
-const buildOptions = { conversationId, mode: 'advanced', hooksInstalled: false, llmAvailable: false, webSearchConfigured: false, loadingRotateMs: 3500 } as const;
+const buildOptions = { conversationId, mode: 'advanced', host: 'unknown', hooksInstalled: false, llmAvailable: false, webSearchConfigured: false, loadingRotateMs: 3500 } as const;
 
 void main();
+
+/** Explain one transcript file directly, without going looking for the workspace it came from. */
+function singleFileStore(transcriptFile: string, format: TranscriptFormat, cacheDir: string): TranscriptStore {
+  const id = path.basename(transcriptFile, '.jsonl');
+  const source: TranscriptSource = {
+    id,
+    file: transcriptFile,
+    mtime: fs.statSync(transcriptFile).mtimeMs,
+    provider: format === 'copilot-chat-session' ? 'copilot' : format,
+    format,
+    title: id,
+    hasMessages: true,
+  };
+  return {
+    provider: source.provider,
+    label: AGENT_LABEL[source.provider],
+    shortLabel: AGENT_SHORT_LABEL[source.provider],
+    location: transcriptFile,
+    watchDirs: [],
+    researchDir: cacheDir,
+    hooksSupported: false,
+    list: () => [source],
+    load: (wanted: string): ParsedTranscript | undefined => (wanted === id ? parserFor(format)(id, fs.readFileSync(transcriptFile, 'utf8')) : undefined),
+  };
+}
+
+/** Spelled out field by field: the stores expose getters, which a spread would flatten away. */
+function withResearchDir(base: TranscriptStore, cacheDir: string): TranscriptStore {
+  return {
+    provider: base.provider,
+    label: base.label,
+    shortLabel: base.shortLabel,
+    location: base.location,
+    watchDirs: base.watchDirs,
+    eventsDir: base.eventsDir,
+    researchDir: cacheDir,
+    hooksSupported: base.hooksSupported,
+    list: () => base.list(),
+    load: (id: string) => base.load(id),
+  };
+}
 
 async function main(): Promise<void> {
   // Curated recommendations only — no model, no network.
   await builder.enhanceWithResearch(builder.build(buildOptions));
   const state: SessionState = { ...builder.build(buildOptions), loadingPhase: 'ready' };
-  fs.rmSync(paths.researchDir, { recursive: true, force: true });
+  fs.rmSync(researchDir, { recursive: true, force: true });
 
   if (flag('json')) {
     // Large payload: let the pipe drain instead of calling process.exit().
@@ -110,7 +160,8 @@ function print(s: SessionState): void {
     console.log('No conversation found.');
     return;
   }
-  console.log(`\n═══ ${s.workspaceName} · chat ${s.conversationId.slice(0, 8)} · ${s.steps.length} actions ═══`);
+  console.log(`\n═══ ${s.workspaceName} · ${s.agentLabel} · chat ${s.conversationId.slice(0, 8)} · ${s.steps.length} actions ═══`);
+  if (s.sourceNote) console.log(s.sourceNote);
   console.log(`${s.liveHeadline}\n${s.liveSummary}\n`);
 
   let coverage = 0;

@@ -243,6 +243,15 @@ export interface ConversationSummary {
   stepCount: number;
 }
 
+/** Which editor Decipher is running in. */
+export type HostKind = 'cursor' | 'vscode' | 'vscode-insiders' | 'unknown';
+
+/** Which agent's transcripts are being explained. */
+export type AgentProvider = 'cursor' | 'copilot' | 'claude-code';
+
+/** `decipher.dataSource`: pin Decipher to one agent, or let the host decide. */
+export type DataSourcePreference = 'auto' | AgentProvider;
+
 export interface SessionState {
   conversationId: string | null;
   conversations: ConversationSummary[];
@@ -273,8 +282,19 @@ export interface SessionState {
   loadingRotateMs: number;
   mode: ExplainMode;
   hooksInstalled: boolean;
+  /** False outside Cursor: no other host exposes an agent hook API Decipher can install into. */
+  hooksSupported: boolean;
   llmAvailable: boolean;
   workspaceName: string;
+  host: HostKind;
+  /** The agent being explained, so the UI can say "Copilot" rather than "the agent". */
+  agentSource: AgentProvider;
+  /** "GitHub Copilot" — long form, for sentences. */
+  agentLabel: string;
+  /** "Copilot" — short form, for the loader and footer. */
+  agentShortLabel: string;
+  /** Why the panel is empty or thin, when Decipher can explain it (e.g. no saved transcript). */
+  sourceNote?: string;
 }
 
 // ---------------------------------------------------------------------------

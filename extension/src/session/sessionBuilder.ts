@@ -5,6 +5,7 @@ import type {
   ExplainMode,
   ExplainedStep,
   HookEvent,
+  HostKind,
   SessionConcept,
   SessionResource,
   SessionState,
@@ -14,12 +15,11 @@ import type {
 import type { LlmSummarizer } from '../explainer/llmSummarizer';
 import type { TemplateEngine } from '../explainer/templateEngine';
 import type { GlossaryService } from '../glossary/glossaryService';
+import type { TranscriptStore } from '../host/transcriptStore';
 import { ConceptDetector } from '../knowledge/conceptDetector';
 import type { KnowledgeGraph } from '../knowledge/knowledgeGraph';
 import { agentModelFromEvents } from '../loading/agentModel';
-import { parseTranscript } from '../parser/transcriptParser';
 import { firstProgram, splitShellCommand } from '../parser/shellParser';
-import { listSubagentTranscripts, listTranscripts, type DecipherPaths } from '../paths';
 import type { ResearchService } from '../research/researchService';
 import { mergeHookEvents } from './hookMerger';
 
@@ -27,7 +27,7 @@ import { mergeHookEvents } from './hookMerger';
 const MAX_SESSION_RESOURCES = 30;
 
 export interface SessionBuilderDeps {
-  paths: DecipherPaths;
+  store: TranscriptStore;
   workspaceName: string;
   engine: TemplateEngine;
   glossary: GlossaryService;
@@ -45,6 +45,7 @@ interface LiveSummary {
 export interface BuildOptions {
   conversationId: string | null;
   mode: ExplainMode;
+  host: HostKind;
   hooksInstalled: boolean;
   llmAvailable: boolean;
   webSearchConfigured: boolean;
@@ -69,25 +70,22 @@ export class SessionBuilder {
   }
 
   listConversations(): ConversationSummary[] {
-    return listTranscripts(this.deps.paths.transcriptsDir)
+    return this.deps.store
+      .list()
       .slice(0, 25)
-      .map(({ id, file, mtime }) => {
-        const head = readHead(file, 8192);
-        const title = titleFromRawHead(head);
-        return { id, title, lastModified: mtime, stepCount: 0 };
-      });
+      .map(({ id, title, mtime }) => ({ id, title, lastModified: mtime, stepCount: 0 }));
   }
 
-  /** Newest conversation, or one that recently received hook events. */
+  /** Newest conversation that actually holds messages, or one that recently received hook events. */
   pickActiveConversation(): string | null {
-    const transcripts = listTranscripts(this.deps.paths.transcriptsDir);
-    const events = listEventFiles(this.deps.paths.eventsDir);
+    const transcripts = this.deps.store.list().filter((t) => t.hasMessages);
+    const events = listEventFiles(this.deps.store.eventsDir);
     const newest = [...transcripts.map((t) => ({ id: t.id, mtime: t.mtime })), ...events].sort((a, b) => b.mtime - a.mtime)[0];
     return newest?.id ?? null;
   }
 
   build(opts: BuildOptions): SessionState {
-    const { glossary, graph } = this.deps;
+    const { glossary, graph, store } = this.deps;
     const conversationId = opts.conversationId ?? this.pickActiveConversation();
     const base: SessionState = {
       conversationId,
@@ -95,7 +93,7 @@ export class SessionBuilder {
       turns: [],
       steps: [],
       liveHeadline: 'Nothing to explain yet',
-      liveSummary: 'Start a chat with the agent — I’ll explain everything here.',
+      liveSummary: `Start a chat with ${store.label} — I’ll explain everything here.`,
       liveSummaryKind: 'idle',
       glossary: glossary.all(),
       concepts: graph.asRecord(),
@@ -108,12 +106,18 @@ export class SessionBuilder {
       loadingRotateMs: opts.loadingRotateMs,
       mode: opts.mode,
       hooksInstalled: opts.hooksInstalled,
+      hooksSupported: store.hooksSupported,
       llmAvailable: opts.llmAvailable,
       workspaceName: this.deps.workspaceName,
+      host: opts.host,
+      agentSource: store.provider,
+      agentLabel: store.label,
+      agentShortLabel: store.shortLabel,
+      sourceNote: this.sourceNote(conversationId),
     };
     if (!conversationId) return base;
 
-    const { steps, turns, events } = this.loadConversation(conversationId);
+    const { steps, turns, events, agentModel } = this.loadConversation(conversationId);
     const userRequests = turns.map((t) => t.userRequest ?? '').filter(Boolean);
 
     const explained: ExplainedStep[] = steps.map((step) => {
@@ -150,8 +154,22 @@ export class SessionBuilder {
       recommendations: research?.recommendations ?? [],
       researchStatus: research?.status ?? 'idle',
       researchNote: research?.note,
-      agentModel: agentModelFromEvents(events),
+      // Hooks report the model directly; Copilot and Claude record it in the transcript.
+      agentModel: agentModelFromEvents(events) ?? agentModel,
     };
+  }
+
+  /**
+   * Explains a thin panel when we can. Claude Code in particular sometimes writes a session
+   * file with only bookkeeping records, and an unexplained empty timeline looks like our bug.
+   */
+  private sourceNote(conversationId: string | null): string | undefined {
+    const { store } = this.deps;
+    const sources = store.list();
+    if (!sources.length) return `No ${store.label} conversations found for this workspace yet (looked in ${store.location}).`;
+    const active = conversationId ? sources.find((s) => s.id === conversationId) : undefined;
+    if (active && !active.hasMessages) return `${store.label} saved this session without its messages, so there is nothing to explain. Newer sessions should record normally.`;
+    return undefined;
   }
 
   /** Turns in the recent window that have not been through the LLM yet. */
@@ -218,41 +236,24 @@ export class SessionBuilder {
     return `${state.conversationId}:${turn.index}:${this.turnSteps(state, turn).length}`;
   }
 
-  private loadConversation(conversationId: string): { steps: ActivityStep[]; turns: Turn[]; events: HookEvent[] } {
-    const { transcriptsDir, eventsDir } = this.deps.paths;
-    const mainFile = `${transcriptsDir}/${conversationId}/${conversationId}.jsonl`;
-    let steps: ActivityStep[] = [];
-    let turns: Turn[] = [];
+  /**
+   * The store owns everything provider-specific: where the file is, which parser reads it, and
+   * how sub-agent work is stitched in. Hook events are Cursor-only and merged on top.
+   */
+  private loadConversation(conversationId: string): { steps: ActivityStep[]; turns: Turn[]; events: HookEvent[]; agentModel?: string } {
+    const { store } = this.deps;
+    const parsed = store.load(conversationId);
+    let steps: ActivityStep[] = parsed?.steps ?? [];
+    let turns: Turn[] = parsed?.turns ?? [];
 
-    if (fs.existsSync(mainFile)) {
-      const parsed = parseTranscript(conversationId, safeRead(mainFile));
-      steps = parsed.steps;
-      turns = parsed.turns;
-      // Subagent transcripts nest under the Task step that spawned them (matched in order).
-      const taskSteps = steps.filter((s) => s.toolName === 'Task');
-      listSubagentTranscripts(transcriptsDir, conversationId).forEach((sub, i) => {
-        const parent = taskSteps[i];
-        const subParsed = parseTranscript(conversationId, safeRead(sub.file), {
-          subagentId: sub.id,
-          parentStepId: parent?.id,
-          indexOffset: (parent?.index ?? steps.length) * 1000 + 1,
-        });
-        for (const s of subParsed.steps) {
-          s.turnIndex = parent?.turnIndex ?? turns.length - 1;
-          steps.push(s);
-        }
-      });
-      steps.sort((a, b) => a.index - b.index);
-    }
-
-    const events = readEvents(`${eventsDir}/${conversationId}.jsonl`);
+    const events = store.eventsDir ? readEvents(`${store.eventsDir}/${conversationId}.jsonl`) : [];
     if (events.length) {
       if (!turns.length) turns.push({ index: 0, status: 'active', stepIds: [] });
       const merged = mergeHookEvents(conversationId, steps, turns, events);
       steps = merged.steps;
       turns = merged.turns;
     }
-    return { steps, turns, events };
+    return { steps, turns, events, agentModel: parsed?.agentModel };
   }
 
   /**
@@ -433,8 +434,8 @@ function readEvents(file: string): HookEvent[] {
     .filter((e): e is HookEvent => Boolean(e));
 }
 
-function listEventFiles(dir: string): Array<{ id: string; mtime: number }> {
-  if (!fs.existsSync(dir)) return [];
+function listEventFiles(dir: string | undefined): Array<{ id: string; mtime: number }> {
+  if (!dir || !fs.existsSync(dir)) return [];
   return fs
     .readdirSync(dir)
     .filter((f) => f.endsWith('.jsonl'))
@@ -449,23 +450,3 @@ function safeRead(file: string): string {
   }
 }
 
-/** The head is raw JSON text, so newlines/quotes are still escaped. */
-export function titleFromRawHead(head: string): string {
-  const m = head.match(/<user_query>([\s\S]*?)<\/user_query>/);
-  if (!m) return 'Untitled chat';
-  const text = m[1].replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\').trim();
-  const line = text.split('\n').find((l) => l.trim()) ?? '';
-  return line.trim().slice(0, 80) || 'Untitled chat';
-}
-
-function readHead(file: string, bytes: number): string {
-  try {
-    const fd = fs.openSync(file, 'r');
-    const buf = Buffer.alloc(bytes);
-    const n = fs.readSync(fd, buf, 0, bytes, 0);
-    fs.closeSync(fd);
-    return buf.subarray(0, n).toString('utf8');
-  } catch {
-    return '';
-  }
-}

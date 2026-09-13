@@ -212,6 +212,46 @@ const shellWait = tool('AwaitShell', 'await', (ctx) => ({
   vocabulary: ['background-process'],
 }));
 
+const killShell = tool('KillShell', 'killshell', () => ({
+  title: 'Stopping a background command',
+  summary: 'Shut down a command it had left running in the background.',
+  whatHappened: 'Servers and watchers keep running until something stops them; the agent tidied up after itself.',
+  vocabulary: ['background-process'],
+}));
+
+/** Claude Code and Cursor both load "skills" — playbooks the agent reads before a task. */
+const skill = tool('Skill', 'skill', (ctx) => {
+  const name = str(ctx.input.skill, 60) || str(ctx.input.command, 60);
+  const args = str(ctx.input.args, 100);
+  return {
+    title: 'Loading an instruction guide',
+    summary: `Loaded the "${name}" skill${args && args !== name ? ` for "${args}"` : ''} before starting.`,
+    whatHappened: 'Skills are step-by-step playbooks written for agents. Loading one tells the agent how an expert would approach this kind of task.',
+    whyItMatters: 'A skill is why the agent suddenly follows a specific process instead of improvising.',
+    technical: `${name}${args ? ` ${args}` : ''}`,
+    vocabulary: ['skill'],
+  };
+});
+
+const runTests = tool('RunTests', 'runtests', (ctx) => {
+  const files = Array.isArray(ctx.input.paths) ? (ctx.input.paths as string[]) : [];
+  return {
+    title: 'Running the tests',
+    summary: files.length ? `Ran the tests in ${files.map((f) => friendlyFile(f).basename).slice(0, 3).join(', ')}.` : 'Ran the project’s test suite.',
+    whatHappened: 'Tests are small programs that check the real code still behaves correctly. Running them after a change is how the agent catches what it broke.',
+    whyItMatters: 'A passing test run is the strongest evidence that an edit did what it was supposed to.',
+    technical: files.join(', '),
+    vocabulary: ['test'],
+  };
+});
+
+const think = tool('Think', 'think', (ctx) => ({
+  title: 'Thinking it through',
+  summary: `Paused to reason before acting${ctx.input.message ? `: "${firstLine(str(ctx.input.message, 200), 120)}"` : ''}.`,
+  whatHappened: 'Some agents have a scratchpad tool for working through a decision. Nothing in your project changes.',
+  vocabulary: [],
+}));
+
 const lints = tool('ReadLints', 'lints', (ctx) => ({
   title: 'Checking for code problems',
   summary: `Asked the editor for any warnings or errors${Array.isArray(ctx.input.paths) && ctx.input.paths.length ? ` in ${(ctx.input.paths as string[]).map((p) => friendlyFile(p).basename).join(', ')}` : ''}.`,
@@ -319,4 +359,4 @@ const unknown: Template = {
     }),
 };
 
-export const TOOL_TEMPLATES: Template[] = [read, glob, grep, write, strReplace, del, notebook, task, ask, todo, plan, step, shellWait, lints, webSearch, webFetch, dynamicTool, sendToUser, switchMode, connectScm, unknown];
+export const TOOL_TEMPLATES: Template[] = [read, glob, grep, write, strReplace, del, notebook, task, ask, todo, plan, step, shellWait, killShell, skill, runTests, think, lints, webSearch, webFetch, dynamicTool, sendToUser, switchMode, connectScm, unknown];
