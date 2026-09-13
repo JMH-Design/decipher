@@ -3,7 +3,7 @@
   "displayName": "Decipher — Plain-Language Agent Explainer",
   "description": "See what your coding agent did in plain English, learn the concepts behind it, and discover tools that could help you build it better. Works with the Cursor agent, GitHub Copilot, and Claude Code.",
   "version": "0.3.0",
-  "publisher": "haggitjm",
+  "publisher": "JMH-Design",
   "license": "MIT",
   "private": true,
   "icon": "media/icon.png",

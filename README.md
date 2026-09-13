@@ -45,6 +45,8 @@ recommendations/   Curated tool / MCP / kit catalog with match rules
 
 ## Quick start
 
+Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=JMH-Design.decipher) or [Open VSX](https://open-vsx.org/extension/JMH-Design/decipher), or build it yourself:
+
 ```bash
 npm install
 npm run install:cursor   # build, package, install into Cursor
