@@ -93,7 +93,7 @@ export interface Explanation {
   /** Chained shell commands produce one sub-explanation per segment. */
   subSteps?: Explanation[];
   templateId: string;
-  /** 0–1. Below `LLM_FALLBACK_THRESHOLD` the LLM layer is consulted. */
+  /** 0–1. Below `LLM_FALLBACK_THRESHOLD` the template is treated as a weak explanation. */
   confidence: number;
   /** Set when the LLM layer rewrote the summary. */
   llmEnhanced?: boolean;
@@ -217,10 +217,13 @@ export interface ResearchResult {
 // ---------------------------------------------------------------------------
 
 /**
- * The webview blocks on a full-panel loader until every stage is done, so the user
- * never sees a half-built panel.
+ * The webview builds its cards underneath a full-content loader and only reveals them once
+ * every stage is done, so the user never reads a half-built panel.
+ *
+ * `working` means the agent's own turn is still running; `parsing` and `research` mean the turn
+ * has finished but Decipher is still writing its recap or looking for tools.
  */
-export type LoadingPhase = 'boot' | 'parsing' | 'research' | 'ready';
+export type LoadingPhase = 'boot' | 'working' | 'parsing' | 'research' | 'ready';
 
 // ---------------------------------------------------------------------------
 // Composite state sent to the webview
@@ -245,7 +248,9 @@ export interface SessionState {
   conversations: ConversationSummary[];
   turns: Turn[];
   steps: ExplainedStep[];
-  /** "Right now: …" / "This turn: …" */
+  /** One-line outcome for the recap: "Read 18 files, edited 3 files, and ran 2 commands." */
+  liveHeadline: string;
+  /** The explanatory paragraph under the headline: what was asked, what happened, the outcome. */
   liveSummary: string;
   liveSummaryKind: 'now' | 'turn' | 'idle';
   glossary: Record<string, GlossaryTerm>;
@@ -276,7 +281,11 @@ export interface SessionState {
 // Webview <-> extension messages
 // ---------------------------------------------------------------------------
 
-export type ToWebviewMessage = { type: 'state'; state: SessionState } | { type: 'toast'; text: string };
+export type ToWebviewMessage =
+  | { type: 'state'; state: SessionState }
+  | { type: 'toast'; text: string }
+  | { type: 'viewVisible' }
+  | { type: 'viewHidden' };
 
 export type FromWebviewMessage =
   | { type: 'ready' }

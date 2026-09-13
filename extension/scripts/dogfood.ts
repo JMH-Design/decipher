@@ -15,6 +15,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import type { ExplainedStep, SessionState } from '../../shared/activity-schema';
+import { LLM_FALLBACK_THRESHOLD } from '../../shared/activity-schema';
 import { LlmSummarizer, NoopLlmProvider } from '../src/explainer/llmSummarizer';
 import { TemplateEngine } from '../src/explainer/templateEngine';
 import { GlossaryService } from '../src/glossary/glossaryService';
@@ -110,7 +111,7 @@ function print(s: SessionState): void {
     return;
   }
   console.log(`\n═══ ${s.workspaceName} · chat ${s.conversationId.slice(0, 8)} · ${s.steps.length} actions ═══`);
-  console.log(`${s.liveSummary}\n`);
+  console.log(`${s.liveHeadline}\n${s.liveSummary}\n`);
 
   let coverage = 0;
   let conceptEdits = 0;
@@ -120,7 +121,7 @@ function print(s: SessionState): void {
     console.log(`── Turn ${turn.index + 1} [${turn.status}] ${turn.userRequest ? `“${turn.userRequest.split('\n')[0].slice(0, 100)}”` : ''}`);
     for (const st of steps) {
       printStep(st, s);
-      if (st.explanation.confidence >= 0.45) coverage++;
+      if (st.explanation.confidence >= LLM_FALLBACK_THRESHOLD) coverage++;
       if (st.category === 'editing') {
         edits++;
         if (st.conceptIds.length) conceptEdits++;

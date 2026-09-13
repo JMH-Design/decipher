@@ -8,6 +8,7 @@ import { TemplateEngine } from './explainer/templateEngine';
 import { VscodeLmProvider } from './explainer/vscodeLmProvider';
 import { GlossaryService } from './glossary/glossaryService';
 import { KnowledgeGraph } from './knowledge/knowledgeGraph';
+import { resolveLoadingPhase } from './loading/resolveLoadingPhase';
 import { expandHome, resolvePaths, type DecipherPaths } from './paths';
 import { RecommendationCatalog } from './research/catalog';
 import { ResearchService } from './research/researchService';
@@ -164,6 +165,11 @@ class DecipherController implements vscode.Disposable {
     return this.config<ExplainMode>('mode') ?? 'beginner';
   }
 
+  /** Latest session snapshot, for re-publishing when the sidebar becomes visible again. */
+  currentState(): SessionState | undefined {
+    return this.state;
+  }
+
   onState(fn: (s: SessionState) => void): vscode.Disposable {
     this.listeners.add(fn);
     if (this.state) fn(this.state);
@@ -176,9 +182,9 @@ class DecipherController implements vscode.Disposable {
   }
 
   /**
-   * Build synchronously, then decide whether async work is still outstanding. The webview only
-   * sees `loadingPhase: 'ready'` once summaries and recommendations have both landed, so it can
-   * block on a single full-panel loader instead of rendering a half-built view.
+   * Build synchronously, then decide whether the panel is ready to be seen. The webview keeps
+   * its cards hidden behind the loader until `loadingPhase: 'ready'`, so it never reveals a
+   * timeline that is still growing.
    */
   refresh(reason: string): void {
     const generation = ++this.generation;
@@ -193,9 +199,10 @@ class DecipherController implements vscode.Disposable {
       });
       const pendingLlm = this.llmAvailable && this.builder.pendingLlmTurns(state) > 0;
       const pendingResearch = this.research.shouldResearch(state);
-      const phase: LoadingPhase = pendingResearch ? 'research' : pendingLlm ? 'parsing' : 'ready';
+      const phase: LoadingPhase = resolveLoadingPhase(state.turns, { llm: pendingLlm, research: pendingResearch });
       this.publish({ ...state, loadingPhase: phase });
-      if (pendingLlm || pendingResearch) void this.enrich(generation, state, pendingLlm, pendingResearch);
+      const turnActive = state.turns[state.turns.length - 1]?.status === 'active';
+      if (!turnActive && (pendingLlm || pendingResearch)) void this.enrich(generation, state, pendingLlm, pendingResearch);
     } catch (err) {
       this.output.appendLine(`refresh(${reason}) failed: ${(err as Error).stack ?? err}`);
       // Never leave the webview stuck behind the loader.
@@ -394,6 +401,13 @@ class ActivityViewProvider implements vscode.WebviewViewProvider {
       this.controller.onState((state) => post({ type: 'state', state })),
       this.controller.onToast((text) => post({ type: 'toast', text })),
       webview.onDidReceiveMessage((msg: FromWebviewMessage) => this.controller.handleMessage(msg)),
+      view.onDidChangeVisibility(() => {
+        post({ type: view.visible ? 'viewVisible' : 'viewHidden' });
+        if (view.visible) {
+          const state = this.controller.currentState();
+          if (state) post({ type: 'state', state });
+        }
+      }),
     ];
     view.onDidDispose(() => subs.forEach((s) => s.dispose()));
   }

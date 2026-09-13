@@ -2,7 +2,7 @@
   "name": "decipher",
   "displayName": "Decipher — Plain-Language Agent Explainer",
   "description": "See what the Cursor agent did in plain English, learn the concepts behind it, and discover tools that could help you build it better.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "haggitjm",
   "license": "MIT",
   "private": true,
@@ -104,12 +104,12 @@
         "decipher.llm.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Use the editor's language model (when available) to summarize complex multi-step turns. Falls back to templates when unavailable."
+          "description": "Use the editor's language model (when available) to write the recap for each finished turn. Falls back to templates when unavailable."
         },
         "decipher.llm.alwaysExplainInDepth": {
           "type": "boolean",
           "default": false,
-          "description": "Ask the language model to rewrite every turn summary, not just complex ones."
+          "description": "Also recap turns where the agent took no actions and only replied."
         },
         "decipher.cursorProjectsDir": {
           "type": "string",
@@ -159,7 +159,7 @@
     "test": "vitest run",
     "dogfood": "tsx scripts/dogfood.ts",
     "package": "node esbuild.mjs --production && vsce package --no-dependencies",
-    "install:cursor": "npm run package && \"/Applications/Cursor.app/Contents/Resources/app/bin/cursor\" --install-extension decipher-0.2.0.vsix --force"
+    "install:cursor": "npm run package && \"/Applications/Cursor.app/Contents/Resources/app/bin/cursor\" --install-extension decipher-0.2.1.vsix --force"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",

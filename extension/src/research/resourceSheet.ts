@@ -14,7 +14,7 @@ export function resourceSheetMarkdown(state: SessionState): string {
     lines.push('');
   }
 
-  lines.push('## What happened', '', state.liveSummary.replace(/^This turn:\s*/, ''), '');
+  lines.push('## What happened', '', `**${state.liveHeadline}**`, '', state.liveSummary, '');
 
   if (state.sessionConcepts.length) {
     lines.push('## Concepts the agent used', '');

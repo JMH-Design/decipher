@@ -36,6 +36,12 @@ export interface SessionBuilderDeps {
   research?: ResearchService;
 }
 
+interface LiveSummary {
+  headline: string;
+  text: string;
+  kind: SessionState['liveSummaryKind'];
+}
+
 export interface BuildOptions {
   conversationId: string | null;
   mode: ExplainMode;
@@ -88,6 +94,7 @@ export class SessionBuilder {
       conversations: this.listConversations(),
       turns: [],
       steps: [],
+      liveHeadline: 'Nothing to explain yet',
       liveSummary: 'Start a chat with the agent — I’ll explain everything here.',
       liveSummaryKind: 'idle',
       glossary: glossary.all(),
@@ -126,7 +133,7 @@ export class SessionBuilder {
       })
       .filter((c): c is SessionConcept => Boolean(c));
 
-    const { text, kind } = this.liveSummary(conversationId, turns, explained);
+    const { headline, text, kind } = this.liveSummary(conversationId, turns, explained);
     const research = this.deps.research?.latest(conversationId);
 
     return {
@@ -134,6 +141,7 @@ export class SessionBuilder {
       conversationId,
       turns,
       steps: explained,
+      liveHeadline: headline,
       liveSummary: text,
       liveSummaryKind: kind,
       sessionConcepts,
@@ -247,21 +255,25 @@ export class SessionBuilder {
     return { steps, turns, events };
   }
 
-  private liveSummary(conversationId: string, turns: Turn[], steps: ExplainedStep[]): { text: string; kind: SessionState['liveSummaryKind'] } {
+  /**
+   * The recap shown once the loader lifts: a headline of what the turn amounted to, and a
+   * paragraph explaining it. While the turn is still running this describes the current step —
+   * only the overlay sees that, but it keeps the recap from being empty mid-turn.
+   */
+  private liveSummary(conversationId: string, turns: Turn[], steps: ExplainedStep[]): LiveSummary {
     const last = turns[turns.length - 1];
-    if (!last) return { text: 'No agent activity in this chat yet.', kind: 'idle' };
+    if (!last) return { headline: 'No agent activity in this chat yet.', text: 'Ask the agent for something and every step will be explained here.', kind: 'idle' };
     const turnSteps = steps.filter((s) => s.turnIndex === last.index && !s.subagentId);
+
     if (last.status === 'active') {
       const current = [...turnSteps].reverse().find((s) => s.status === 'running') ?? turnSteps[turnSteps.length - 1];
-      if (!current) return { text: 'The agent is thinking about your request…', kind: 'now' };
-      return { text: `Right now: ${lowerFirst(current.explanation.title)} — ${lowerFirst(current.explanation.summary)}`, kind: 'now' };
+      if (!current) return { headline: 'Thinking about your request', text: 'The agent has not taken an action yet.', kind: 'now' };
+      return { headline: current.explanation.title, text: current.explanation.summary, kind: 'now' };
     }
+
+    const headline = turnSteps.length ? composeTurn(turnSteps) : last.finalResponse ? 'Answered without changing anything.' : 'No actions were taken.';
     const llm = this.llmSummaryFor(conversationId, last, turnSteps.length);
-    if (llm) return { text: `This turn: ${llm}`, kind: 'turn' };
-    if (last.status === 'error') return { text: `This turn: something went wrong. ${composeTurn(turnSteps)}`, kind: 'turn' };
-    if (last.status === 'aborted') return { text: `This turn was stopped early. ${composeTurn(turnSteps)}`, kind: 'turn' };
-    if (!turnSteps.length) return { text: last.finalResponse ? `This turn: the agent replied without changing anything.` : 'This turn: no actions were taken.', kind: 'turn' };
-    return { text: `This turn: ${composeTurn(turnSteps)}`, kind: 'turn' };
+    return { headline, text: llm ?? composeTurnRecap(last, turnSteps), kind: 'turn' };
   }
 }
 
@@ -354,6 +366,58 @@ export function composeTurn(steps: ExplainedStep[]): string {
   return `${joined[0].toUpperCase()}${joined.slice(1)}.`;
 }
 
+/**
+ * The recap paragraph when no language model wrote one. The headline already carries the
+ * counts, so this explains the consequences instead: what changed, what broke, how it ended.
+ */
+export function composeTurnRecap(turn: Turn, steps: ExplainedStep[]): string {
+  if (!steps.length) {
+    return turn.finalResponse
+      ? `The agent answered from what it already knew, without touching your project. It said: “${firstSentence(turn.finalResponse)}”`
+      : 'The agent took no actions, so nothing in your project changed.';
+  }
+
+  const parts: string[] = [];
+  if (turn.status === 'error') parts.push('Something went wrong partway through, so the work may be unfinished.');
+  else if (turn.status === 'aborted') parts.push('The turn was stopped early, so some of the steps never ran.');
+
+  const edited = [...new Set(steps.filter((s) => s.category === 'editing' && typeof s.input.path === 'string').map((s) => basename(String(s.input.path))))];
+  if (edited.length) {
+    const shown = edited.slice(0, 4);
+    const extra = edited.length - shown.length;
+    parts.push(`It changed ${joinList(shown)}${extra ? `, and ${extra} more ${extra === 1 ? 'file' : 'files'}` : ''}.`);
+  } else if (!steps.some((s) => MUTATING_CATEGORIES.includes(s.category))) {
+    parts.push('Nothing in your project was changed — this turn only looked around.');
+  }
+
+  const failed = steps.filter((s) => s.status === 'error').length;
+  if (failed && turn.status !== 'error') parts.push(`${failed === 1 ? 'One step' : `${failed} steps`} failed along the way, and the agent carried on.`);
+
+  if (turn.finalResponse) parts.push(`It finished by telling you: “${firstSentence(turn.finalResponse)}”`);
+  else if (!parts.length) parts.push('The agent finished without a closing note.');
+
+  return parts.join(' ');
+}
+
+/** Categories that can leave something behind on disk, in git, or on another machine. */
+const MUTATING_CATEGORIES: StepCategory[] = ['editing', 'running', 'saving'];
+
+function joinList(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? '';
+  return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
+}
+
+function firstSentence(text: string, max = 180): string {
+  const flat = text.replace(/\s+/g, ' ').trim();
+  const end = flat.search(/[.!?](\s|$)/);
+  const sentence = end > 0 ? flat.slice(0, end + 1) : flat;
+  return sentence.length > max ? `${sentence.slice(0, max - 1).trimEnd()}…` : sentence;
+}
+
+function basename(p: string): string {
+  return p.split(/[\\/]/).filter(Boolean).pop() ?? p;
+}
+
 function readEvents(file: string): HookEvent[] {
   if (!fs.existsSync(file)) return [];
   return safeRead(file)
@@ -405,5 +469,3 @@ function readHead(file: string, bytes: number): string {
     return '';
   }
 }
-
-const lowerFirst = (s: string) => (s ? s[0].toLowerCase() + s.slice(1) : s);

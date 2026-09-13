@@ -39,7 +39,7 @@ function Goal({ state }: { state: SessionState }) {
     <section className="learn-card">
       <h3>What you asked for</h3>
       <p className="goal-quote">“{state.goal.split('\n').find((l) => l.trim())?.slice(0, 240)}”</p>
-      <p className="muted small">{state.liveSummary.replace(/^This turn:\s*/, '')}</p>
+      <p className="muted small">{state.liveSummary}</p>
     </section>
   );
 }

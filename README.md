@@ -12,8 +12,9 @@ Built for non-technical users who want to understand *what happened*, *what to s
 - **Learn more** on every card — what happened, why it matters, glossary, and concept tags
 - **Learn & improve tab** — the concepts in this chat, merged learning resources (official docs, videos, courses, workshops), and tool suggestions tied to what you asked for
 - **Improvement research** — a curated catalog plus live web search and the editor's language model, refreshed after each agent turn
-- **Hybrid explanations** — ~60 rule-based templates for common actions; optional LLM summaries for complex turns
-- **Branded loading state** — a looping SVG and a rotating phrase that riffs on the model you are chatting with
+- **Turn recap** — a distinct box under the timeline with a headline of what the turn amounted to and a paragraph explaining it
+- **Hybrid explanations** — ~60 rule-based templates for common actions; an LLM-written recap for each finished turn when a model is available
+- **Branded loading state** — the cards build behind a looping SVG and a rotating phrase that riffs on the model you are chatting with, then dissolve into view once the turn is done
 - **Cursor hooks plugin** — captures command output, diffs, durations, and the active model that transcripts alone don't include (local only, redacted)
 
 ## Repository layout
@@ -38,13 +39,13 @@ Reload Cursor (`Developer: Reload Window`), click the **Decipher** icon in the a
 
 To enable live web search for tool suggestions, run **Decipher: Set Context.dev API key** from the command palette (or press *Set up web search* in the Learn & improve tab). Without a key, suggestions come from the built-in catalog and the language model.
 
-See [`extension/README.md`](extension/README.md) for settings, development commands, and privacy details.
+See [`extension/README.md`](extension/README.md) for settings, development commands, and privacy details. Product requirements: [`docs/PRD.md`](docs/PRD.md).
 
 ## Development
 
 ```bash
 npm run watch              # rebuild on change
-npm test                   # vitest (64 tests)
+npm test                   # vitest (82 tests)
 npm run typecheck
 npm run dogfood -- --workspace /path/to/project [--id <conversationId>]
 ```
@@ -55,7 +56,7 @@ npm run dogfood -- --workspace /path/to/project [--id <conversationId>]
 2. **Hooks** — optional plugin writes to `~/.cursor/projects/<workspace>/decipher/events/`
 3. **Pipeline** — parse → merge hooks → template engine → glossary → concept detection → learning resources → research → webview
 
-The timeline, turn summaries, and tool suggestions are published together, so the panel shows a single loader rather than filling in piecemeal.
+The cards are built as the agent works, but stay behind a single loader until the turn is over and the recap and tool suggestions have landed — so the panel is revealed finished rather than filling in piecemeal.
 
 Nothing leaves your machine unless you turn on LLM summaries (the editor's built-in language model, redacted input) or live web search (a short, path-stripped query sent to Context.dev).
 

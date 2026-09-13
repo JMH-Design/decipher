@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ExplainMode, SessionState } from '../../../shared/activity-schema';
 import { ConceptDetail } from './components/ConceptDetail';
 import { LearnImprovePanel } from './components/LearnImprovePanel';
-import { LoadingState } from './components/LoadingState';
-import { SummaryStrip } from './components/SummaryStrip';
+import { LoadingOverlay, LoadingState, useLoadingOverlay } from './components/LoadingState';
 import { Timeline } from './components/Timeline';
+import { TurnRecap } from './components/TurnRecap';
 import { getUiState, onMessage, post, setUiState } from './vscodeApi';
 
 type Tab = 'activity' | 'learn';
@@ -18,10 +18,13 @@ export function App() {
   const [state, setState] = useState<SessionState | null>(null);
   const [ui, setUi] = useState<UiState>(() => getUiState<UiState>() ?? { tab: 'activity' });
   const [toast, setToast] = useState<string | null>(null);
+  const [viewVisible, setViewVisible] = useState(true);
 
   useEffect(() => {
     const off = onMessage((msg) => {
       if (msg.type === 'state') setState(msg.state);
+      if (msg.type === 'viewVisible') setViewVisible(true);
+      if (msg.type === 'viewHidden') setViewVisible(false);
       if (msg.type === 'toast') {
         setToast(msg.text);
         setTimeout(() => setToast(null), 3500);
@@ -34,21 +37,13 @@ export function App() {
   useEffect(() => setUiState(ui), [ui]);
 
   const conversationTitle = useMemo(() => state?.conversations.find((c) => c.id === state.conversationId)?.title, [state]);
+  const overlay = useLoadingOverlay(state?.loadingPhase ?? 'boot', viewVisible);
 
   // No state yet: the host has not finished its first build.
   if (!state) {
     return (
       <div className="app">
         <LoadingState phase="boot" />
-      </div>
-    );
-  }
-
-  // Timeline, turn summaries, and recommendations all land together, so one loader covers them.
-  if (state.loadingPhase !== 'ready') {
-    return (
-      <div className={`app mode-${state.mode}`}>
-        <LoadingState phase={state.loadingPhase} model={state.agentModel} rotateMs={state.loadingRotateMs} />
       </div>
     );
   }
@@ -88,17 +83,23 @@ export function App() {
         </div>
       )}
 
-      <SummaryStrip state={state} />
+      {/* The cards build underneath the overlay, so the panel is complete the moment it shows. */}
+      <div className="stage">
+        <div className="stage-body" aria-hidden={overlay.visible} aria-busy={overlay.visible}>
+          <main className="content">
+            {openConcept ? (
+              <ConceptDetail concept={openConcept} state={state} onBack={() => setUi({ tab: ui.tab })} />
+            ) : ui.tab === 'activity' ? (
+              <Timeline state={state} onOpenConcept={(id) => setUi({ tab: 'activity', openConcept: id })} />
+            ) : (
+              <LearnImprovePanel state={state} onOpenConcept={(id) => setUi({ tab: 'learn', openConcept: id })} />
+            )}
+          </main>
+          {!openConcept && <TurnRecap state={state} />}
+        </div>
 
-      <main className="content">
-        {openConcept ? (
-          <ConceptDetail concept={openConcept} state={state} onBack={() => setUi({ tab: ui.tab })} />
-        ) : ui.tab === 'activity' ? (
-          <Timeline state={state} onOpenConcept={(id) => setUi({ tab: 'activity', openConcept: id })} />
-        ) : (
-          <LearnImprovePanel state={state} onOpenConcept={(id) => setUi({ tab: 'learn', openConcept: id })} />
-        )}
-      </main>
+        {overlay.visible && <LoadingOverlay phase={state.loadingPhase} model={state.agentModel} rotateMs={state.loadingRotateMs} fading={overlay.fading} />}
+      </div>
 
       {toast && <div className="toast">{toast}</div>}
       <footer className="footer">

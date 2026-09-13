@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import type { HookEvent } from '../../shared/activity-schema';
+import type { HookEvent, Turn, TurnStatus } from '../../shared/activity-schema';
 import { agentModelFromEvents } from '../src/loading/agentModel';
 import { GENERIC_NOUNS, VERBS, loadingPhrase, nounsForModel, renderPhrase } from '../src/loading/loadingPhrases';
+import { initialOverlayVisibility, nextOverlayVisibility } from '../src/loading/overlayVisibility';
+import { resolveLoadingPhase } from '../src/loading/resolveLoadingPhase';
 
 const event = (over: Partial<HookEvent>): HookEvent => ({ ts: '2026-09-13T00:00:00Z', hook: 'sessionStart', conversationId: 'c', ...over });
+const turns = (...statuses: TurnStatus[]): Turn[] => statuses.map((status, index) => ({ index, status, stepIds: [] }));
+const nothingPending = { llm: false, research: false };
 
 describe('loading phrases', () => {
   it('reads as "Verb the noun" and stays grammatical for possessive nouns', () => {
@@ -36,6 +40,46 @@ describe('loading phrases', () => {
 
   it('never produces a double article', () => {
     for (const noun of GENERIC_NOUNS) expect(renderPhrase('Parsing', noun)).not.toMatch(/the the/);
+  });
+});
+
+describe('loading phase', () => {
+  it('holds the loader for the whole of the agent turn, whatever else is pending', () => {
+    expect(resolveLoadingPhase(turns('success', 'active'), nothingPending)).toBe('working');
+    expect(resolveLoadingPhase(turns('active'), { llm: true, research: true })).toBe('working');
+  });
+
+  it('keeps holding it after the turn while the recap and suggestions are written', () => {
+    expect(resolveLoadingPhase(turns('success'), { llm: false, research: true })).toBe('research');
+    expect(resolveLoadingPhase(turns('success'), { llm: true, research: false })).toBe('parsing');
+  });
+
+  it('is ready once nothing is outstanding, including with no turns at all', () => {
+    expect(resolveLoadingPhase(turns('success'), nothingPending)).toBe('ready');
+    expect(resolveLoadingPhase(turns('error'), nothingPending)).toBe('ready');
+    expect(resolveLoadingPhase([], nothingPending)).toBe('ready');
+  });
+});
+
+describe('loading overlay', () => {
+  it('starts hidden unless the panel is waiting on the agent or enrich', () => {
+    expect(initialOverlayVisibility('ready')).toBe('hidden');
+    expect(initialOverlayVisibility('boot')).toBe('hidden');
+    expect(initialOverlayVisibility('working')).toBe('visible');
+    expect(initialOverlayVisibility('parsing')).toBe('visible');
+    expect(initialOverlayVisibility('research')).toBe('visible');
+  });
+
+  it('dissolves once, then stays gone', () => {
+    expect(nextOverlayVisibility('visible', 'ready')).toBe('fading');
+    expect(nextOverlayVisibility('fading', 'ready')).toBe('fading');
+    expect(nextOverlayVisibility('hidden', 'ready')).toBe('hidden');
+  });
+
+  it('comes back for a new turn, cancelling a half-played fade', () => {
+    expect(nextOverlayVisibility('fading', 'working')).toBe('visible');
+    expect(nextOverlayVisibility('hidden', 'working')).toBe('visible');
+    expect(nextOverlayVisibility('hidden', 'research')).toBe('visible');
   });
 });
 

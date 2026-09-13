@@ -1,5 +1,4 @@
 import type { ExplainedStep, Turn } from '../../../shared/activity-schema';
-import { LLM_FALLBACK_THRESHOLD } from '../../../shared/activity-schema';
 
 /** Minimal provider abstraction so the summarizer can run without `vscode` (tests, CLI). */
 export interface LlmProvider {
@@ -22,10 +21,15 @@ export interface TurnSummaryInput {
 const SYSTEM_SUMMARY = `You explain what an AI coding agent did to a non-technical person.
 Rules:
 - Plain English. No jargon unless you define it in the same sentence.
-- One or two sentences, max 45 words total. Past tense. Start with a verb.
+- Three or four sentences, max 90 words total. Past tense.
+- Cover what the person asked for, what the agent actually did, and where it ended up.
 - Describe outcomes ("searched for leftover references and found none"), not tools ("ran rg").
+- Do not open with a count of files or commands; the panel already shows those above you.
 - Never invent results you were not given. If an outcome is unknown, describe the action only.
 - Do not mention file paths longer than a file name. Do not use markdown.`;
+
+/** ~90 words of plain English, with headroom for punctuation. */
+export const MAX_RECAP_CHARS = 900;
 
 /**
  * Layer 2 of the hybrid explainer. Templates run first and always; the LLM only rewrites
@@ -56,13 +60,14 @@ export class LlmSummarizer {
     return this.availability;
   }
 
-  /** Plan trigger rules: 3+ distinct tool types in a turn, or a low-confidence template, or user opt-in. */
+  /**
+   * The recap is the panel's headline feature, so every finished turn that did something gets
+   * one. Mid-turn the panel shows the current step instead, and turns with no steps are only
+   * worth a model call when the user has asked for every turn to be explained in depth.
+   */
   shouldSummarize(input: TurnSummaryInput): boolean {
-    if (!this.options.enabled || input.steps.length === 0) return false;
-    if (this.options.alwaysExplainInDepth) return true;
-    const distinctTools = new Set(input.steps.map((s) => s.toolName)).size;
-    if (distinctTools >= 3) return true;
-    return input.steps.some((s) => s.explanation.confidence < LLM_FALLBACK_THRESHOLD);
+    if (!this.options.enabled || input.turnStatus === 'active') return false;
+    return input.steps.length > 0 || this.options.alwaysExplainInDepth;
   }
 
   /** Cache key: the turn is stable once its step list stops growing. */
@@ -88,7 +93,8 @@ export class LlmSummarizer {
     };
     const result = await this.safeComplete(SYSTEM_SUMMARY, JSON.stringify(payload), signal);
     const cleaned = result?.replace(/\s+/g, ' ').trim();
-    const final = cleaned && cleaned.length > 10 && cleaned.length < 400 ? cleaned : undefined;
+    // Room for the four sentences we ask for; anything longer means the model ignored the brief.
+    const final = cleaned && cleaned.length > 10 && cleaned.length <= MAX_RECAP_CHARS ? cleaned : undefined;
     this.cache.set(key, final);
     return final;
   }

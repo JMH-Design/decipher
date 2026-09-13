@@ -157,40 +157,64 @@ h4 {
   border-bottom: 1px solid var(--border);
 }
 
-/* ---------------------------------------------------------------- summary strip */
+/* ---------------------------------------------------------------- turn recap */
 
-.summary-strip {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
+/*
+ * Deliberately not a step card: a tinted surface, a top rule in the accent colour, and a
+ * headline a size up, so the eye lands here first when the loader dissolves.
+ */
+.turn-recap {
+  flex: none;
+  padding: 10px 12px 12px;
+  border-top: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--card));
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.16);
+}
+
+.turn-recap.kind-now {
+  border-top-color: var(--c-running);
+}
+
+.turn-recap.kind-idle {
+  border-top-color: var(--border);
   background: var(--card);
+}
+
+.turn-recap.error {
+  border-top-color: var(--error);
+}
+
+.recap-eyebrow {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px 8px;
-  align-items: baseline;
+  align-items: center;
+  gap: 5px;
+  margin: 0 0 3px;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-muted);
 }
 
-.summary-strip.kind-now {
-  border-left: 3px solid var(--c-running);
+.turn-recap.error .recap-eyebrow {
+  color: var(--error);
 }
 
-.summary-strip.kind-turn {
-  border-left: 3px solid var(--accent);
+.recap-headline {
+  font-size: 14px;
+  line-height: 1.35;
+  margin: 0 0 5px;
 }
 
-.summary-strip.error {
-  border-left-color: var(--error);
+.recap-body {
+  margin: 0;
+  color: var(--fg-muted);
 }
 
-.summary-text {
-  flex: 1 1 100%;
-}
-
-.summary-text strong {
-  margin-right: 4px;
-}
-
-.summary-request {
-  flex: 1 1 100%;
+.recap-request {
+  margin: 6px 0 0;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
   font-size: 11.5px;
   color: var(--fg-muted);
   white-space: nowrap;
@@ -200,8 +224,25 @@ h4 {
 
 /* ---------------------------------------------------------------- content */
 
+/* Positioning context for the loader, so it covers the cards but not the tabs. */
+.stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.stage-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .content {
   flex: 1;
+  /* Lets the timeline scroll instead of pushing the recap off the bottom. */
+  min-height: 0;
   overflow-y: auto;
   padding: 8px 10px 16px;
 }
@@ -771,6 +812,25 @@ h4 {
 
 /* ---------------------------------------------------------------- loading state */
 
+/* Opaque so the cards being built underneath never show through. */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  opacity: 1;
+  transition: opacity 300ms ease-out;
+}
+
+/* Kept mounted for the length of the dissolve; clicks go to the panel beneath immediately. */
+.loading-overlay.fading {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .loading-state {
   flex: 1;
   display: flex;
@@ -861,6 +921,10 @@ h4 {
   .decipher-spinner .ds-core,
   .loading-phrase {
     animation: none;
+  }
+  /* No dissolve: the overlay is simply gone once the panel is ready. */
+  .loading-overlay {
+    transition: none;
   }
   .decipher-spinner .ds-core {
     opacity: 1;
