@@ -45,7 +45,7 @@ recommendations/   Curated tool / MCP / kit catalog with match rules
 
 ## Quick start
 
-Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=JMH-Design.lumen) or [Open VSX](https://open-vsx.org/extension/JMH-Design/lumen), or build it yourself:
+Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=JMH-Design.lumen-explainer) or [Open VSX](https://open-vsx.org/extension/JMH-Design/lumen-explainer), or build it yourself:
 
 ```bash
 npm install

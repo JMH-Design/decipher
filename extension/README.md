@@ -33,7 +33,7 @@ Hooks are a Cursor plugin, so command output, edit diffs, and exit codes are Cur
 
 ## Install
 
-From the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=JMH-Design.lumen) or [Open VSX](https://open-vsx.org/extension/JMH-Design/lumen), or from source:
+From the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=JMH-Design.lumen-explainer) or [Open VSX](https://open-vsx.org/extension/JMH-Design/lumen-explainer), or from source:
 
 ```bash
 npm install

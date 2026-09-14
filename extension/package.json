@@ -1,5 +1,5 @@
 {
-  "name": "lumen",
+  "name": "lumen-explainer",
   "displayName": "Lumen — Plain-Language Agent Explainer",
   "description": "See what your coding agent did in plain English, learn the concepts behind it, and discover tools that could help you build it better. Works with the Cursor agent, GitHub Copilot, and Claude Code.",
   "version": "0.3.1",
@@ -208,10 +208,10 @@
     "dogfood": "tsx scripts/dogfood.ts",
     "icon": "node scripts/buildIcon.mjs",
     "package": "node esbuild.mjs --production && vsce package --no-dependencies",
-    "install:cursor": "npm run package && \"/Applications/Cursor.app/Contents/Resources/app/bin/cursor\" --install-extension \"lumen-$npm_package_version.vsix\" --force",
-    "install:vscode": "npm run package && \"/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code\" --install-extension \"lumen-$npm_package_version.vsix\" --force",
-    "publish:marketplace": "npm run package && vsce publish --no-dependencies --packagePath \"lumen-$npm_package_version.vsix\"",
-    "publish:openvsx": "npm run package && ovsx publish \"lumen-$npm_package_version.vsix\""
+    "install:cursor": "npm run package && \"/Applications/Cursor.app/Contents/Resources/app/bin/cursor\" --install-extension \"$npm_package_name-$npm_package_version.vsix\" --force",
+    "install:vscode": "npm run package && \"/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code\" --install-extension \"$npm_package_name-$npm_package_version.vsix\" --force",
+    "publish:marketplace": "npm run package && vsce publish --no-dependencies --packagePath \"$npm_package_name-$npm_package_version.vsix\"",
+    "publish:openvsx": "npm run package && ovsx publish \"$npm_package_name-$npm_package_version.vsix\""
   },
   "devDependencies": {
     "@types/node": "^20.14.0",

@@ -16,7 +16,7 @@ It functions as both **education** and **improvement**:
 - **Education** — detects concepts the agent used (GSAP, React, git, etc.) and surfaces learning resources: official docs, videos, courses, workshops, and local skills.
 - **Improvement** — reviews what the user asked for and researches tools, MCP servers, kits, and services that could help them achieve the same goal with more quality or efficiency.
 
-**v0.3.1 changes from v0.3.0:** Product renamed from Decipher to **Lumen** (`JMH-Design.lumen` on the Marketplace). Settings, commands, and on-disk cache paths use the `lumen` prefix; pre-rename `decipher.*` settings and `decipher/events/` hook data are still read.
+**v0.3.1 changes from v0.3.0:** Product renamed from Decipher to **Lumen** (`JMH-Design.lumen-explainer` on the Marketplace; display name **Lumen — Plain-Language Agent Explainer**). Settings, commands, and on-disk cache paths use the `lumen` prefix; pre-rename `decipher.*` settings and `decipher/events/` hook data are still read.
 
 **v0.3 changes from v0.2:** Lumen is now **multi-host**. Transcript discovery and parsing sit behind per-agent adapters, so the same build explains the Cursor agent, GitHub Copilot Chat in agent mode, and Claude Code. Everything downstream of the adapters — templates, glossary, concepts, research, recap, overlay — is unchanged and host-agnostic. The extension publishes to the VS Code Marketplace and Open VSX.
 
