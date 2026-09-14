@@ -1,13 +1,13 @@
-# Decipher Hooks (Cursor plugin)
+# Lumen Hooks (Cursor plugin)
 
-Companion plugin for the Decipher sidebar extension. Cursor's agent transcripts record *which* tools ran but not what they returned; these hooks capture the missing half (shell output, edit diffs, failures, subagent summaries) so the sidebar can say "the search found 0 matches" instead of just "searched".
+Companion plugin for the Lumen sidebar extension. Cursor's agent transcripts record *which* tools ran but not what they returned; these hooks capture the missing half (shell output, edit diffs, failures, subagent summaries) so the sidebar can say "the search found 0 matches" instead of just "searched".
 
 ## What it writes
 
 One JSON line per event, redacted and truncated, to:
 
 ```
-~/.cursor/projects/<workspace-slug>/decipher/events/<conversation_id>.jsonl
+~/.cursor/projects/<workspace-slug>/lumen/events/<conversation_id>.jsonl
 ```
 
 Nothing leaves your machine. Values that look like tokens, passwords, or private keys are replaced with `[redacted]`; edits to `.env`, `*.pem`, `*.key`, and similar files are hidden entirely.
@@ -16,11 +16,11 @@ Nothing leaves your machine. Values that look like tokens, passwords, or private
 
 ```bash
 mkdir -p ~/.cursor/plugins/local
-cp -R plugin ~/.cursor/plugins/local/decipher-hooks
-chmod +x ~/.cursor/plugins/local/decipher-hooks/hooks/capture-event.mjs
+cp -R plugin ~/.cursor/plugins/local/lumen-hooks
+chmod +x ~/.cursor/plugins/local/lumen-hooks/hooks/capture-event.mjs
 ```
 
-Then run **Developer: Reload Window** in Cursor. The Decipher extension also offers a one-click **Install Cursor hooks** command that does the same thing.
+Then run **Developer: Reload Window** in Cursor. The Lumen extension also offers a one-click **Install Cursor hooks** command that does the same thing.
 
 ## Events captured
 

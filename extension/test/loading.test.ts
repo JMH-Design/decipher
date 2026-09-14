@@ -12,8 +12,8 @@ const nothingPending = { llm: false, research: false };
 
 describe('loading phrases', () => {
   it('reads as "Verb the noun" and stays grammatical for possessive nouns', () => {
-    expect(renderPhrase('Deciphering', { text: 'black box', article: true })).toBe('Deciphering the black box…');
-    expect(renderPhrase('Deciphering', { text: "Claude's inner monologue", article: false })).toBe("Deciphering Claude's inner monologue…");
+    expect(renderPhrase('Illuminating', { text: 'black box', article: true })).toBe('Illuminating the black box…');
+    expect(renderPhrase('Illuminating', { text: "Claude's inner monologue", article: false })).toBe("Illuminating Claude's inner monologue…");
   });
 
   it('always builds a phrase from the pools, whatever the random source', () => {

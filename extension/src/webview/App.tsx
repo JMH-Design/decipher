@@ -77,7 +77,7 @@ export function App() {
       {/* Hooks only exist in Cursor; elsewhere the absence is expected, not a setup step. */}
       {state.hooksSupported && !state.hooksInstalled && (
         <div className="banner">
-          <span>Install Decipher hooks to see results (what a search found, whether a command succeeded).</span>
+          <span>Install Lumen hooks to see results (what a search found, whether a command succeeded).</span>
           <button className="link" onClick={() => post({ type: 'installHooks' })}>
             Install
           </button>

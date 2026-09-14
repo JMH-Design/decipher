@@ -1,14 +1,14 @@
 {
-  "name": "decipher-hooks",
-  "displayName": "Decipher Hooks",
-  "description": "Captures agent tool activity (commands, outputs, edits) so the Decipher sidebar can explain it in plain language. All data stays on your machine.",
+  "name": "lumen-hooks",
+  "displayName": "Lumen Hooks",
+  "description": "Captures agent tool activity (commands, outputs, edits) so the Lumen sidebar can explain it in plain language. All data stays on your machine.",
   "version": "0.1.0",
   "author": {
     "name": "haggitjm"
   },
   "license": "MIT",
   "keywords": [
-    "decipher",
+    "lumen",
     "explainer",
     "learning",
     "hooks"

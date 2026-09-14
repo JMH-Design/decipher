@@ -1,5 +1,5 @@
 {
-  "$comment": "Curated tools, MCP servers, kits, and services Decipher suggests based on what you asked for and what the agent used. Matched by concept id, request keyword, package, or concept category. `whyForYou` is written to complete the sentence 'Worth a look because …'.",
+  "$comment": "Curated tools, MCP servers, kits, and services Lumen suggests based on what you asked for and what the agent used. Matched by concept id, request keyword, package, or concept category. `whyForYou` is written to complete the sentence 'Worth a look because …'.",
   "entries": [
     {
       "id": "rive",

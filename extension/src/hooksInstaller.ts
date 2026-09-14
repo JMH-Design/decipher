@@ -2,17 +2,27 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
-const PLUGIN_NAME = 'decipher-hooks';
+export const PLUGIN_NAME = 'lumen-hooks';
+const LEGACY_PLUGIN_NAME = 'decipher-hooks';
 
 export function localPluginDir(): string {
   return path.join(os.homedir(), '.cursor', 'plugins', 'local', PLUGIN_NAME);
 }
 
-/** True when the Decipher hooks plugin is installed locally or hook events have ever been written. */
-export function hooksInstalled(eventsDir: string): boolean {
+export function legacyPluginDir(): string {
+  return path.join(os.homedir(), '.cursor', 'plugins', 'local', LEGACY_PLUGIN_NAME);
+}
+
+/** True when the Lumen hooks plugin is installed locally or hook events have ever been written. */
+export function hooksInstalled(eventsDir: string, legacyEventsDir?: string): boolean {
   if (fs.existsSync(path.join(localPluginDir(), '.cursor-plugin', 'plugin.json'))) return true;
+  if (fs.existsSync(path.join(legacyPluginDir(), '.cursor-plugin', 'plugin.json'))) return true;
+  return dirHasEvents(eventsDir) || (legacyEventsDir ? dirHasEvents(legacyEventsDir) : false);
+}
+
+function dirHasEvents(dir: string): boolean {
   try {
-    return fs.existsSync(eventsDir) && fs.readdirSync(eventsDir).some((f) => f.endsWith('.jsonl'));
+    return fs.existsSync(dir) && fs.readdirSync(dir).some((f) => f.endsWith('.jsonl'));
   } catch {
     return false;
   }
@@ -20,7 +30,7 @@ export function hooksInstalled(eventsDir: string): boolean {
 
 /**
  * Copy the bundled plugin (extension/dist/plugin, mirrored from /plugin at build time) into
- * `~/.cursor/plugins/local/decipher-hooks`. Cursor loads local plugins after a window reload.
+ * `~/.cursor/plugins/local/lumen-hooks`. Cursor loads local plugins after a window reload.
  */
 export function installHooks(bundledPluginDir: string): { target: string; installed: boolean; reason?: string } {
   const target = localPluginDir();

@@ -46,7 +46,7 @@ const webviewConfig = {
 if (watch) {
   const [a, b] = await Promise.all([esbuild.context(extensionConfig), esbuild.context(webviewConfig)]);
   await Promise.all([a.watch(), b.watch()]);
-  console.log('[decipher] watching…');
+  console.log('[lumen] watching…');
 } else {
   await Promise.all([esbuild.build(extensionConfig), esbuild.build(webviewConfig)]);
 }

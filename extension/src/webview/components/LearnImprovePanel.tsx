@@ -126,7 +126,7 @@ function Improve({ state }: { state: SessionState }) {
       <div className="learn-actions">
         <button onClick={() => post({ type: 'researchNow' })}>Refresh suggestions</button>
         {!webSearchConfigured && (
-          <button onClick={() => post({ type: 'configureWebSearch' })} title="Adds a Context.dev API key so Decipher can search the live web">
+          <button onClick={() => post({ type: 'configureWebSearch' })} title="Adds a Context.dev API key so Lumen can search the live web">
             Set up web search
           </button>
         )}

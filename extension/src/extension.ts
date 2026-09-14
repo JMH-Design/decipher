@@ -11,6 +11,8 @@ import { detectHost, HOST_LABEL } from './host/detectHost';
 import { resolveStore, type StoreContext, type TranscriptStore } from './host/transcriptStore';
 import { KnowledgeGraph } from './knowledge/knowledgeGraph';
 import { resolveLoadingPhase } from './loading/resolveLoadingPhase';
+import { LEGACY_SEARCH_KEY_SECRET, lumenConfig, lumenConfigUpdate, SEARCH_KEY_SECRET } from './config';
+import { hooksInstalled as pluginHooksInstalled, installHooks as installHooksPlugin, localPluginDir } from './hooksInstaller';
 import { expandHome } from './paths';
 import { RecommendationCatalog } from './research/catalog';
 import { ResearchService } from './research/researchService';
@@ -19,37 +21,34 @@ import { ContextDevSearchClient } from './research/webSearchClient';
 import { SessionBuilder } from './session/sessionBuilder';
 import { ActivityWatcher } from './session/watcher';
 
-const VIEW_ID = 'decipher.activityView';
-const LOCAL_PLUGIN_DIR = path.join(os.homedir(), '.cursor', 'plugins', 'local', 'decipher-hooks');
+const VIEW_ID = 'lumen.activityView';
 const CURSOR_HOOKS_JSON = path.join(os.homedir(), '.cursor', 'hooks.json');
-/** Secret storage key for the Context.dev token used by live web search. */
-const SEARCH_KEY_SECRET = 'decipher.contextDevApiKey';
 
 export function activate(context: vscode.ExtensionContext): void {
-  const output = vscode.window.createOutputChannel('Decipher');
+  const output = vscode.window.createOutputChannel('Lumen');
   context.subscriptions.push(output);
 
   const workspace = vscode.workspace.workspaceFolders?.[0];
   if (!workspace) {
-    output.appendLine('No workspace folder open; Decipher is idle.');
+    output.appendLine('No workspace folder open; Lumen is idle.');
     return;
   }
 
-  const controller = new DecipherController(context, workspace.uri.fsPath, output);
+  const controller = new LumenController(context, workspace.uri.fsPath, output);
   context.subscriptions.push(controller);
 
   const provider = new ActivityViewProvider(context.extensionUri, controller);
   context.subscriptions.push(vscode.window.registerWebviewViewProvider(VIEW_ID, provider, { webviewOptions: { retainContextWhenHidden: true } }));
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('decipher.open', () => vscode.commands.executeCommand(`${VIEW_ID}.focus`)),
-    vscode.commands.registerCommand('decipher.refresh', () => controller.refresh('manual')),
-    vscode.commands.registerCommand('decipher.installHooks', () => controller.installHooks()),
-    vscode.commands.registerCommand('decipher.researchNow', () => controller.researchNow()),
-    vscode.commands.registerCommand('decipher.setSearchApiKey', () => controller.setSearchApiKey()),
-    vscode.commands.registerCommand('decipher.exportResourceSheet', () => controller.exportResourceSheet()),
+    vscode.commands.registerCommand('lumen.open', () => vscode.commands.executeCommand(`${VIEW_ID}.focus`)),
+    vscode.commands.registerCommand('lumen.refresh', () => controller.refresh('manual')),
+    vscode.commands.registerCommand('lumen.installHooks', () => controller.installHooks()),
+    vscode.commands.registerCommand('lumen.researchNow', () => controller.researchNow()),
+    vscode.commands.registerCommand('lumen.setSearchApiKey', () => controller.setSearchApiKey()),
+    vscode.commands.registerCommand('lumen.exportResourceSheet', () => controller.exportResourceSheet()),
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration('decipher')) controller.reloadConfig();
+      if (e.affectsConfiguration('lumen') || e.affectsConfiguration('decipher')) controller.reloadConfig();
     }),
   );
 
@@ -62,7 +61,7 @@ export function deactivate(): void {
 
 // ---------------------------------------------------------------------------
 
-class DecipherController implements vscode.Disposable {
+class LumenController implements vscode.Disposable {
   private readonly host: HostKind;
   private store: TranscriptStore;
   private readonly glossary = new GlossaryService();
@@ -93,14 +92,16 @@ class DecipherController implements vscode.Disposable {
     this.store = resolveStore(this.storeContext());
     this.engine = new TemplateEngine({ glossary: this.glossary, workspaceRoot });
     this.llm = new LlmSummarizer(this.lmProvider, this.llmOptions());
-    this.search = new ContextDevSearchClient(async () => this.context.secrets.get(SEARCH_KEY_SECRET));
+    this.search = new ContextDevSearchClient(
+      async () => (await this.context.secrets.get(SEARCH_KEY_SECRET)) ?? (await this.context.secrets.get(LEGACY_SEARCH_KEY_SECRET)),
+    );
     this.research = this.makeResearch();
     this.builder = this.makeBuilder();
     output.appendLine(`Host: ${HOST_LABEL[this.host]} · reading ${this.store.label} from ${this.store.location}`);
   }
 
   private config<T>(key: string): T | undefined {
-    return vscode.workspace.getConfiguration('decipher').get<T>(key);
+    return lumenConfig<T>(key);
   }
 
   private storeContext(): StoreContext {
@@ -170,7 +171,7 @@ class DecipherController implements vscode.Disposable {
 
   private startWatching(): void {
     // Gates the "Install Cursor hooks" command so it never shows up where it cannot work.
-    void vscode.commands.executeCommand('setContext', 'decipher.hooksSupported', this.store.hooksSupported);
+    void vscode.commands.executeCommand('setContext', 'lumen.hooksSupported', this.store.hooksSupported);
     this.watcher?.stop();
     // Only Cursor's directories are ours to create; another agent's are watched as-is.
     this.watcher = new ActivityWatcher(this.store.watchDirs, () => this.refresh('watch'), 250, this.store.provider === 'cursor');
@@ -247,7 +248,7 @@ class DecipherController implements vscode.Disposable {
   }
 
   /**
-   * The first chat of a session can arrive after Decipher starts, and it may belong to a
+   * The first chat of a session can arrive after Lumen starts, and it may belong to a
    * different agent than the one we guessed. Re-resolving while empty costs two directory
    * listings and saves the user a window reload.
    */
@@ -281,14 +282,13 @@ class DecipherController implements vscode.Disposable {
   /** Hooks are a Cursor plugin. Everywhere else the answer is "not applicable", not "missing". */
   private hooksInstalled(): boolean {
     if (!this.store.hooksSupported) return false;
-    if (fs.existsSync(path.join(LOCAL_PLUGIN_DIR, 'hooks', 'capture-event.mjs'))) return true;
+    if (fs.existsSync(path.join(localPluginDir(), 'hooks', 'capture-event.mjs'))) return true;
     try {
-      if (/decipher/i.test(fs.readFileSync(CURSOR_HOOKS_JSON, 'utf8'))) return true;
+      if (/\b(lumen|decipher)\b/i.test(fs.readFileSync(CURSOR_HOOKS_JSON, 'utf8'))) return true;
     } catch {
       /* no user hooks */
     }
-    const eventsDir = this.store.eventsDir;
-    return Boolean(eventsDir) && fs.existsSync(eventsDir!) && fs.readdirSync(eventsDir!).length > 0;
+    return pluginHooksInstalled(this.store.eventsDir ?? '', this.store.legacyEventsDir);
   }
 
   handleMessage(msg: FromWebviewMessage): void {
@@ -302,7 +302,7 @@ class DecipherController implements vscode.Disposable {
         this.refresh('select');
         break;
       case 'setMode':
-        void vscode.workspace.getConfiguration('decipher').update('mode', msg.mode, vscode.ConfigurationTarget.Global);
+        void lumenConfigUpdate('mode', msg.mode);
         break;
       case 'openResource':
         void this.openResource(msg.resource);
@@ -329,7 +329,7 @@ class DecipherController implements vscode.Disposable {
   researchNow(): void {
     const id = this.state?.conversationId;
     if (!id) {
-      void vscode.window.showInformationMessage('Decipher: pick a chat first.');
+      void vscode.window.showInformationMessage('Lumen: pick a chat first.');
       return;
     }
     this.research.requestNow(id);
@@ -343,8 +343,8 @@ class DecipherController implements vscode.Disposable {
   async setSearchApiKey(): Promise<void> {
     const existing = await this.context.secrets.get(SEARCH_KEY_SECRET);
     const value = await vscode.window.showInputBox({
-      title: 'Decipher — Context.dev API key',
-      prompt: 'Paste a Context.dev API key to let Decipher search the live web for tools. Leave blank to remove the stored key.',
+      title: 'Lumen — Context.dev API key',
+      prompt: 'Paste a Context.dev API key to let Lumen search the live web for tools. Leave blank to remove the stored key.',
       placeHolder: existing ? 'A key is already stored — type a new one, or leave blank to remove it' : 'ctxt_secret_…',
       password: true,
       ignoreFocusOut: true,
@@ -367,7 +367,7 @@ class DecipherController implements vscode.Disposable {
   async exportResourceSheet(): Promise<void> {
     const state = this.state;
     if (!state?.conversationId || (!state.sessionConcepts.length && !state.recommendations.length)) {
-      void vscode.window.showInformationMessage('Decipher: nothing to export yet — no concepts or suggestions for this chat.');
+      void vscode.window.showInformationMessage('Lumen: nothing to export yet — no concepts or suggestions for this chat.');
       return;
     }
     const doc = await vscode.workspace.openTextDocument({ content: resourceSheetMarkdown(state), language: 'markdown' });
@@ -385,7 +385,7 @@ class DecipherController implements vscode.Disposable {
         const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(p));
         await vscode.window.showTextDocument(doc, { preview: true });
       } else {
-        void vscode.window.showInformationMessage(`Decipher: that skill is not installed on this machine (${resource.path}).`);
+        void vscode.window.showInformationMessage(`Lumen: that skill is not installed on this machine (${resource.path}).`);
       }
     }
   }
@@ -400,7 +400,7 @@ class DecipherController implements vscode.Disposable {
         editor.selection = new vscode.Selection(pos, pos);
       }
     } catch {
-      void vscode.window.showWarningMessage(`Decipher: could not open ${p}`);
+      void vscode.window.showWarningMessage(`Lumen: could not open ${p}`);
     }
   }
 
@@ -408,24 +408,22 @@ class DecipherController implements vscode.Disposable {
   async installHooks(): Promise<void> {
     if (!this.store.hooksSupported) {
       void vscode.window.showInformationMessage(
-        `Decipher: hooks are a Cursor plugin, and ${HOST_LABEL[this.host]} has no equivalent yet. Step cards still work — only tool output, durations, and exit codes are missing.`,
+        `Lumen: hooks are a Cursor plugin, and ${HOST_LABEL[this.host]} has no equivalent yet. Step cards still work — only tool output, durations, and exit codes are missing.`,
       );
       return;
     }
     const src = vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'plugin').fsPath;
-    if (!fs.existsSync(src)) {
-      void vscode.window.showErrorMessage('Decipher: bundled plugin not found. Run the extension build first.');
+    const result = installHooksPlugin(src);
+    if (!result.installed) {
+      void vscode.window.showErrorMessage(`Lumen: ${result.reason ?? 'could not install hooks'}. Run the extension build first.`);
       return;
     }
     try {
-      fs.mkdirSync(LOCAL_PLUGIN_DIR, { recursive: true });
-      fs.cpSync(src, LOCAL_PLUGIN_DIR, { recursive: true, force: true });
-      fs.chmodSync(path.join(LOCAL_PLUGIN_DIR, 'hooks', 'capture-event.mjs'), 0o755);
-      const choice = await vscode.window.showInformationMessage('Decipher hooks installed. Reload the window so Cursor picks them up.', 'Reload now', 'Later');
+      const choice = await vscode.window.showInformationMessage('Lumen hooks installed. Reload the window so Cursor picks them up.', 'Reload now', 'Later');
       if (choice === 'Reload now') await vscode.commands.executeCommand('workbench.action.reloadWindow');
       this.refresh('hooks');
     } catch (err) {
-      void vscode.window.showErrorMessage(`Decipher: could not install hooks — ${(err as Error).message}`);
+      void vscode.window.showErrorMessage(`Lumen: could not install hooks — ${(err as Error).message}`);
     }
   }
 
@@ -445,7 +443,7 @@ class DecipherController implements vscode.Disposable {
 class ActivityViewProvider implements vscode.WebviewViewProvider {
   constructor(
     private readonly extensionUri: vscode.Uri,
-    private readonly controller: DecipherController,
+    private readonly controller: LumenController,
   ) {}
 
   resolveWebviewView(view: vscode.WebviewView): void {
@@ -480,7 +478,7 @@ class ActivityViewProvider implements vscode.WebviewViewProvider {
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}'; img-src ${webview.cspSource} data:; font-src ${webview.cspSource};" />
 <link rel="stylesheet" href="${style}" />
-<title>Decipher</title>
+<title>Lumen</title>
 </head>
 <body>
 <div id="root"></div>

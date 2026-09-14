@@ -3,14 +3,19 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { workspaceSlug } from '../../shared/activity-schema';
 
-export interface DecipherPaths {
+export interface LumenPaths {
   cursorProjectsDir: string;
   projectDir: string;
   transcriptsDir: string;
-  decipherDir: string;
+  /** Primary cache dir: `~/.cursor/projects/<slug>/lumen/`. */
+  dataDir: string;
+  /** Pre-rename cache dir, still read for hook events and research. */
+  legacyDataDir: string;
   eventsDir: string;
+  legacyEventsDir: string;
   /** Cached research results, one file per conversation. */
   researchDir: string;
+  legacyResearchDir: string;
   hooksJsonPath: string;
 }
 
@@ -21,9 +26,9 @@ export function expandHome(p: string): string {
 /**
  * Resolve where Cursor keeps per-project data for a workspace.
  * If the slug we compute does not exist we fall back to scanning for the closest match so a
- * slight change in Cursor's slug rule does not break Decipher.
+ * slight change in Cursor's slug rule does not break Lumen.
  */
-export function resolvePaths(workspacePath: string, projectsDirOverride?: string): DecipherPaths {
+export function resolvePaths(workspacePath: string, projectsDirOverride?: string): LumenPaths {
   const cursorProjectsDir = projectsDirOverride ? expandHome(projectsDirOverride) : path.join(os.homedir(), '.cursor', 'projects');
   let slug = workspaceSlug(workspacePath);
   let projectDir = path.join(cursorProjectsDir, slug);
@@ -41,14 +46,18 @@ export function resolvePaths(workspacePath: string, projectsDirOverride?: string
     }
   }
 
-  const decipherDir = path.join(projectDir, 'decipher');
+  const dataDir = path.join(projectDir, 'lumen');
+  const legacyDataDir = path.join(projectDir, 'decipher');
   return {
     cursorProjectsDir,
     projectDir,
     transcriptsDir: path.join(projectDir, 'agent-transcripts'),
-    decipherDir,
-    eventsDir: path.join(decipherDir, 'events'),
-    researchDir: path.join(decipherDir, 'research'),
+    dataDir,
+    legacyDataDir,
+    eventsDir: path.join(dataDir, 'events'),
+    legacyEventsDir: path.join(legacyDataDir, 'events'),
+    researchDir: path.join(dataDir, 'research'),
+    legacyResearchDir: path.join(legacyDataDir, 'research'),
     hooksJsonPath: path.join(os.homedir(), '.cursor', 'hooks.json'),
   };
 }

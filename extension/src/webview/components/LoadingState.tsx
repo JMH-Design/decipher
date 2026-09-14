@@ -22,7 +22,7 @@ function stageLabel(phase: LoadingPhase, agent: string): string {
 }
 
 /**
- * Covers the timeline until the agent's turn is over and Decipher has finished writing it up,
+ * Covers the timeline until the agent's turn is over and Lumen has finished writing it up,
  * so the user never reads a panel that is still changing underneath them.
  */
 export function LoadingOverlay({ phase, model, rotateMs, fading, agent }: { phase: LoadingPhase; model?: string; rotateMs?: number; fading: boolean; agent?: string }) {
@@ -65,7 +65,7 @@ export function LoadingState({ phase, model, rotateMs = DEFAULT_ROTATE_MS, agent
 
   return (
     <div className="loading-state" role="status" aria-live="polite">
-      <DecipherSpinner />
+      <LumenSpinner />
       <p className="loading-phrase">{phrase}</p>
       <p className="loading-stage">{stageLabel(phase, agent)}</p>
     </div>
@@ -98,9 +98,9 @@ function useRotatingPhrase(model: string | undefined, rotateMs: number): string 
  * Three concentric arcs turning at different speeds — a lock being picked.
  * Animation lives in `styles.css` so it inherits the editor's reduced-motion preference.
  */
-function DecipherSpinner() {
+function LumenSpinner() {
   return (
-    <svg className="decipher-spinner" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false">
+    <svg className="lumen-spinner" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true" focusable="false">
       <circle className="ds-track" cx="24" cy="24" r="20" />
       <circle className="ds-track" cx="24" cy="24" r="13" />
       <circle className="ds-arc ds-arc-outer" cx="24" cy="24" r="20" />

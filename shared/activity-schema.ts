@@ -1,5 +1,5 @@
 /**
- * Shared types for Decipher.
+ * Shared types for Lumen.
  *
  * These are imported by the extension host, the webview, and the dogfood CLI.
  * Keep this file free of runtime dependencies (types + tiny pure helpers only).
@@ -221,7 +221,7 @@ export interface ResearchResult {
  * every stage is done, so the user never reads a half-built panel.
  *
  * `working` means the agent's own turn is still running; `parsing` and `research` mean the turn
- * has finished but Decipher is still writing its recap or looking for tools.
+ * has finished but Lumen is still writing its recap or looking for tools.
  */
 export type LoadingPhase = 'boot' | 'working' | 'parsing' | 'research' | 'ready';
 
@@ -243,13 +243,13 @@ export interface ConversationSummary {
   stepCount: number;
 }
 
-/** Which editor Decipher is running in. */
+/** Which editor Lumen is running in. */
 export type HostKind = 'cursor' | 'vscode' | 'vscode-insiders' | 'unknown';
 
 /** Which agent's transcripts are being explained. */
 export type AgentProvider = 'cursor' | 'copilot' | 'claude-code';
 
-/** `decipher.dataSource`: pin Decipher to one agent, or let the host decide. */
+/** `lumen.dataSource`: pin Lumen to one agent, or let the host decide. */
 export type DataSourcePreference = 'auto' | AgentProvider;
 
 export interface SessionState {
@@ -282,7 +282,7 @@ export interface SessionState {
   loadingRotateMs: number;
   mode: ExplainMode;
   hooksInstalled: boolean;
-  /** False outside Cursor: no other host exposes an agent hook API Decipher can install into. */
+  /** False outside Cursor: no other host exposes an agent hook API Lumen can install into. */
   hooksSupported: boolean;
   llmAvailable: boolean;
   workspaceName: string;
@@ -293,7 +293,7 @@ export interface SessionState {
   agentLabel: string;
   /** "Copilot" — short form, for the loader and footer. */
   agentShortLabel: string;
-  /** Why the panel is empty or thin, when Decipher can explain it (e.g. no saved transcript). */
+  /** Why the panel is empty or thin, when Lumen can explain it (e.g. no saved transcript). */
   sourceNote?: string;
 }
 

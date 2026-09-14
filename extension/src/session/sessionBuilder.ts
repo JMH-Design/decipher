@@ -79,7 +79,7 @@ export class SessionBuilder {
   /** Newest conversation that actually holds messages, or one that recently received hook events. */
   pickActiveConversation(): string | null {
     const transcripts = this.deps.store.list().filter((t) => t.hasMessages);
-    const events = listEventFiles(this.deps.store.eventsDir);
+    const events = [...listEventFiles(this.deps.store.eventsDir), ...listEventFiles(this.deps.store.legacyEventsDir)];
     const newest = [...transcripts.map((t) => ({ id: t.id, mtime: t.mtime })), ...events].sort((a, b) => b.mtime - a.mtime)[0];
     return newest?.id ?? null;
   }
@@ -246,7 +246,7 @@ export class SessionBuilder {
     let steps: ActivityStep[] = parsed?.steps ?? [];
     let turns: Turn[] = parsed?.turns ?? [];
 
-    const events = store.eventsDir ? readEvents(`${store.eventsDir}/${conversationId}.jsonl`) : [];
+    const events = readHookEvents(store.eventsDir, store.legacyEventsDir, conversationId);
     if (events.length) {
       if (!turns.length) turns.push({ index: 0, status: 'active', stepIds: [] });
       const merged = mergeHookEvents(conversationId, steps, turns, events);
@@ -417,6 +417,13 @@ function firstSentence(text: string, max = 180): string {
 
 function basename(p: string): string {
   return p.split(/[\\/]/).filter(Boolean).pop() ?? p;
+}
+
+function readHookEvents(eventsDir: string | undefined, legacyEventsDir: string | undefined, conversationId: string): HookEvent[] {
+  if (!eventsDir && !legacyEventsDir) return [];
+  const primary = eventsDir ? readEvents(`${eventsDir}/${conversationId}.jsonl`) : [];
+  if (primary.length) return primary;
+  return legacyEventsDir ? readEvents(`${legacyEventsDir}/${conversationId}.jsonl`) : [];
 }
 
 function readEvents(file: string): HookEvent[] {

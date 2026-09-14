@@ -5,7 +5,7 @@ import type { SessionState } from '../../../shared/activity-schema';
  * concepts behind it with links, and the tools that could make the next attempt easier.
  */
 export function resourceSheetMarkdown(state: SessionState): string {
-  const lines: string[] = ['# Decipher — what to learn and what could help', ''];
+  const lines: string[] = ['# Lumen — what to learn and what could help', ''];
 
   const requests = state.turns.map((t) => t.userRequest).filter((r): r is string => Boolean(r));
   if (requests.length) {

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { candidateProviders, detectHost, hooksSupported } from '../src/host/detectHost';
 
 describe('detectHost', () => {
-  it('recognises the editors Decipher ships to', () => {
+  it('recognises the editors Lumen ships to', () => {
     expect(detectHost('Cursor')).toBe('cursor');
     expect(detectHost('Visual Studio Code')).toBe('vscode');
     expect(detectHost('VSCodium')).toBe('vscode');

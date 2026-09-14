@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Decipher hook: receives a Cursor hook payload on stdin and appends a compact,
- * redacted event to `~/.cursor/projects/<slug>/decipher/events/<conversation_id>.jsonl`.
+ * Lumen hook: receives a Cursor hook payload on stdin and appends a compact,
+ * redacted event to `~/.cursor/projects/<slug>/lumen/events/<conversation_id>.jsonl`.
  *
  * Design rules:
  * - Never block the agent: always exit 0 and print a valid JSON object.
@@ -126,7 +126,7 @@ function buildEvent(payload) {
 }
 
 /**
- * Cursor passes the active model on every agent hook. Decipher only needs it to caption its
+ * Cursor passes the active model on every agent hook. Lumen only needs it to caption its
  * loading state, so we record it on the two per-turn hooks rather than on every tool call.
  */
 function recordModel(ev, payload) {
@@ -164,7 +164,7 @@ async function main() {
   try {
     const roots = Array.isArray(payload.workspace_roots) ? payload.workspace_roots : [];
     const root = roots[0] ?? process.env.CURSOR_PROJECT_DIR ?? process.cwd();
-    const eventsDir = join(homedir(), '.cursor', 'projects', workspaceSlug(root), 'decipher', 'events');
+    const eventsDir = join(homedir(), '.cursor', 'projects', workspaceSlug(root), 'lumen', 'events');
     mkdirSync(eventsDir, { recursive: true });
     const ev = buildEvent(payload);
     const file = join(eventsDir, `${String(ev.conversationId).replace(/[^A-Za-z0-9_-]/g, '_')}.jsonl`);

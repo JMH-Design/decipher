@@ -1039,7 +1039,7 @@
       "plugin"
     ],
     "category": "cursor",
-    "definition": "An add-on that gives the editor new features, like this Decipher panel."
+    "definition": "An add-on that gives the editor new features, like this Lumen panel."
   },
   {
     "id": "workspace",

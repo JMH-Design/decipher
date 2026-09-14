@@ -76,9 +76,10 @@ describe('CursorStore', () => {
 
   it('exposes the hook events directory, which only exists in Cursor', () => {
     const store = createStore('cursor', context({ cursorProjectsDir: cursorProject('conv-1', conversation) }));
-    expect(store.eventsDir).toContain(path.join('decipher', 'events'));
+    expect(store.eventsDir).toContain(path.join('lumen', 'events'));
+    expect(store.legacyEventsDir).toContain(path.join('decipher', 'events'));
     expect(store.hooksSupported).toBe(true);
-    expect(store.watchDirs).toHaveLength(2);
+    expect(store.watchDirs).toHaveLength(3);
   });
 
   it('reports no hook support when Cursor transcripts are read from another editor', () => {
@@ -112,7 +113,7 @@ describe('ClaudeStore', () => {
     expect(store.load('sess-1')!.steps[0].toolName).toBe('Read');
   });
 
-  it('keeps Decipher’s own cache out of the agent’s directory', () => {
+  it('keeps Lumen’s own cache out of the agent’s directory', () => {
     const storageDir = tmp('decipher-storage-');
     const store = createStore('claude-code', context({ storageDir, claudeConfigDir: claudeHome({ 'sess-1': claudeConversation }) }));
     expect(store.researchDir.startsWith(storageDir)).toBe(true);
@@ -163,7 +164,7 @@ describe('resolveStore', () => {
     expect(resolveStore(ctx).provider).toBe('cursor');
   });
 
-  it('obeys an explicit decipher.dataSource even when another agent has more to show', () => {
+  it('obeys an explicit lumen.dataSource even when another agent has more to show', () => {
     const ctx = context({
       preference: 'claude-code',
       cursorProjectsDir: cursorProject('conv-1', [cursorLine('user', [{ type: 'text', text: '<user_query>hi</user_query>' }])]),

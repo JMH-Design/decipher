@@ -1,22 +1,24 @@
-# Decipher — Product Requirements Document
+# Lumen — Product Requirements Document
 
-**Status:** Shipped (v0.3)  
-**Version:** 0.3.0  
-**Repository:** [github.com/JMH-Design/decipher](https://github.com/JMH-Design/decipher)  
+**Status:** Shipped (v0.3.1)  
+**Version:** 0.3.1  
+**Repository:** [github.com/JMH-Design/lumen](https://github.com/JMH-Design/lumen)  
 **Last updated:** September 13, 2026
 
 ---
 
 ## 1. Executive summary
 
-Decipher is an extension for Cursor and VS Code that translates coding-agent activity into plain English and helps users learn from it and do better next time. It sits in the activity bar (like Claude Code) and shows a timeline of every agent action — reads, edits, searches, git operations, package installs — each explained in language a non-technical user can understand.
+Lumen is an extension for Cursor and VS Code that translates coding-agent activity into plain English and helps users learn from it and do better next time. It sits in the activity bar (like Claude Code) and shows a timeline of every agent action — reads, edits, searches, git operations, package installs — each explained in language a non-technical user can understand.
 
 It functions as both **education** and **improvement**:
 
 - **Education** — detects concepts the agent used (GSAP, React, git, etc.) and surfaces learning resources: official docs, videos, courses, workshops, and local skills.
 - **Improvement** — reviews what the user asked for and researches tools, MCP servers, kits, and services that could help them achieve the same goal with more quality or efficiency.
 
-**v0.3 changes from v0.2:** Decipher is now **multi-host**. Transcript discovery and parsing sit behind per-agent adapters, so the same build explains the Cursor agent, GitHub Copilot Chat in agent mode, and Claude Code. Everything downstream of the adapters — templates, glossary, concepts, research, recap, overlay — is unchanged and host-agnostic. The extension publishes to the VS Code Marketplace and Open VSX.
+**v0.3.1 changes from v0.3.0:** Product renamed from Decipher to **Lumen** (`JMH-Design.lumen` on the Marketplace). Settings, commands, and on-disk cache paths use the `lumen` prefix; pre-rename `decipher.*` settings and `decipher/events/` hook data are still read.
+
+**v0.3 changes from v0.2:** Lumen is now **multi-host**. Transcript discovery and parsing sit behind per-agent adapters, so the same build explains the Cursor agent, GitHub Copilot Chat in agent mode, and Claude Code. Everything downstream of the adapters — templates, glossary, concepts, research, recap, overlay — is unchanged and host-agnostic. The extension publishes to the VS Code Marketplace and Open VSX.
 
 **v0.2 changes from v0.1:** Knowledge Debt (scoring, queues, learned/seen status, profile persistence) has been removed. The product is now organized around a **Learn & improve** tab, **improvement research** (curated catalog + optional live web search), a **branded loading overlay**, and a **turn recap** docked at the bottom of the sidebar.
 
@@ -33,7 +35,7 @@ When a coding agent works on a task, the chat log is dense: shell commands, file
 - *What should I learn so I understand it next time?*
 - *What tools could help me do this better myself?*
 
-Existing tools show *what* happened at a technical level. Decipher shows *what it means*, *what to study*, and *what to reach for next time*.
+Existing tools show *what* happened at a technical level. Lumen shows *what it means*, *what to study*, and *what to reach for next time*.
 
 ---
 
@@ -50,7 +52,7 @@ Existing tools show *what* happened at a technical level. Decipher shows *what i
 
 - Has some technical literacy but encounters unfamiliar stacks (Astro, GSAP, MCP tools)
 - Wants resources tied to real work, not generic tutorials
-- Uses Decipher to discover complementary tools and MCP servers for recurring goals
+- Uses Lumen to discover complementary tools and MCP servers for recurring goals
 
 ### Non-target (v0.2)
 
@@ -65,7 +67,7 @@ Existing tools show *what* happened at a technical level. Decipher shows *what i
 
 ### Goals (v0.3)
 
-| Goal | How Decipher addresses it |
+| Goal | How Lumen addresses it |
 |------|---------------------------|
 | Comprehension | Plain-language step cards with title, summary, and expandable detail |
 | Turn-level understanding | Bottom **turn recap** with headline + explanatory paragraph after each turn |
@@ -75,7 +77,7 @@ Existing tools show *what* happened at a technical level. Decipher shows *what i
 | Trust & privacy | All data local by default; redaction before storage/display |
 | Low friction | One-click hooks install; auto-follow latest conversation |
 | Host neutrality | One build works in Cursor and VS Code; per-agent adapters normalise transcripts so the explanation engine never branches on host |
-| Honest degradation | Where a host cannot supply hook data, Decipher says so and hides the install prompt rather than asking for something unavailable |
+| Honest degradation | Where a host cannot supply hook data, Lumen says so and hides the install prompt rather than asking for something unavailable |
 
 ### Non-goals (v0.3)
 
@@ -103,7 +105,7 @@ Existing tools show *what* happened at a technical level. Decipher shows *what i
 
 **Host detection:** `vscode.env.appName` resolves to `cursor`, `vscode`, `vscode-insiders`, or `unknown`.
 
-**Source selection (`decipher.dataSource`):**
+**Source selection (`lumen.dataSource`):**
 
 1. An explicit value (`cursor`, `copilot`, `claude-code`) always wins.
 2. `auto` (default) prefers the host's own agent, then falls back to Claude Code, which runs in either host. A candidate is only chosen if its transcripts contain real messages, so a metadata-only Claude session does not shadow a working Copilot one.
@@ -112,27 +114,27 @@ Existing tools show *what* happened at a technical level. Decipher shows *what i
 
 **Prerequisites:** VS Code 1.94+ with GitHub Copilot Chat in agent mode, or the Claude Code extension, or both. The Cursor path needs nothing beyond Cursor itself.
 
-**Decipher-owned storage:** in Cursor, caches live beside the agent's data in `~/.cursor/projects/<slug>/decipher/`. Elsewhere there is no host project directory to borrow, so research and events go under the extension's `globalStorageUri`, keyed by workspace slug.
+**Lumen-owned storage:** in Cursor, caches live beside the agent's data in `~/.cursor/projects/<slug>/lumen/`. Elsewhere there is no host project directory to borrow, so research and events go under the extension's `globalStorageUri`, keyed by workspace slug.
 
 **Settings:**
 
 | Setting | Default | Behavior |
 |---------|---------|----------|
-| `decipher.dataSource` | `auto` | `auto`, `cursor`, `copilot`, or `claude-code` |
-| `decipher.projectsDirOverride` | `""` | Override the Cursor projects directory |
-| `decipher.claudeConfigDir` | `""` | Override the Claude Code config directory; defaults to `$CLAUDE_CONFIG_DIR`, then `~/.claude` |
-| `decipher.cursorProjectsDir` | `""` | Deprecated alias for `decipher.projectsDirOverride`; still read for backward compatibility |
+| `lumen.dataSource` | `auto` | `auto`, `cursor`, `copilot`, or `claude-code` |
+| `lumen.projectsDirOverride` | `""` | Override the Cursor projects directory |
+| `lumen.claudeConfigDir` | `""` | Override the Claude Code config directory; defaults to `$CLAUDE_CONFIG_DIR`, then `~/.claude` |
+| `lumen.cursorProjectsDir` | `""` | Deprecated alias for `lumen.projectsDirOverride`; still read for backward compatibility |
 
 ### 5.2 Entry point
 
-- **Activity bar icon** — speech bubble + magnifying glass (`Decipher`)
-- **Command palette** — `Decipher: Open activity explainer`
+- **Activity bar icon** — speech bubble + magnifying glass (`Lumen`)
+- **Command palette** — `Lumen: Open activity explainer`
 - Sidebar webview titled **Agent activity**
 
 ### 5.3 Information architecture
 
 ```
-Decipher sidebar
+Lumen sidebar
 ├── Top bar
 │   ├── Conversation picker (chats for this workspace)
 │   └── Detail level toggle (Plain / Hints / Full)
@@ -178,7 +180,7 @@ Decipher sidebar
 
 ### 6.2 Loading overlay
 
-**Description:** Branded loader that covers the timeline area while the agent is working or Decipher is still enriching the session. The user never reads a half-built panel.
+**Description:** Branded loader that covers the timeline area while the agent is working or Lumen is still enriching the session. The user never reads a half-built panel.
 
 | Requirement | Status | Notes |
 |-------------|--------|-------|
@@ -194,7 +196,7 @@ Decipher sidebar
 | Reduced motion | Shipped | Instant hide when `prefers-reduced-motion: reduce` |
 | No fake splash on cached chats | Shipped | Already-finished turns with cached research go straight to `ready` |
 | Hidden until genuinely waiting | Shipped | Overlay starts hidden on `ready`/`boot`; only mounts when phase is `working`, `parsing`, or `research` |
-| Restore on sidebar open | Shipped | If Decipher was collapsed while the agent worked, reopening the sidebar re-shows the overlay when phase ≠ `ready` |
+| Restore on sidebar open | Shipped | If Lumen was collapsed while the agent worked, reopening the sidebar re-shows the overlay when phase ≠ `ready` |
 | Enrich deferred during active turn | Shipped | LLM recap and research do not start until the agent turn ends (`status !== 'active'`) |
 
 **Loading phases (`loadingPhase`):**
@@ -207,7 +209,7 @@ Decipher sidebar
 | `research` | Turn finished; tool suggestions pending | Looking for resources and tools |
 | `ready` | Nothing outstanding | Overlay dissolves |
 
-**Settings:** `decipher.loading.rotateMs` (default 3500) — phrase rotation interval.
+**Settings:** `lumen.loading.rotateMs` (default 3500) — phrase rotation interval.
 
 **Implementation:** `resolveLoadingPhase.ts`, `overlayVisibility.ts` (`initialOverlayVisibility`, `nextOverlayVisibility`), `LoadingState.tsx`, `useLoadingOverlay` in webview. Host sends `viewVisible` / `viewHidden` when the sidebar is expanded or collapsed; webview re-shows the overlay on `viewVisible` if enrich is still running.
 
@@ -250,7 +252,7 @@ Decipher sidebar
 | Friendly file names | Shipped | "main stylesheet (global.css)" vs raw paths |
 | Sensitive file handling | Shipped | `.env`, keys — never show contents |
 | LLM turn recap | Shipped | Every finished turn with steps gets a recap when model available |
-| LLM opt-in for reply-only turns | Shipped | `decipher.llm.alwaysExplainInDepth` |
+| LLM opt-in for reply-only turns | Shipped | `lumen.llm.alwaysExplainInDepth` |
 | Confidence scoring | Shipped | Template confidence still used for dogfood coverage metrics |
 
 **Template coverage targets (dogfood):**
@@ -273,13 +275,13 @@ Decipher sidebar
 | `sessionStart` | Active agent model (for loading phrases) |
 | `stop` / `subagentStop` | Turn completion |
 
-**Storage:** `~/.cursor/projects/<slug>/decipher/events/<conversation_id>.jsonl`
+**Storage:** `~/.cursor/projects/<slug>/lumen/events/<conversation_id>.jsonl`
 
-**Install:** Extension copies bundled plugin to `~/.cursor/plugins/local/decipher-hooks`.
+**Install:** Extension copies bundled plugin to `~/.cursor/plugins/local/lumen-hooks`.
 
 **Redaction (before write):** Authorization headers, tokens, `*_KEY=` env vars, password flags; truncation of large outputs.
 
-**Outside Cursor:** the extension sets a `decipher.hooksSupported` context key to `false`, which hides the install banner and disables the `Decipher: Install Cursor hooks` command in the palette. Running it anyway explains the gap instead of failing. Step cards still work from transcripts; what is missing is command output, edit diffs, durations, exit codes, and the agent model used for the witty loading phrases. VS Code has hooks-adjacent APIs in proposal ([`chatParticipantPrivate`](https://github.com/microsoft/vscode/issues/293567)); a VS Code hook installer is a follow-up once those stabilise.
+**Outside Cursor:** the extension sets a `lumen.hooksSupported` context key to `false`, which hides the install banner and disables the `Lumen: Install Cursor hooks` command in the palette. Running it anyway explains the gap instead of failing. Step cards still work from transcripts; what is missing is command output, edit diffs, durations, exit codes, and the agent model used for the witty loading phrases. VS Code has hooks-adjacent APIs in proposal ([`chatParticipantPrivate`](https://github.com/microsoft/vscode/issues/293567)); a VS Code hook installer is a follow-up once those stabilise.
 
 ---
 
@@ -291,7 +293,7 @@ Decipher sidebar
 | **Hints** | One-line monospace hint per step |
 | **Full** | Full command/path block inline |
 
-Setting: `decipher.mode`
+Setting: `lumen.mode`
 
 ---
 
@@ -325,8 +327,8 @@ Setting: `decipher.mode`
 | Curated catalog | Shipped | ~40 entries in `recommendations/catalog.json` |
 | Match rules | Shipped | By concept id, keyword, package, category |
 | Auto trigger | Shipped | Default: refresh after each finished turn |
-| Manual trigger | Shipped | `Decipher: Refresh tool suggestions` / button in UI |
-| Per-turn cache | Shipped | `~/.cursor/projects/<slug>/decipher/research/` in Cursor; extension global storage elsewhere |
+| Manual trigger | Shipped | `Lumen: Refresh tool suggestions` / button in UI |
+| Per-turn cache | Shipped | `~/.cursor/projects/<slug>/lumen/research/` in Cursor; extension global storage elsewhere |
 | Live web search | Shipped | Context.dev API; requires stored API key |
 | Overlay waits for research | Shipped | `loadingPhase: research` until cache hit or run completes |
 
@@ -334,10 +336,10 @@ Setting: `decipher.mode`
 
 | Setting | Default | Behavior |
 |---------|---------|----------|
-| `decipher.research.enabled` | `true` | Suggest tools/MCPs/kits |
-| `decipher.research.webSearch` | `true` | Search live web via Context.dev |
-| `decipher.research.trigger` | `auto` | `auto` after each turn; `manual` on request |
-| `decipher.research.maxResults` | `6` | Cap visible suggestions |
+| `lumen.research.enabled` | `true` | Suggest tools/MCPs/kits |
+| `lumen.research.webSearch` | `true` | Search live web via Context.dev |
+| `lumen.research.trigger` | `auto` | `auto` after each turn; `manual` on request |
+| `lumen.research.maxResults` | `6` | Cap visible suggestions |
 
 ---
 
@@ -345,8 +347,8 @@ Setting: `decipher.mode`
 
 | Setting | Default | Behavior |
 |---------|---------|----------|
-| `decipher.llm.enabled` | `true` | Write turn recap when model available |
-| `decipher.llm.alwaysExplainInDepth` | `false` | Also recap reply-only turns (no tool steps) |
+| `lumen.llm.enabled` | `true` | Write turn recap when model available |
+| `lumen.llm.alwaysExplainInDepth` | `false` | Also recap reply-only turns (no tool steps) |
 
 Provider: VS Code Language Model API (`vscode.lm`) — Cursor's own models in Cursor, Copilot's in VS Code. Graceful fallback to `composeTurnRecap` when unavailable. Redacted input only — never file contents.
 
@@ -356,12 +358,12 @@ Provider: VS Code Language Model API (`vscode.lm`) — Cursor's own models in Cu
 
 | Command | Action |
 |---------|--------|
-| Decipher: Open activity explainer | Focus sidebar |
-| Decipher: Refresh from transcripts | Force re-parse |
-| Decipher: Install Cursor hooks | Copy plugin locally (Cursor only; hidden from the palette elsewhere) |
-| Decipher: Refresh tool suggestions | Invalidate research cache and re-run |
-| Decipher: Set Context.dev API key | Enable/disable live web search |
-| Decipher: Export resource sheet | Save Markdown summary |
+| Lumen: Open activity explainer | Focus sidebar |
+| Lumen: Refresh from transcripts | Force re-parse |
+| Lumen: Install Cursor hooks | Copy plugin locally (Cursor only; hidden from the palette elsewhere) |
+| Lumen: Refresh tool suggestions | Invalidate research cache and re-run |
+| Lumen: Set Context.dev API key | Enable/disable live web search |
+| Lumen: Export resource sheet | Save Markdown summary |
 
 **Removed in v0.2:** Export learning plan, Reset learning profile.
 
@@ -372,9 +374,9 @@ Provider: VS Code Language Model API (`vscode.lm`) — Cursor's own models in Cu
 ### Flow A: First-time user watches an agent session
 
 1. User starts an agent chat (Cursor agent, Copilot agent mode, or Claude Code)
-2. Opens Decipher from activity bar and **keeps it visible** (loader only shows while the sidebar is open or when reopened mid-turn)
+2. Opens Lumen from activity bar and **keeps it visible** (loader only shows while the sidebar is open or when reopened mid-turn)
 3. In Cursor, sees hooks banner → clicks **Install** → reloads. Elsewhere the banner does not appear.
-4. While agent works: overlay shows spinner + rotating phrase ("Deciphering the black box…") with stage label "Watching the agent work"
+4. While agent works: overlay shows spinner + rotating phrase ("Lumening the black box…") with stage label "Watching the agent work"
 5. Agent finishes; overlay stays up while recap and suggestions are written (`parsing` / `research`)
 6. Overlay dissolves over 300ms; timeline + bottom turn recap appear together
 7. User reads recap headline and paragraph, expands **Learn more** on a step
@@ -390,7 +392,7 @@ Provider: VS Code Language Model API (`vscode.lm`) — Cursor's own models in Cu
 
 ### Flow C: Reviewing a finished chat (instant open)
 
-1. User opens Decipher on a chat whose turn already completed and research is cached
+1. User opens Lumen on a chat whose turn already completed and research is cached
 2. No overlay delay — panel shows immediately with recap and suggestions
 3. User runs **Refresh tool suggestions** to force new research → overlay returns briefly
 
@@ -405,7 +407,7 @@ Provider: VS Code Language Model API (`vscode.lm`) — Cursor's own models in Cu
 │  Cursor agent ──▶ agent-transcripts/*.jsonl ─┐          │
 │  Copilot Chat ──▶ workspaceStorage/…/*.jsonl ─┤         │
 │  Claude Code  ──▶ ~/.claude/projects/…/*.jsonl┤         │
-│  Hooks plugin ──▶ decipher/events/*.jsonl ────┤ (Cursor)│
+│  Hooks plugin ──▶ lumen/events/*.jsonl ────┤ (Cursor)│
 │                                               │          │
 │  ┌────────────────────────────────────────────▼───────┐ │
 │  │ detectHost → resolveStore (TranscriptStore)        │ │
@@ -413,7 +415,7 @@ Provider: VS Code Language Model API (`vscode.lm`) — Cursor's own models in Cu
 │  │   parserFor(format) → ParsedTranscript             │ │
 │  └────────────────────────────┬───────────────────────┘ │
 │  ┌────────────────────────────▼───────────────────────┐ │
-│  │ Decipher Extension (Node) — host-agnostic          │ │
+│  │ Lumen Extension (Node) — host-agnostic          │ │
 │  │  Watcher → HookMerger                              │ │
 │  │         → TemplateEngine                           │ │
 │  │         → ConceptDetector → KnowledgeGraph         │ │
@@ -458,8 +460,8 @@ Local files:
 | Data | Location | Leaves machine? |
 |------|----------|-----------------|
 | Transcripts | Agent-managed `.jsonl` (Cursor, Copilot workspace storage, or `~/.claude`) | No (read only) |
-| Hook events | `decipher/events/` | No |
-| Research cache | `decipher/research/`, or extension global storage off Cursor | No |
+| Hook events | `lumen/events/` | No |
+| Research cache | `lumen/research/`, or extension global storage off Cursor | No |
 | LLM recap / recommendations | Editor LM API | Only if enabled; redacted |
 | Web search query | Context.dev | Only if API key set; path-stripped, ≤200 chars |
 
@@ -495,10 +497,10 @@ Local files:
 7. **Overlay reappears each turn** — by design; cached finished chats open instantly
 8. **Web search requires Context.dev key** — without it, suggestions come from catalog + LLM only
 9. **Loader requires an up-to-date install** — local dev changes are not picked up until `npm run install:cursor` / `install:vscode` and a window reload
-10. **Opening Decipher after the turn finishes** — by design, no loader; the host pre-builds recap and suggestions in the background while the sidebar is closed
-11. **Claude Code persistence is unreliable in VS Code** — upstream issues report sessions saved as metadata-only stubs ([anthropics/claude-code#79118](https://github.com/anthropics/claude-code/issues/79118), [#22900](https://github.com/anthropics/claude-code/issues/22900)). Decipher detects these, keeps them out of `auto` selection, and shows a quiet source note instead of an empty timeline.
-12. **Copilot and Claude transcript formats are undocumented** — each adapter is fixture-tested and version-sniffs where it can, but an upstream format change can degrade a timeline. `decipher.dataSource` and the directory overrides are the escape hatches.
-13. **Copilot workspace matching depends on `workspace.json`** — folders opened without a workspace file, or exotic multi-root setups, may not resolve; `decipher.projectsDirOverride` is the manual fallback.
+10. **Opening Lumen after the turn finishes** — by design, no loader; the host pre-builds recap and suggestions in the background while the sidebar is closed
+11. **Claude Code persistence is unreliable in VS Code** — upstream issues report sessions saved as metadata-only stubs ([anthropics/claude-code#79118](https://github.com/anthropics/claude-code/issues/79118), [#22900](https://github.com/anthropics/claude-code/issues/22900)). Lumen detects these, keeps them out of `auto` selection, and shows a quiet source note instead of an empty timeline.
+12. **Copilot and Claude transcript formats are undocumented** — each adapter is fixture-tested and version-sniffs where it can, but an upstream format change can degrade a timeline. `lumen.dataSource` and the directory overrides are the escape hatches.
+13. **Copilot workspace matching depends on `workspace.json`** — folders opened without a workspace file, or exotic multi-root setups, may not resolve; `lumen.projectsDirOverride` is the manual fallback.
 
 ---
 
@@ -511,7 +513,7 @@ Local files:
 | v0.4+ | Cross-conversation browser, community-editable concepts, replay/scrub timeline, further agents (Cline, Continue) behind the same store seam |
 | Later | Team dashboards, PDF export for stakeholders, learning progress (if reintroduced without v0.1 debt model) |
 
-**Design artifact:** [Decipher UI (Figma)](https://www.figma.com/design/l8qUkbC8pDRhizd8bAAPlF) — needs update for turn recap and overlay UX.
+**Design artifact:** [Lumen UI (Figma)](https://www.figma.com/design/l8qUkbC8pDRhizd8bAAPlF) — needs update for turn recap and overlay UX.
 
 ---
 
@@ -530,7 +532,7 @@ Local files:
 - [x] Host detection + `TranscriptStore` abstraction; Cursor path unchanged
 - [x] Copilot Chat adapter (event stream + `chatSessions` fallback) with fixture tests
 - [x] Claude Code adapter with sidechain nesting and metadata-only stub detection
-- [x] Host-aware copy; hooks banner and command gated on `decipher.hooksSupported`
+- [x] Host-aware copy; hooks banner and command gated on `lumen.hooksSupported`
 - [x] `LICENSE`, `repository`, and Marketplace icon in the package
 - [x] 153 unit tests passing
 - [x] Dogfood validated on real sessions (`--source`, `--file` + `--format`)
@@ -541,10 +543,10 @@ Local files:
 
 1. Should the recap stay visible while scrolling a long timeline, or collapse to a compact bar?
 2. Is there demand for a "manager view" export (PDF/Markdown for non-IDE stakeholders)?
-3. ~~Should Decipher publish to Open VSX / Cursor marketplace, or stay sideload-only?~~ **Answered in v0.3:** publish to both the VS Code Marketplace and Open VSX.
-4. Should `decipher.research.trigger` default flip to `manual` once users complain about overlay duration on long research runs?
+3. ~~Should Lumen publish to Open VSX / Cursor marketplace, or stay sideload-only?~~ **Answered in v0.3:** publish to both the VS Code Marketplace and Open VSX.
+4. Should `lumen.research.trigger` default flip to `manual` once users complain about overlay duration on long research runs?
 5. Should learning progress return in a lighter form (bookmarks/favorites) without the v0.1 debt model?
-6. When a workspace has both Copilot and Claude Code transcripts, should the picker show conversations from both at once rather than making `decipher.dataSource` an either/or?
+6. When a workspace has both Copilot and Claude Code transcripts, should the picker show conversations from both at once rather than making `lumen.dataSource` an either/or?
 
 ---
 
@@ -557,10 +559,10 @@ Local files:
 | Claude Code as a source | `~/.claude/projects` discovery; sidechain work nests as subagent steps; metadata-only stubs detected |
 | `TranscriptStore` seam | Replaces Cursor-only path resolution; one store per agent, one parser per format |
 | Canonical tool names | Copilot and Claude tool names and argument keys remap onto the existing template set |
-| `decipher.dataSource` | Pin the agent, or let `auto` prefer the host's own |
+| `lumen.dataSource` | Pin the agent, or let `auto` prefer the host's own |
 | Host-aware copy | Loading phrases, empty states, and footer name the active agent |
 | Hooks gating | Install banner and command hidden outside Cursor; quiet source-note banner replaces dead ends |
-| `decipher.projectsDirOverride`, `decipher.claudeConfigDir` | Directory escape hatches; `cursorProjectsDir` kept as a deprecated alias |
+| `lumen.projectsDirOverride`, `lumen.claudeConfigDir` | Directory escape hatches; `cursorProjectsDir` kept as a deprecated alias |
 | Packaging | `LICENSE`, `repository`, Marketplace icon, `install:vscode`, Marketplace + Open VSX publish scripts |
 
 ---

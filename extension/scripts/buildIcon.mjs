@@ -20,13 +20,13 @@ const RENDER_SIZE = 1024;
 const OUTPUT_SIZE = 256;
 
 function main() {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'decipher-icon-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'lumen-icon-'));
   try {
     execFileSync('qlmanage', ['-t', '-s', String(RENDER_SIZE), '-o', tmp, source], { stdio: 'ignore' });
     const image = decodePng(fs.readFileSync(path.join(tmp, `${path.basename(source)}.png`)));
     const box = artworkBounds(image);
     fs.writeFileSync(target, encodePng(downsample(crop(image, box), OUTPUT_SIZE)));
-    console.log(`[decipher] icon.png written at ${OUTPUT_SIZE}px from a ${box.size}px crop`);
+    console.log(`[lumen] icon.png written at ${OUTPUT_SIZE}px from a ${box.size}px crop`);
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

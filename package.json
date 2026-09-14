@@ -1,8 +1,8 @@
 {
-  "name": "decipher-monorepo",
+  "name": "lumen-monorepo",
   "private": true,
-  "version": "0.3.0",
-  "description": "Decipher: plain-language agent activity explainer, learning resources, and tool recommendations for Cursor and VS Code (extension + plugin)",
+  "version": "0.3.1",
+  "description": "Lumen: plain-language agent activity explainer, learning resources, and tool recommendations for Cursor and VS Code (extension + plugin)",
   "workspaces": [
     "extension"
   ],

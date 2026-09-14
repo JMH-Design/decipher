@@ -289,7 +289,7 @@ const catCmd = prog(['cat', 'head', 'tail', 'less', 'more', 'bat'], 'cat', (ctx)
   return {
     title: 'Reading a file in the terminal',
     summary: withFilters(ctx, `Displayed ${part} ${files.length ? files.map((f) => friendlyFile(f).phrase).join(' and ') : 'some text'}`.replace(/\s+/g, ' ')),
-    whatHappened: sensitive ? 'This file may contain secrets, so Decipher does not show its contents.' : 'The agent printed the file to read it.',
+    whatHappened: sensitive ? 'This file may contain secrets, so Lumen does not show its contents.' : 'The agent printed the file to read it.',
     vocabulary: ['cat', 'path'],
   };
 });
@@ -575,7 +575,7 @@ const fallback: ShellTemplate = {
       templateId: 'shell.generic',
       title: 'Running a command',
       summary: `Ran the "${ctx.program}" command${ctx.positional[0] ? ` on ${shortPath(ctx.positional[0], ctx.workspaceRoot)}` : ''}.`,
-      whatHappened: `Decipher does not have a plain-language description for "${ctx.program}" yet. The technical version is shown below.`,
+      whatHappened: `Lumen does not have a plain-language description for "${ctx.program}" yet. The technical version is shown below.`,
       technical: tech(ctx),
       vocabulary: ['command', 'terminal'],
       confidence: 0.2,

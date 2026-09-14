@@ -2,7 +2,7 @@
  * Loading phrases for the full-panel loader.
  *
  * Every phrase follows the same shape: an understanding verb in the present participle,
- * then a noun for the thing being understood — "Deciphering the black box".
+ * then a noun for the thing being understood — "Illuminating the black box".
  * When the agent's model is known we mix in jokes about that specific model.
  *
  * Pure data + pure functions: this module is bundled into the webview, so it must not
@@ -14,7 +14,6 @@ export const VERBS = [
   'Analyzing',
   'Grasping',
   'Comprehending',
-  'Deciphering',
   'Unpacking',
   'Demystifying',
   'Parsing',

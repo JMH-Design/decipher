@@ -4,7 +4,7 @@ import { workspaceSlug } from '../../../shared/activity-schema';
 import { parserFor, type TranscriptFormat } from '../parser/adapters';
 import { cleanClaudePrompt } from '../parser/adapters/claudeTranscript';
 import type { ParsedTranscript } from '../parser/transcriptParser';
-import { listSubagentTranscripts, listTranscripts, resolvePaths, type DecipherPaths } from '../paths';
+import { listSubagentTranscripts, listTranscripts, resolvePaths, type LumenPaths } from '../paths';
 import { claudeHomeDir, findClaudeProjectDir, listClaudeSessions, readHead } from './claudePaths';
 import { findCopilotWorkspaceStorage, listCopilotTranscripts, vscodeUserDataDir, type CopilotWorkspaceStorage } from './copilotPaths';
 import { AGENT_LABEL, AGENT_SHORT_LABEL, candidateProviders, hooksSupported, type AgentProvider, type DataSourcePreference, type HostKind } from './detectHost';
@@ -22,7 +22,7 @@ export interface TranscriptSource {
 }
 
 /**
- * The single seam between Decipher and the editor it is running in. Everything above this
+ * The single seam between Lumen and the editor it is running in. Everything above this
  * interface — session building, explanations, research, the webview — is host-agnostic.
  */
 export interface TranscriptStore {
@@ -35,8 +35,10 @@ export interface TranscriptStore {
   readonly location: string;
   /** Directories whose changes should trigger a rebuild. */
   readonly watchDirs: string[];
-  /** Hook events written by the Decipher Cursor plugin. Undefined where hooks cannot run. */
+  /** Hook events written by the Lumen Cursor plugin. Undefined where hooks cannot run. */
   readonly eventsDir?: string;
+  /** Pre-rename hook events dir (`decipher/events`), read when the primary dir is empty. */
+  readonly legacyEventsDir?: string;
   readonly researchDir: string;
   readonly hooksSupported: boolean;
   list(): TranscriptSource[];
@@ -47,7 +49,7 @@ export interface StoreContext {
   host: HostKind;
   workspacePath: string;
   preference: DataSourcePreference;
-  /** `context.globalStorageUri.fsPath`: where Decipher caches its own work off Cursor. */
+  /** `context.globalStorageUri.fsPath`: where Lumen caches its own work off Cursor. */
   storageDir: string;
   cursorProjectsDir?: string;
   claudeConfigDir?: string;
@@ -75,7 +77,7 @@ export function createStore(provider: AgentProvider, ctx: StoreContext): Transcr
   }
 }
 
-/** Decipher's own cache for hosts where it cannot write next to the agent's data. */
+/** Lumen's own cache for hosts where it cannot write next to the agent's data. */
 function workspaceStorageDir(ctx: StoreContext): string {
   return path.join(ctx.storageDir, 'workspaces', workspaceSlug(ctx.workspacePath));
 }
@@ -108,7 +110,7 @@ class CursorStore implements TranscriptStore {
   readonly label = AGENT_LABEL.cursor;
   readonly shortLabel = AGENT_SHORT_LABEL.cursor;
   readonly hooksSupported: boolean;
-  readonly paths: DecipherPaths;
+  readonly paths: LumenPaths;
   private readonly titles = new TitleCache();
 
   constructor(ctx: StoreContext) {
@@ -121,11 +123,15 @@ class CursorStore implements TranscriptStore {
   }
 
   get watchDirs(): string[] {
-    return [this.paths.transcriptsDir, this.paths.eventsDir];
+    return [this.paths.transcriptsDir, this.paths.eventsDir, this.paths.legacyEventsDir];
   }
 
   get eventsDir(): string {
     return this.paths.eventsDir;
+  }
+
+  get legacyEventsDir(): string {
+    return this.paths.legacyEventsDir;
   }
 
   get researchDir(): string {

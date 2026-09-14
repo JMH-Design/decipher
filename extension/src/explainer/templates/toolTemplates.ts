@@ -56,7 +56,7 @@ const read = tool('Read', 'read', (ctx) => {
     whatHappened: isSkill
       ? 'Skills are step-by-step playbooks. The agent consults one before tackling a specialised task, like an animation library.'
       : f.sensitive
-        ? 'This file may contain secrets, so Decipher does not display its contents.'
+        ? 'This file may contain secrets, so Lumen does not display its contents.'
         : `The agent read the file's contents into its working memory. Reading does not change anything.`,
     whyItMatters: isSkill ? undefined : 'Agents read before they write so edits fit the existing code.',
     technical: shortPath(p, ctx.workspaceRoot),
@@ -352,7 +352,7 @@ const unknown: Template = {
       templateId: 'tool.unknown',
       title: `Using the ${ctx.toolName} tool`,
       summary: `Used a tool called "${ctx.toolName}".`,
-      whatHappened: 'Decipher does not have a description for this tool yet; the raw input is shown below.',
+      whatHappened: 'Lumen does not have a description for this tool yet; the raw input is shown below.',
       technical: JSON.stringify(ctx.input).slice(0, 300),
       vocabulary: ['tool-call'],
       confidence: 0.15,

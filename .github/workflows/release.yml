@@ -43,9 +43,9 @@ jobs:
       - name: Publish to VS Code Marketplace
         if: env.VSCE_PAT != ''
         working-directory: extension
-        run: npx vsce publish --no-dependencies --packagePath decipher-*.vsix
+        run: npx vsce publish --no-dependencies --packagePath lumen-*.vsix
 
       - name: Publish to Open VSX
         if: env.OVSX_PAT != ''
         working-directory: extension
-        run: npx ovsx publish decipher-*.vsix -p "$OVSX_PAT"
+        run: npx ovsx publish lumen-*.vsix -p "$OVSX_PAT"

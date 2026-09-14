@@ -1,8 +1,8 @@
-# Decipher
+# Lumen
 
 **Plain-language explanations of what your coding agent did, the concepts behind it, and the tools that could help you do it better.**
 
-Decipher adds a sidebar to Cursor and VS Code that turns agent transcripts into a live timeline anyone can read. Every step gets a plain-English summary, glossary terms, and optional technical detail. Alongside it, a **Learn & improve** tab shows the concepts the agent used with videos, courses, and workshops for each — and suggests tools, MCP servers, and kits that could get you the same result with less effort.
+Lumen adds a sidebar to Cursor and VS Code that turns agent transcripts into a live timeline anyone can read. Every step gets a plain-English summary, glossary terms, and optional technical detail. Alongside it, a **Learn & improve** tab shows the concepts the agent used with videos, courses, and workshops for each — and suggests tools, MCP servers, and kits that could get you the same result with less effort.
 
 Built for non-technical users who want to understand *what happened*, *what to study next*, and *what to reach for next time*.
 
@@ -14,9 +14,9 @@ Built for non-technical users who want to understand *what happened*, *what to s
 | VS Code / Insiders | GitHub Copilot Chat (agent mode) | Yes | Yes | Durations and pass/fail from the transcript |
 | Cursor or VS Code | Claude Code | Yes | Yes | Tool results from the transcript |
 
-Decipher picks the editor's own agent by default and falls back to Claude Code, which can run in either. Pin it with `decipher.dataSource`.
+Lumen picks the editor's own agent by default and falls back to Claude Code, which can run in either. Pin it with `lumen.dataSource`.
 
-Hooks are a Cursor plugin, and no other editor exposes an equivalent API yet — outside Cursor, Decipher works from transcripts alone and the install banner stays hidden.
+Hooks are a Cursor plugin, and no other editor exposes an equivalent API yet — outside Cursor, Lumen works from transcripts alone and the install banner stays hidden.
 
 ## Features
 
@@ -45,7 +45,7 @@ recommendations/   Curated tool / MCP / kit catalog with match rules
 
 ## Quick start
 
-Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=JMH-Design.decipher) or [Open VSX](https://open-vsx.org/extension/JMH-Design/decipher), or build it yourself:
+Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=JMH-Design.lumen) or [Open VSX](https://open-vsx.org/extension/JMH-Design/lumen), or build it yourself:
 
 ```bash
 npm install
@@ -53,9 +53,9 @@ npm run install:cursor   # build, package, install into Cursor
 npm run install:vscode   # ...or into VS Code
 ```
 
-Reload the editor (`Developer: Reload Window`) and click the **Decipher** icon in the activity bar. In Cursor, accept the hooks install banner for richer explanations.
+Reload the editor (`Developer: Reload Window`) and click the **Lumen** icon in the activity bar. In Cursor, accept the hooks install banner for richer explanations.
 
-To enable live web search for tool suggestions, run **Decipher: Set Context.dev API key** from the command palette (or press *Set up web search* in the Learn & improve tab). Without a key, suggestions come from the built-in catalog and the language model.
+To enable live web search for tool suggestions, run **Lumen: Set Context.dev API key** from the command palette (or press *Set up web search* in the Learn & improve tab). Without a key, suggestions come from the built-in catalog and the language model.
 
 See [`extension/README.md`](extension/README.md) for settings, development commands, and privacy details. Product requirements: [`docs/PRD.md`](docs/PRD.md).
 
@@ -74,7 +74,7 @@ npm run dogfood -- --workspace /path/to/project [--source copilot] [--id <conver
    - Cursor: `~/.cursor/projects/<workspace>/agent-transcripts/*.jsonl`
    - Copilot: `<VS Code user data>/workspaceStorage/<hash>/GitHub.copilot-chat/transcripts/*.jsonl`, with the hash matched by the folder URI in `workspace.json`
    - Claude Code: `~/.claude/projects/<encoded-workspace-path>/*.jsonl`
-2. **Hooks** — optional Cursor plugin writes to `~/.cursor/projects/<workspace>/decipher/events/`. Off Cursor, Decipher caches its own work under the extension's global storage instead.
+2. **Hooks** — optional Cursor plugin writes to `~/.cursor/projects/<workspace>/lumen/events/` (Lumen still reads the pre-rename `decipher/events/` if present). Off Cursor, Lumen caches its own work under the extension's global storage instead.
 3. **Pipeline** — parse → merge hooks → template engine → glossary → concept detection → learning resources → research → webview
 
 The cards are built as the agent works, but stay behind a single loader until the turn is over and the recap and tool suggestions have landed — so the panel is revealed finished rather than filling in piecemeal.

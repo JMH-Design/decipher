@@ -133,7 +133,7 @@ export class ResearchService {
         goal: input.goal,
         recommendations: [],
         status: 'error',
-        note: 'Decipher could not put together suggestions for this turn. Try Refresh.',
+        note: 'Lumen could not put together suggestions for this turn. Try Refresh.',
         generatedAt: new Date().toISOString(),
       };
       // Cached in memory only, so restarting the editor retries.
@@ -156,7 +156,7 @@ export class ResearchService {
         notes.push(searchNote(err));
       }
     } else if (this.deps.options.webSearch) {
-      notes.push('Web search is not set up yet, so these come from Decipher’s built-in list.');
+      notes.push('Web search is not set up yet, so these come from Lumen’s built-in list.');
     }
 
     if (this.deps.provider) {
@@ -164,10 +164,10 @@ export class ResearchService {
         researched = await this.synthesize(input, curated, snippets, signal);
       } catch (err) {
         this.deps.log?.(`research: model synthesis failed — ${(err as Error).message}`);
-        notes.push('The language model could not be reached, so these come from Decipher’s built-in list.');
+        notes.push('The language model could not be reached, so these come from Lumen’s built-in list.');
       }
     } else {
-      notes.push('No language model available, so these come from Decipher’s built-in list.');
+      notes.push('No language model available, so these come from Lumen’s built-in list.');
     }
 
     const recommendations = mergeRecommendations(curated, researched, this.deps.options.maxResults);
@@ -345,14 +345,14 @@ function searchNote(err: unknown): string {
       case 'no-key':
         return 'Add a Context.dev API key to search the live web for newer tools.';
       case 'unauthorized':
-        return 'Your Context.dev API key was rejected — check it in Decipher’s settings.';
+        return 'Your Context.dev API key was rejected — check it in Lumen’s settings.';
       case 'quota':
         return 'Your Context.dev plan has no search credits left, so these come from the built-in list.';
       case 'rate-limit':
         return 'Context.dev is rate-limiting requests; try refreshing in a minute.';
       default:
-        return 'Live web search could not be reached, so these come from Decipher’s built-in list.';
+        return 'Live web search could not be reached, so these come from Lumen’s built-in list.';
     }
   }
-  return 'Live web search failed, so these come from Decipher’s built-in list.';
+  return 'Live web search failed, so these come from Lumen’s built-in list.';
 }
